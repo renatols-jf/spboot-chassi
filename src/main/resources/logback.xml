@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <property name="project.artifactId" value="chassi-application"/>
+    <property name="logIndex" value="core"/>
+
+
+    <appender name="console-json-logstash" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"${project.artifactId}"}</customFields>
+            <fieldNames>
+                <thread>[ignore]</thread>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="console-json-logstash"/>
+    </root>
+
+</configuration>
