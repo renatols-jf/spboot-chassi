@@ -23,6 +23,29 @@ public class RestOperation {
 
     private static final String REQUEST_DURATION_METRIC_NAME = "integration_request_millis";
 
+    private static final String REQUEST_DURATION_METRIC_TYPE_TAG = "type";
+    private static final String REQUEST_DURATION_METRIC_GROUP_TAG = "group";
+    private static final String REQUEST_DURATION_METRIC_SERVICE_TAG = "service";
+    private static final String REQUEST_DURATION_METRIC_OPERATION_TAG = "operation";
+    private static final String REQUEST_DURATION_METRIC_OUTCOME_TAG = "outcome";
+
+    private static final String REQUEST_DURATION_METRIC_TYPE_TAG_VALUE = "rest";
+
+    private static final String LOGGING_FIELD_GROUP = "group";
+    private static final String LOGGING_FIELD_SERVICE = "service";
+    private static final String LOGGING_FIELD_OPERATION = "operation";
+    private static final String LOGGING_FIELD_ENDPOINT = "endpoint";
+    private static final String LOGGING_FIELD_METHOD = "method";
+    private static final String LOGGING_FIELD_CONNECTION_ERROR = "connectionError";
+    private static final String LOGGING_FIELD_REQUEST_ERROR = "requestError";
+    private static final String LOGGING_FIELD_HTTP_STATUS = "httpStatus";
+    private static final String LOGGING_FIELD_REQUEST_HEADERS = "requestHeaders";
+    private static final String LOGGING_FIELD_REQUEST_BODY = "requestBody";
+    private static final String LOGGING_FIELD_RESPONSE_HEADERS = "responseHeaders";
+    private static final String LOGGING_FIELD_RESPONSE_BODY = "responseBody";
+    private static final String LOGGING_FIELD_REQUEST_DURATION = "requestDuration";
+
+
     private static ObjectMapper mapper = new ObjectMapper();
 
     private String group;
@@ -123,30 +146,30 @@ public class RestOperation {
             Context.forRequest().createLogger()
                     .info("API CALL: " + this.method.toString() + " " + this.uri +
                             " " + statusCode + " " + duration)
-                    .attach("group", this.group)
-                    .attach("service", this.service)
-                    .attach("operation", this.operation)
-                    .attach("endpoint", this.uri)
-                    .attach("method", this.method.toString())
-                    .attach("connectionError", false)
-                    .attach("requestError", true)
-                    .attach("httpStatus", statusCode)
-                    .attach("requestHeaders", this.headers)
-                    .attach("requestBody", this.body)
-                    .attach("responseHeaders", e.getResponseHeaders())
-                    .attach("responseBody", stringBody)
-                    .attach("requestDuration", duration)
+                    .attach(LOGGING_FIELD_GROUP, this.group)
+                    .attach(LOGGING_FIELD_SERVICE, this.service)
+                    .attach(LOGGING_FIELD_OPERATION, this.operation)
+                    .attach(LOGGING_FIELD_ENDPOINT, this.uri)
+                    .attach(LOGGING_FIELD_METHOD, this.method.toString())
+                    .attach(LOGGING_FIELD_CONNECTION_ERROR, false)
+                    .attach(LOGGING_FIELD_REQUEST_ERROR, true)
+                    .attach(LOGGING_FIELD_HTTP_STATUS, statusCode)
+                    .attach(LOGGING_FIELD_REQUEST_HEADERS, this.headers)
+                    .attach(LOGGING_FIELD_REQUEST_BODY, this.body)
+                    .attach(LOGGING_FIELD_RESPONSE_HEADERS, e.getResponseHeaders())
+                    .attach(LOGGING_FIELD_RESPONSE_BODY, stringBody)
+                    .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                     .log();
 
             /*ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
                     duration, e.getStatusCode().value());*/
 
             Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withTag("type", "rest")
-                    .withTag("group", this.group)
-                    .withTag("service", this.service)
-                    .withTag("operation", this.operation)
-                    .withTag("outcome", String.valueOf(e.getStatusCode().value()))
+                    .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
+                    .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
+                    .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
+                    .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
+                    .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, String.valueOf(e.getStatusCode().value()))
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(timedOperation.getExecutionTimeInMillis());
 
@@ -186,30 +209,30 @@ public class RestOperation {
             Context.forRequest().createLogger()
                     .info("API CALL: " + this.method.toString() + " " + this.uri +
                             " CONNECTION_ERROR " + duration)
-                    .attach("group", this.group)
-                    .attach("service", this.service)
-                    .attach("operation", this.operation)
-                    .attach("endpoint", this.uri)
-                    .attach("method", this.method.toString())
-                    .attach("connectionError", true)
-                    .attach("requestError", false)
-                    .attach("httpStatus", null)
-                    .attach("requestHeaders", this.headers)
-                    .attach("requestBody", this.body)
-                    .attach("responseHeaders", null)
-                    .attach("responseBody", null)
-                    .attach("requestDuration", duration)
+                    .attach(LOGGING_FIELD_GROUP, this.group)
+                    .attach(LOGGING_FIELD_SERVICE, this.service)
+                    .attach(LOGGING_FIELD_OPERATION, this.operation)
+                    .attach(LOGGING_FIELD_ENDPOINT, this.uri)
+                    .attach(LOGGING_FIELD_METHOD, this.method.toString())
+                    .attach(LOGGING_FIELD_CONNECTION_ERROR, true)
+                    .attach(LOGGING_FIELD_REQUEST_ERROR, false)
+                    .attach(LOGGING_FIELD_HTTP_STATUS, null)
+                    .attach(LOGGING_FIELD_REQUEST_HEADERS, this.headers)
+                    .attach(LOGGING_FIELD_REQUEST_BODY, this.body)
+                    .attach(LOGGING_FIELD_RESPONSE_HEADERS, null)
+                    .attach(LOGGING_FIELD_RESPONSE_BODY, null)
+                    .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                     .log();
 
             //ApplicationHealthEngine.addRestBasedRequestDataWithConnectionError(this.group, this.service,
                     //this.operation, duration);
 
             Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withTag("type", "rest")
-                    .withTag("group", this.group)
-                    .withTag("service", this.service)
-                    .withTag("operation", this.operation)
-                    .withTag("outcome", "connection_error")
+                    .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
+                    .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
+                    .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
+                    .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
+                    .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, "connection_error")
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(timedOperation.getExecutionTimeInMillis());
 
@@ -224,30 +247,30 @@ public class RestOperation {
         Context.forRequest().createLogger()
                 .info("API CALL: " + this.method.toString() + " " + this.uri+
                         " " + statusCode + " " + duration)
-                .attach("group", this.group)
-                .attach("service", this.service)
-                .attach("operation", this.operation)
-                .attach("endpoint", this.uri)
-                .attach("method", this.method.toString())
-                .attach("connectionError", false)
-                .attach("requestError", false)
-                .attach("httpStatus", statusCode)
-                .attach("requestHeaders", this.headers)
-                .attach("requestBody", this.body)
-                .attach("responseHeaders", re.getHeaders())
-                .attach("responseBody", stringBody)
-                .attach("requestDuration", duration)
+                .attach(LOGGING_FIELD_GROUP, this.group)
+                .attach(LOGGING_FIELD_SERVICE, this.service)
+                .attach(LOGGING_FIELD_OPERATION, this.operation)
+                .attach(LOGGING_FIELD_ENDPOINT, this.uri)
+                .attach(LOGGING_FIELD_METHOD, this.method.toString())
+                .attach(LOGGING_FIELD_CONNECTION_ERROR, false)
+                .attach(LOGGING_FIELD_REQUEST_ERROR, false)
+                .attach(LOGGING_FIELD_HTTP_STATUS, statusCode)
+                .attach(LOGGING_FIELD_REQUEST_HEADERS, this.headers)
+                .attach(LOGGING_FIELD_REQUEST_BODY, this.body)
+                .attach(LOGGING_FIELD_RESPONSE_HEADERS, re.getHeaders())
+                .attach(LOGGING_FIELD_RESPONSE_BODY, stringBody)
+                .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                 .log();
 
         //ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
                 //duration, re.getStatusCode().value());
 
         Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                .withTag("type", "rest")
-                .withTag("group", this.group)
-                .withTag("service", this.service)
-                .withTag("operation", this.operation)
-                .withTag("outcome", String.valueOf(re.getStatusCode().value()))
+                .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
+                .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
+                .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
+                .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
+                .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, String.valueOf(re.getStatusCode().value()))
                 .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                 .observe(timedOperation.getExecutionTimeInMillis());
 
