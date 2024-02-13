@@ -5,17 +5,17 @@ import java.util.Map;
 public abstract class Metric {
 
     private String name;
-    private Map<String, String> labels;
+    private Map<String, String> tags;
 
     private MetricListener metricListener;
 
-    protected Metric(String name, Map<String, String> labels) {
+    protected Metric(String name, Map<String, String> tags) {
         this.name = name;
-        this.labels = labels;
+        this.tags = tags;
     }
 
     public MetricId toMetricId() {
-        return new MetricId(this.getClass(), this.name, this.labels);
+        return new MetricId(this.getClass(), this.name, this.tags);
     }
 
     protected abstract void doObserve(double v);
@@ -39,8 +39,8 @@ public abstract class Metric {
         return this.name;
     }
 
-    public Map<String, String> getLabels() {
-        return this.labels;
+    public Map<String, String> getTags() {
+        return this.tags;
     }
 
 }

@@ -10,8 +10,8 @@ public class Gauge extends Metric {
 
     //private WeakReference<ObservableTask> taskReference;
 
-    public Gauge(String name, Map<String, String> labels) {
-        super(name, labels);
+    public Gauge(String name, Map<String, String> tags) {
+        super(name, tags);
     }
 
     public synchronized void inc() {

@@ -18,14 +18,14 @@ public class MetricRegistry implements MetricListener {
     public class MetricBuilder {
 
         private final String name;
-        private final Map<String, String> labels = new HashMap<>();
+        private final Map<String, String> tags = new HashMap<>();
 
         MetricBuilder(String name) {
             this.name = name;
         }
 
-        public MetricBuilder withLabel(String labelName, String labelValue) {
-            this.labels.put(labelName, labelValue);
+        public MetricBuilder withTag(String tagName, String tagValue) {
+            this.tags.put(tagName, tagValue);
             return this;
         }
 
@@ -57,10 +57,10 @@ public class MetricRegistry implements MetricListener {
         }
 
         private <T extends Metric> T registerMetric(Class<T> metricType) {
-            T metric = (T) MetricRegistry.this.registeredMetrics.get(new MetricId(metricType, this.name, this.labels).toString());
+            T metric = (T) MetricRegistry.this.registeredMetrics.get(new MetricId(metricType, this.name, this.tags).toString());
             if (metric == null) {
                 try {
-                    metric = metricType.getConstructor(String.class, Map.class).newInstance(name, labels);
+                    metric = metricType.getConstructor(String.class, Map.class).newInstance(name, tags);
                     metric.setMetricListener(MetricRegistry.this);
                     MetricRegistry.this.registeredMetrics.put(metric.toMetricId().toString(), metric);
                 } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
@@ -85,15 +85,15 @@ public class MetricRegistry implements MetricListener {
     public void metricObserved(Metric metric, double value) {
         if (metric instanceof Counter) {
             io.micrometer.core.instrument.Counter.Builder b = io.micrometer.core.instrument.Counter.builder(metric.getName());
-            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            metric.getTags().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
             b.register(AppRegistry.getResource(MeterRegistry.class)).increment(value);
         } else if (metric instanceof Gauge) {
             io.micrometer.core.instrument.Gauge.Builder b = io.micrometer.core.instrument.Gauge.builder(metric.getName(), ()-> ((Gauge) metric).getValue());
-            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            metric.getTags().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
             b.register(AppRegistry.getResource(MeterRegistry.class));
         } else if (metric instanceof Histogram) {
             io.micrometer.core.instrument.DistributionSummary.Builder b = io.micrometer.core.instrument.DistributionSummary.builder(metric.getName());
-            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            metric.getTags().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
             b.serviceLevelObjectives(((Histogram) metric).getRanges())
                     .register(AppRegistry.getResource(MeterRegistry.class)).record(value);
         }

@@ -142,11 +142,11 @@ public class RestOperation {
                     duration, e.getStatusCode().value());*/
 
             Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withLabel("type", "rest")
-                    .withLabel("group", this.group)
-                    .withLabel("service", this.service)
-                    .withLabel("operation", this.operation)
-                    .withLabel("outcome", String.valueOf(e.getStatusCode().value()))
+                    .withTag("type", "rest")
+                    .withTag("group", this.group)
+                    .withTag("service", this.service)
+                    .withTag("operation", this.operation)
+                    .withTag("outcome", String.valueOf(e.getStatusCode().value()))
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(timedOperation.getExecutionTimeInMillis());
 
@@ -205,11 +205,11 @@ public class RestOperation {
                     //this.operation, duration);
 
             Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withLabel("type", "rest")
-                    .withLabel("group", this.group)
-                    .withLabel("service", this.service)
-                    .withLabel("operation", this.operation)
-                    .withLabel("outcome", "CONNECTION_ERROR")
+                    .withTag("type", "rest")
+                    .withTag("group", this.group)
+                    .withTag("service", this.service)
+                    .withTag("operation", this.operation)
+                    .withTag("outcome", "CONNECTION_ERROR")
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(timedOperation.getExecutionTimeInMillis());
 
@@ -243,11 +243,11 @@ public class RestOperation {
                 //duration, re.getStatusCode().value());
 
         Chassi.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                .withLabel("type", "rest")
-                .withLabel("group", this.group)
-                .withLabel("service", this.service)
-                .withLabel("operation", this.operation)
-                .withLabel("outcome", String.valueOf(re.getStatusCode().value()))
+                .withTag("type", "rest")
+                .withTag("group", this.group)
+                .withTag("service", this.service)
+                .withTag("operation", this.operation)
+                .withTag("outcome", String.valueOf(re.getStatusCode().value()))
                 .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                 .observe(timedOperation.getExecutionTimeInMillis());
 

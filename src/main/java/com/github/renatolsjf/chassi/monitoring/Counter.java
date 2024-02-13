@@ -8,8 +8,8 @@ public class Counter extends Metric {
     //protected double value = 0;
     protected AtomicLong value = new AtomicLong(0);
 
-    public Counter(String name, Map<String, String> labels) {
-        super(name, labels);
+    public Counter(String name, Map<String, String> tags) {
+        super(name, tags);
     }
 
     @Override

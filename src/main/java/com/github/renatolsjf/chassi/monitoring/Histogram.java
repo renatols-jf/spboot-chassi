@@ -11,10 +11,10 @@ public class Histogram extends Metric {
     private double sum;
     private int count;
 
-    public Histogram(String name, Map<String, String> labels) {
-        super(name, labels);
-        if (labels.containsKey("le")) {
-            throw new InvalidMetricException("Histograms can not have le as labels");
+    public Histogram(String name, Map<String, String> tags) {
+        super(name, tags);
+        if (tags.containsKey("le")) {
+            throw new InvalidMetricException("Histograms can not have le as tag");
         }
         this.buckets.add(new HistogramBucket(Double.MAX_VALUE));
     }
