@@ -3,8 +3,8 @@ package com.github.renatolsjf.chassi.monitoring;
 
 import java.util.Map;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
+//TODO count and sum are not thread safe, but we are not exporting this information yet. The data displayed is controlled by micrometer MeterRegistry
 public class Histogram extends Metric {
 
     private TreeSet<HistogramBucket> buckets = new TreeSet<>();
@@ -32,7 +32,7 @@ public class Histogram extends Metric {
     }
 
     @Override
-    public void doObserve(double value) {
+    public synchronized void doObserve(double value) {
         ++count;
         sum += value;
         this.buckets.forEach(hb -> hb.increaseCountIfInRange(value));

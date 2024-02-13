@@ -6,36 +6,36 @@ import java.util.Map;
 
 public class Gauge extends Metric {
 
-    protected double value = 0;
+    protected volatile double value = 0;
 
     //private WeakReference<ObservableTask> taskReference;
 
-    protected Gauge(String name, Map<String, String> labels) {
+    public Gauge(String name, Map<String, String> labels) {
         super(name, labels);
     }
 
-    public void inc() {
+    public synchronized void inc() {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
         this.inc(1);
     }
 
-    public void inc (double v) {
+    public synchronized void inc (double v) {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
         this.observe(this.value + v);
     }
 
-    public void dec() {
+    public synchronized void dec() {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
         this.dec(1);
     }
 
-    public void dec (double v) {
+    public synchronized void dec (double v) {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }
@@ -46,25 +46,25 @@ public class Gauge extends Metric {
     }
 
     @Override
-    protected void doObserve(double v) {
+    protected synchronized void doObserve(double v) {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
         this.value = v;
     }
 
-    public void set(double v) {
+    public synchronized void set(double v) {
         this.observe(v);
     }
 
-    public void setToCurrentTime() {
+    public synchronized void setToCurrentTime() {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
         this.observe(Instant.now().getEpochSecond());
     }
 
-    public void reset() {
+    public synchronized void reset() {
         /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }*/
@@ -83,7 +83,7 @@ public class Gauge extends Metric {
         /*if (this.isInTrackingMode()) {
             return this.getTrackedTaskValue();
         } else {*/
-            return this.getValue();
+            return this.value;
         //}
     }
 

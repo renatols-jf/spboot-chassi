@@ -1,5 +1,7 @@
 package com.github.renatolsjf.chassi.monitoring;
 
+
+//TODO count is not thread safe, but we are not exporting this information yet. The data displayed is controlled by micrometer MeterRegistry
 public class HistogramBucket implements Comparable<HistogramBucket> {
 
     private double le;

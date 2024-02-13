@@ -53,6 +53,11 @@ public abstract class Request {
     public final Media process() {
         try {
 
+            Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
+                    .withLabel("action", context.getAction())
+                    .buildGauge()
+                    .inc();
+
             this.context.createLogger()
                     .info("Starting request: {}", this.getClass().getSimpleName())
                     .attachObject(this)
@@ -98,7 +103,13 @@ public abstract class Request {
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedSeconds());
 
+            Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
+                    .withLabel("action", context.getAction())
+                    .buildGauge()
+                    .dec();
+
             Context.clear();
+
         }
     }
 

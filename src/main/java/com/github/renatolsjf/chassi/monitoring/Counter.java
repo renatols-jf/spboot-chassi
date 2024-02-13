@@ -1,12 +1,14 @@
 package com.github.renatolsjf.chassi.monitoring;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Counter extends Metric {
 
-    protected double value = 0;
+    //protected double value = 0;
+    protected AtomicLong value = new AtomicLong(0);
 
-    protected Counter(String name, Map<String, String> labels) {
+    public Counter(String name, Map<String, String> labels) {
         super(name, labels);
     }
 
@@ -15,7 +17,7 @@ public class Counter extends Metric {
         if (v <= 0) {
             throw new InvalidMetricException("Can not increment a metric with a value lower than 0", v);
         }
-        this.value += v;
+        this.value.addAndGet(Double.doubleToLongBits(v));
     }
 
     public void inc() {
@@ -27,7 +29,7 @@ public class Counter extends Metric {
     }
 
     public double getValue() {
-        return this.value;
+        return Double.longBitsToDouble(this.value.get());
     }
 
 }
