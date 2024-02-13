@@ -3,7 +3,6 @@ package com.github.renatolsjf.chassi.integration;
 import com.github.renatolsjf.chassi.Chassi;
 import com.github.renatolsjf.chassi.MetricRegistry;
 import com.github.renatolsjf.chassi.context.Context;
-import com.github.renatolsjf.chassi.monitoring.ApplicationHealthEngine;
 import com.github.renatolsjf.chassi.monitoring.timing.TimedOperation;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,7 +114,7 @@ public class RestOperation {
             re = timedOperation.execute(() -> r.exchange(this.uri, this.method, he, String.class));
         } catch (HttpClientErrorException | HttpServerErrorException e) {
 
-            long duration = timedOperation.getExecutionTime();
+            long duration = timedOperation.getExecutionTimeInMillis();
             String statusCode = String.valueOf(e.getStatusCode().value());
             String stringBody = e.getResponseBodyAsString();
 
@@ -147,7 +146,7 @@ public class RestOperation {
                     .withLabel("operation", this.operation)
                     .withLabel("outcome", String.valueOf(e.getStatusCode().value()))
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(timedOperation.getDuration().toSeconds());
+                    .observe(timedOperation.getExecutionTimeInSeconds());
 
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 Context.forRequest().createLogger()
@@ -180,7 +179,7 @@ public class RestOperation {
 
         } catch(Exception e) {
 
-            long duration = timedOperation.getExecutionTime();
+            long duration = timedOperation.getExecutionTimeInMillis();
 
             Context.forRequest().createLogger()
                     .info("API CALL: " + this.method.toString() + " " + this.uri +
@@ -210,13 +209,13 @@ public class RestOperation {
                     .withLabel("operation", this.operation)
                     .withLabel("outcome", "CONNECTION_ERROR")
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(timedOperation.getDuration().toSeconds());
+                    .observe(timedOperation.getExecutionTimeInSeconds());
 
             throw new IOErrorOperationException("Unknown error on http call", e);
 
         }
 
-        long duration = timedOperation.getExecutionTime();
+        long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = String.valueOf(re.getStatusCode().value());
         String stringBody = re.getBody();//Try.of(() -> mapper.writeValueAsString(re.getBody())).getOrElse("");
 
@@ -248,7 +247,7 @@ public class RestOperation {
                 .withLabel("operation", this.operation)
                 .withLabel("outcome", String.valueOf(re.getStatusCode().value()))
                 .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                .observe(timedOperation.getDuration().toSeconds());
+                .observe(timedOperation.getExecutionTimeInSeconds());
 
         return re;
 

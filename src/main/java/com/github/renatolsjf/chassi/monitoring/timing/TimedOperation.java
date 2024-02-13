@@ -48,12 +48,15 @@ public class TimedOperation<T> {
         }
     }
 
-    public long getExecutionTime() {
+    public long getExecutionTimeInMillis() {
         return this.executionTime;
+    }
+    public double getExecutionTimeInSeconds() {
+        return this.getExecutionTimeInMillis() / 1000d;
     }
 
     public Duration getDuration() {
-        return Duration.ofMillis(this.executionTime);
+        return Duration.ofMillis(this.getExecutionTimeInMillis());
     }
 
 }

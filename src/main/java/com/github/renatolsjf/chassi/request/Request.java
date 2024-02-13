@@ -23,11 +23,11 @@ public abstract class Request {
     @Classified(IgnoringCypher.class)
     protected RequestOutcome outcome;
 
-    protected Request(String action, String transactionId, String correlationId) {
+    public Request(String action, String transactionId, String correlationId) {
         this(action, transactionId, correlationId, Collections.emptyMap());
     }
 
-    protected Request(String action, String transactionId, String correlationId,
+    public Request(String action, String transactionId, String correlationId,
                    Map<String, String> requestContextEntries) {
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
@@ -87,7 +87,7 @@ public abstract class Request {
                     .withLabel("action", context.getAction())
                     .withLabel("outcome", this.outcome.toString())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(context.getRequestDuration().toSeconds());
+                    .observe(context.getElapsedSeconds());
 
             Context.clear();
         }

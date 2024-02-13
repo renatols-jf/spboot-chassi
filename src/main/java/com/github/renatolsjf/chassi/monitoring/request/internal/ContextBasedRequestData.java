@@ -16,14 +16,14 @@ public class ContextBasedRequestData extends RequestData {
 
     public ContextBasedRequestData(Context c) {
         this.action = c.getAction();
-        this.requestDuration = c.getElapsedTime();
+        this.requestDuration = c.getElapsedMillis();
         this.clientError = false;
         this.serverError = false;
     }
 
     public ContextBasedRequestData(Context c, boolean clientError, boolean serverError) {
         this.action = c.getAction();
-        this.requestDuration = c.getElapsedTime();
+        this.requestDuration = c.getElapsedMillis();
         this.clientError = clientError;
         this.serverError = serverError;
     }

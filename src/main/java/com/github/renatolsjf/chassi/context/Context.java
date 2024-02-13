@@ -71,9 +71,12 @@ public class Context {
 
     public String getTransactionId() { return this.transactionId; }
     public String getCorrelationId() { return this.correlationId; }
-    public Long getElapsedTime() { return System.currentTimeMillis() - this.requestStartingTime; }
+    public Long getElapsedMillis() { return System.currentTimeMillis() - this.requestStartingTime; }
+    public double getElapsedSeconds() {
+        return this.getElapsedMillis() / 1000d;
+    }
     public Duration getRequestDuration() {
-        return Duration.ofMillis(this.getElapsedTime());
+        return Duration.ofMillis(this.getElapsedMillis());
     }
 
     public Context withCorrelationId(String correlationId) {
@@ -133,17 +136,17 @@ public class Context {
         loggingAttributes.put("transactionId", () -> this.transactionId);
         loggingAttributes.put("correlationId", () -> this.correlationId);
         loggingAttributes.put("action", () -> this.action);
-        loggingAttributes.put("elapsedTime", () -> this.getElapsedTime().toString());
+        loggingAttributes.put("elapsedTime", () -> this.getElapsedMillis().toString());
         loggingAttributes.put("operationTimes", () -> {
 
             Map<String, Long> operationTimes = new HashMap<>();
-            operationTimes.put("total", this.getElapsedTime());
+            operationTimes.put("total", this.getElapsedMillis());
             AtomicLong taggedValues = new AtomicLong();
             this.operationTimeCounter.forEach((key, value) -> {
                 operationTimes.put(key, value);
                 taggedValues.addAndGet(value);
             });
-            operationTimes.put("internal", this.getElapsedTime() - taggedValues.get());
+            operationTimes.put("internal", this.getElapsedMillis() - taggedValues.get());
 
             return operationTimes.toString();
 
