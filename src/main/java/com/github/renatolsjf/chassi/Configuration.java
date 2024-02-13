@@ -13,7 +13,8 @@ public class Configuration {
         VALIDATOR_FAIL_ON_EXECUTION_ERROR,
         CONTEXT_FORBID_UNAUTHORIZED_CREATION,
         CONTEXT_ALLOW_CORRELATION_ID_UPDATE,
-        METRIC_REQUEST_DURATION_HISTOGRAM_RANGES
+        METRIC_REQUEST_DURATION_HISTOGRAM_RANGES,
+        METRIC_EXPORT_REQUEST_DURATION_BY_TYPE
     }
 
     Map<Properties, Object> configData = new EnumMap<>(Properties.class);
@@ -57,6 +58,11 @@ public class Configuration {
     public double[] monitoringRequestDurationRanges() {
         return (double[]) this.configData
                 .getOrDefault(Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES, new double[]{200, 500, 1000, 2000, 5000, 10000});
+    }
+
+    public Boolean exportRequestDurationMetricByType() {
+        return (Boolean) this.configData
+                .getOrDefault(Properties.METRIC_EXPORT_REQUEST_DURATION_BY_TYPE, Boolean.TRUE);
     }
 
 }

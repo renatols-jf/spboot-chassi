@@ -209,7 +209,7 @@ public class RestOperation {
                     .withTag("group", this.group)
                     .withTag("service", this.service)
                     .withTag("operation", this.operation)
-                    .withTag("outcome", "CONNECTION_ERROR")
+                    .withTag("outcome", "connection_error")
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(timedOperation.getExecutionTimeInMillis());
 

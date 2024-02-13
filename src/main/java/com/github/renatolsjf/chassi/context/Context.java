@@ -147,6 +147,16 @@ public class Context {
         return new ApplicationLogger(clazz, this.createFixedLogginAttributes());
     }
 
+    public Map<String, Long> getOperationTimeByType() {
+        Map<String, Long> times = new HashMap<>(this.operationTimeCounter);
+        AtomicLong taggedValues = new AtomicLong(0);
+        this.operationTimeCounter.forEach((key, value) -> {
+            taggedValues.addAndGet(value);
+        });
+        times.put("internal", this.getElapsedMillis() - taggedValues.get());
+        return times;
+    }
+
     private Map<String, LoggingAttribute> createFixedLogginAttributes() {
 
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
@@ -161,18 +171,9 @@ public class Context {
         loggingAttributes.put("action", () -> this.action);
         loggingAttributes.put("elapsedTime", () -> this.getElapsedMillis().toString());
         loggingAttributes.put("operationTimes", () -> {
-
-            Map<String, Long> operationTimes = new HashMap<>();
+            Map<String, Long> operationTimes = this.getOperationTimeByType();
             operationTimes.put("total", this.getElapsedMillis());
-            AtomicLong taggedValues = new AtomicLong();
-            this.operationTimeCounter.forEach((key, value) -> {
-                operationTimes.put(key, value);
-                taggedValues.addAndGet(value);
-            });
-            operationTimes.put("internal", this.getElapsedMillis() - taggedValues.get());
-
             return operationTimes.toString();
-
         });
 
         if (overrideDefaultAttributes) {

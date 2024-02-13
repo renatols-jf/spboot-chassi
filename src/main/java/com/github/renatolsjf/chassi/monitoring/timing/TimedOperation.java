@@ -6,8 +6,8 @@ import java.time.Duration;
 
 public class TimedOperation<T> {
 
-    public static final String HTTP_OPERATION = "Http";
-    public static final String DATABASE_OPERATION = "Db";
+    public static final String HTTP_OPERATION = "http";
+    public static final String DATABASE_OPERATION = "db";
 
     public interface Executable {
          Object execute();

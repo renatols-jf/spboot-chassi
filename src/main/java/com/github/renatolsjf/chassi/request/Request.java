@@ -96,11 +96,27 @@ public abstract class Request {
 
         } finally {
 
-            Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
-                    .withTag("action", context.getAction())
-                    .withTag("outcome", this.outcome.toString())
-                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(context.getElapsedMillis());
+            if (Chassi.getInstance().getConfig().exportRequestDurationMetricByType()) {
+
+                context.getOperationTimeByType().entrySet().stream().forEach(entry ->
+                        Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
+                                .withTag("action", context.getAction())
+                                .withTag("outcome", this.outcome.toString().toLowerCase())
+                                .withTag("timer_type", entry.getKey())
+                                .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                                .observe(entry.getValue())
+
+                );
+
+            } else {
+
+                Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
+                        .withTag("action", context.getAction())
+                        .withTag("outcome", this.outcome.toString().toLowerCase())
+                        .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                        .observe(context.getElapsedMillis());
+
+            }
 
             Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
                     .withTag("action", context.getAction())
