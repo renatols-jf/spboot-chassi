@@ -2,6 +2,8 @@ package com.github.renatolsjf.chassi.monitoring.timing;
 
 import com.github.renatolsjf.chassi.context.Context;
 
+import java.time.Duration;
+
 public class TimedOperation<T> {
 
     public static final String HTTP_OPERATION = "Http";
@@ -48,6 +50,10 @@ public class TimedOperation<T> {
 
     public long getExecutionTime() {
         return this.executionTime;
+    }
+
+    public Duration getDuration() {
+        return Duration.ofMillis(this.executionTime);
     }
 
 }

@@ -19,6 +19,7 @@ public class Histogram extends Metric {
         this.buckets.add(new HistogramBucket(Double.MAX_VALUE));
     }
 
+    //TODO This won't update interfaced metrics buckets. The listener has to be aware of this to.
     public Histogram addBucket(double le) {
         if (!(this.buckets.stream().anyMatch(b -> b.isSameRange(le)))) {
             this.buckets.add(new HistogramBucket(le));

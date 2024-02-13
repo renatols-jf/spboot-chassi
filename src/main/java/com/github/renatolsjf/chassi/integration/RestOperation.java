@@ -1,5 +1,7 @@
 package com.github.renatolsjf.chassi.integration;
 
+import com.github.renatolsjf.chassi.Chassi;
+import com.github.renatolsjf.chassi.MetricRegistry;
 import com.github.renatolsjf.chassi.context.Context;
 import com.github.renatolsjf.chassi.monitoring.ApplicationHealthEngine;
 import com.github.renatolsjf.chassi.monitoring.timing.TimedOperation;
@@ -135,8 +137,17 @@ public class RestOperation {
                     .attach("requestDuration", duration)
                     .log();
 
-            ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
-                    duration, e.getStatusCode().value());
+            /*ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
+                    duration, e.getStatusCode().value());*/
+
+            Chassi.getInstance().getMetricRegistry().createBuilder("integration_request_seconds")
+                    .withLabel("type", "rest")
+                    .withLabel("group", this.group)
+                    .withLabel("service", this.service)
+                    .withLabel("operation", this.operation)
+                    .withLabel("outcome", String.valueOf(e.getStatusCode().value()))
+                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                    .observe(timedOperation.getDuration().toSeconds());
 
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 Context.forRequest().createLogger()
@@ -189,8 +200,17 @@ public class RestOperation {
                     .attach("requestDuration", duration)
                     .log();
 
-            ApplicationHealthEngine.addRestBasedRequestDataWithConnectionError(this.group, this.service,
-                    this.operation, duration);
+            //ApplicationHealthEngine.addRestBasedRequestDataWithConnectionError(this.group, this.service,
+                    //this.operation, duration);
+
+            Chassi.getInstance().getMetricRegistry().createBuilder("integration_request_seconds")
+                    .withLabel("type", "rest")
+                    .withLabel("group", this.group)
+                    .withLabel("service", this.service)
+                    .withLabel("operation", this.operation)
+                    .withLabel("outcome", "CONNECTION_ERROR")
+                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                    .observe(timedOperation.getDuration().toSeconds());
 
             throw new IOErrorOperationException("Unknown error on http call", e);
 
@@ -218,8 +238,17 @@ public class RestOperation {
                 .attach("requestDuration", duration)
                 .log();
 
-        ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
-                duration, re.getStatusCode().value());
+        //ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
+                //duration, re.getStatusCode().value());
+
+        Chassi.getInstance().getMetricRegistry().createBuilder("integration_request_seconds")
+                .withLabel("type", "rest")
+                .withLabel("group", this.group)
+                .withLabel("service", this.service)
+                .withLabel("operation", this.operation)
+                .withLabel("outcome", String.valueOf(re.getStatusCode().value()))
+                .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                .observe(timedOperation.getDuration().toSeconds());
 
         return re;
 
