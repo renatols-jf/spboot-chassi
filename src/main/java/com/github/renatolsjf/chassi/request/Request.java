@@ -12,6 +12,7 @@ import com.github.renatolsjf.chassi.rendering.Media;
 import com.github.renatolsjf.chassi.rendering.transforming.MediaTransformerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @ContextCreator
@@ -24,15 +25,23 @@ public abstract class Request {
     protected RequestOutcome outcome;
 
     public Request(String action, String transactionId, String correlationId) {
-        this(action, transactionId, correlationId, Collections.emptyMap());
+        this(action, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap());
     }
 
-    public Request(String action, String transactionId, String correlationId,
+    public Request(String action, String transactionId, String correlationId, List<String> projection) {
+        this(action, transactionId, correlationId, projection, Collections.emptyMap());
+    }
+
+    public Request(String action, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
+        this(action, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
+    }
+
+    public Request(String action, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
-        this.context = Context.initialize(transactionId, correlationId).withAction(action);
+        this.context = Context.initialize(transactionId, correlationId).withAction(action).withProjection(projection);
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
     }
 

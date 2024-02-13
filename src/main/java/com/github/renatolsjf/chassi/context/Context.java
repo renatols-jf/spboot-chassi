@@ -2,11 +2,10 @@ package com.github.renatolsjf.chassi.context;
 
 import com.github.renatolsjf.chassi.Chassi;
 import com.github.renatolsjf.chassi.context.data.LoggingAttribute;
+import com.github.renatolsjf.chassi.rendering.transforming.Projection;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Context {
@@ -52,6 +51,7 @@ public class Context {
     private String transactionId = UUID.randomUUID().toString();
     private String correlationId;
     private String action;
+    private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
 
     private ApplicationLogger logger = new ApplicationLogger(this.createFixedLogginAttributes());
@@ -69,14 +69,28 @@ public class Context {
         this.correlationId = correlationId;
     }
 
-    public String getTransactionId() { return this.transactionId; }
-    public String getCorrelationId() { return this.correlationId; }
-    public Long getElapsedMillis() { return System.currentTimeMillis() - this.requestStartingTime; }
+    public String getTransactionId() {
+        return this.transactionId;
+    }
+
+    public String getCorrelationId() {
+        return this.correlationId;
+    }
+
+    public Long getElapsedMillis() {
+        return System.currentTimeMillis() - this.requestStartingTime;
+    }
+
     public double getElapsedSeconds() {
         return this.getElapsedMillis() / 1000d;
     }
+
     public Duration getRequestDuration() {
         return Duration.ofMillis(this.getElapsedMillis());
+    }
+
+    public Projection getProjection() {
+        return this.projection;
     }
 
     public Context withCorrelationId(String correlationId) {
@@ -93,6 +107,15 @@ public class Context {
 
     public Context withRequestContextEntry(String key, String value) {
         this.requestContext.put(key, value);
+        return this;
+    }
+
+    public Context withProjection(List<String> projection) {
+        if (projection != null) {
+            this.projection = new Projection(projection);
+        } else {
+            this.projection = new Projection(Collections.emptyList());
+        }
         return this;
     }
 

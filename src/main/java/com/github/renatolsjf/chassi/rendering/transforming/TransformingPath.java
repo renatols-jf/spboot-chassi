@@ -14,6 +14,10 @@ public class TransformingPath {
         this.pathHierarchy.add(startingPath);
     }
 
+    private TransformingPath(List<String> paths) {
+        this.pathHierarchy = paths;
+    }
+
     public TransformingPath path(String path) {
         if (path == null || path.isBlank()) {
             throw new IllegalArgumentException("Caminho de transformação não pdoe ser vazio");
@@ -31,6 +35,10 @@ public class TransformingPath {
             throw new IndexOutOfBoundsException("Path inválido; não há hierarquia a se percorrer");
         }
         return pathHierarchy.remove(0);
+    }
+
+    public static TransformingPath fromList(List<String> paths) {
+        return new TransformingPath(paths);
     }
 
 

@@ -17,6 +17,8 @@ public class MediaTransformerFactory {
             }
         };
 
+        trasnformer = context.getProjection().createTransformer(trasnformer);
+
         return trasnformer;
 
     }
