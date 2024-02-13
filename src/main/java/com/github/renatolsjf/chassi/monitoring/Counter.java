@@ -10,15 +10,20 @@ public class Counter extends Metric {
         super(name, labels);
     }
 
-    public void inc() {
-        this.value++;
-    }
-
-    public void inc (double v) {
+    @Override
+    protected void doObserve(double v) {
         if (v <= 0) {
             throw new InvalidMetricException("Can not increment a metric with a value lower than 0", v);
         }
         this.value += v;
+    }
+
+    public void inc() {
+        this.observe(1);
+    }
+
+    public void inc (double v) {
+        this.observe(v);
     }
 
     public double getValue() {

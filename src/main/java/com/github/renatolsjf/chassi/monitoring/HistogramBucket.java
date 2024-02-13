@@ -23,4 +23,8 @@ public class HistogramBucket {
         return Double.compare(le, v) == 0;
     }
 
+    public double getLe() {
+        return this.le;
+    }
+
 }

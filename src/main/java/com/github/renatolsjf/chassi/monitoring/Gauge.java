@@ -4,85 +4,90 @@ import java.lang.ref.WeakReference;
 import java.time.Instant;
 import java.util.Map;
 
-public class Gauge extends Counter {
+public class Gauge extends Metric {
 
-    private WeakReference<ObservableTask> taskReference;
+    protected double value = 0;
+
+    //private WeakReference<ObservableTask> taskReference;
 
     protected Gauge(String name, Map<String, String> labels) {
         super(name, labels);
     }
 
-    @Override
     public void inc() {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
-        super.inc();
+        }*/
+        this.inc(1);
     }
 
-    @Override
     public void inc (double v) {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
-        super.inc(v);
+        }*/
+        this.observe(this.value + v);
     }
 
     public void dec() {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
-        this.value--;
+        }*/
+        this.dec(1);
     }
 
     public void dec (double v) {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
         }
         if (v <= 0) {
             throw new InvalidMetricException("Can not decrement a metric with a value lower than 0", v);
-        }
-        this.value -= v;
+        }*/
+        this.observe(this.value - v);
     }
 
-    public void set(double v) {
-        if (this.isInTrackingMode()) {
+    @Override
+    protected void doObserve(double v) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
+        }*/
         this.value = v;
     }
 
+    public void set(double v) {
+        this.observe(v);
+    }
+
     public void setToCurrentTime() {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
-        this.value = Instant.now().getEpochSecond();
+        }*/
+        this.observe(Instant.now().getEpochSecond());
     }
 
     public void reset() {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             throw new InvalidMetricException("Metric in tracking mode can not have its value changed");
-        }
-        this.value = 0;
+        }*/
+        this.observe(0);
     }
 
-    public void track(ObservableTask task) {
+    /*public void track(ObservableTask task) {
         if (task == null) {
             throw new NullPointerException("Observable task is null");
         }
         this.value = 0;
         this.taskReference = new WeakReference<>(task);
-    }
+    }*/
 
     public double getValue() {
-        if (this.isInTrackingMode()) {
+        /*if (this.isInTrackingMode()) {
             return this.getTrackedTaskValue();
-        } else {
+        } else {*/
             return this.getValue();
-        }
+        //}
     }
 
-    private boolean isInTrackingMode() {
+    /*private boolean isInTrackingMode() {
         return this.taskReference != null && this.taskReference.get() != null;
     }
 
@@ -93,6 +98,6 @@ public class Gauge extends Counter {
         } else {
             return 0;
         }
-    }
+    }*/
 
 }

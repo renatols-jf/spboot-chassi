@@ -12,7 +12,8 @@ public class Configuration {
         LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE,
         VALIDATOR_FAIL_ON_EXECUTION_ERROR,
         CONTEXT_FORBID_UNAUTHORIZED_CREATION,
-        CONTEXT_ALLOW_CORRELATION_ID_UPDATE;
+        CONTEXT_ALLOW_CORRELATION_ID_UPDATE,
+        METRIC_REQUEST_DURATION_HISTOGRAM_RANGES
     }
 
     Map<Properties, Object> configData = new EnumMap<>(Properties.class);
@@ -51,6 +52,11 @@ public class Configuration {
     public Boolean allowContextCorrelationIdUpdate() {
         return (Boolean) this.configData
                 .getOrDefault(Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE, Boolean.TRUE);
+    }
+
+    public double[] monitoringRequestDurationRanges() {
+        return (double[]) this.configData
+                .getOrDefault(Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES, new double[]{.2d, .5d, 1d, 2d, 5d, 10d});
     }
 
 }

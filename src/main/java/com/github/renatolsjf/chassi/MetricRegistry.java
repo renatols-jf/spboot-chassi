@@ -1,13 +1,15 @@
 package com.github.renatolsjf.chassi;
 
+import com.github.renatolsjf.chassi.context.AppRegistry;
 import com.github.renatolsjf.chassi.monitoring.*;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MetricRegistry {
+public class MetricRegistry implements MetricListener {
 
     public enum HistogramRanges {
         REQUEST_DURATION;
@@ -40,7 +42,12 @@ public class MetricRegistry {
         }
 
         public Histogram buildHistogram(HistogramRanges range) {
-            return null;
+            switch (range) {
+                case REQUEST_DURATION:
+                    return this.buildHistogram(Chassi.getInstance().getConfig().monitoringRequestDurationRanges());
+                default:
+                    return this.registerMetric(Histogram.class);
+            }
         }
 
         public Histogram buildHistogram(double... ranges) {
@@ -54,6 +61,7 @@ public class MetricRegistry {
             if (metric == null) {
                 try {
                     metric = metricType.getConstructor(String.class, Map.class).newInstance(name, labels);
+                    metric.setMetricListener(MetricRegistry.this);
                     MetricRegistry.this.registeredMetrics.put(metric.toMetricId().toString(), metric);
                 } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
                     throw new InvalidMetricException("Error creating metric", e);
@@ -71,6 +79,26 @@ public class MetricRegistry {
 
     public MetricBuilder createBuilder(String name) {
         return new MetricBuilder(name);
+    }
+
+    @Override
+    public void metricObserved(Metric metric, double value) {
+        if (metric instanceof Counter) {
+            io.micrometer.core.instrument.Counter.Builder b = io.micrometer.core.instrument.Counter.builder(metric.getName());
+            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            b.register(AppRegistry.getResource(MeterRegistry.class)).increment(value);
+        } else if (metric instanceof Gauge) {
+            io.micrometer.core.instrument.Gauge.Builder b = io.micrometer.core.instrument.Gauge.builder(metric.getName(), ()-> ((Gauge) metric).getValue());
+            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            b.register(AppRegistry.getResource(MeterRegistry.class));
+        } else if (metric instanceof Histogram) {
+            io.micrometer.core.instrument.DistributionSummary.Builder b = io.micrometer.core.instrument.DistributionSummary.builder(metric.getName());
+            metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            b.serviceLevelObjectives(((Histogram) metric).getRanges());
+            b.register(AppRegistry.getResource(MeterRegistry.class)).record(value);
+        }
+
+
     }
 
 

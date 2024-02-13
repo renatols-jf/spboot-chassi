@@ -3,6 +3,7 @@ package com.github.renatolsjf.chassi.monitoring;
 
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class Histogram extends Metric {
 
@@ -25,7 +26,12 @@ public class Histogram extends Metric {
         return this;
     }
 
-    public void observe(double value) {
+    public double[] getRanges() {
+        return this.buckets.stream().filter(b -> Double.compare(Double.MAX_VALUE, b.getLe()) != 0).mapToDouble(b -> b.getLe()).toArray();
+    }
+
+    @Override
+    public void doObserve(double value) {
         ++count;
         sum += value;
         this.buckets.forEach(hb -> hb.increaseCountIfInRange(value));
