@@ -1,6 +1,6 @@
 package com.github.renatolsjf.chassi.monitoring;
 
-public class HistogramBucket {
+public class HistogramBucket implements Comparable<HistogramBucket> {
 
     private double le;
     private int count = 0;
@@ -27,4 +27,8 @@ public class HistogramBucket {
         return this.le;
     }
 
+    @Override
+    public int compareTo(HistogramBucket o) {
+        return Double.compare(this.le, o.le);
+    }
 }

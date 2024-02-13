@@ -23,16 +23,16 @@ public abstract class Request {
     @Classified(IgnoringCypher.class)
     protected RequestOutcome outcome;
 
-    protected Request(String action, String transactionId, String extTransactionId) {
-        this(action, transactionId, extTransactionId, Collections.emptyMap());
+    protected Request(String action, String transactionId, String correlationId) {
+        this(action, transactionId, correlationId, Collections.emptyMap());
     }
 
-    protected Request(String action, String transactionId, String extTransactionId,
+    protected Request(String action, String transactionId, String correlationId,
                    Map<String, String> requestContextEntries) {
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
-        this.context = Context.initialize(transactionId, extTransactionId).withAction(action);
+        this.context = Context.initialize(transactionId, correlationId).withAction(action);
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
     }
 
