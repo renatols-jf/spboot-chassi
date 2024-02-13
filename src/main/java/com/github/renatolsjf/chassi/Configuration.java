@@ -56,7 +56,7 @@ public class Configuration {
 
     public double[] monitoringRequestDurationRanges() {
         return (double[]) this.configData
-                .getOrDefault(Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES, new double[]{.2d, .5d, 1d, 2d, 5d, 10d});
+                .getOrDefault(Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES, new double[]{200, 500, 1000, 2000, 5000, 10000});
     }
 
 }

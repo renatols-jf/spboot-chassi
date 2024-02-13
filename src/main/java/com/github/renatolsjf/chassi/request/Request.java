@@ -97,11 +97,11 @@ public abstract class Request {
 
         } finally {
 
-            Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_seconds")
+            Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
                     .withLabel("action", context.getAction())
                     .withLabel("outcome", this.outcome.toString())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(context.getElapsedSeconds());
+                    .observe(context.getElapsedMillis());
 
             Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
                     .withLabel("action", context.getAction())

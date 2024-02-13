@@ -94,8 +94,8 @@ public class MetricRegistry implements MetricListener {
         } else if (metric instanceof Histogram) {
             io.micrometer.core.instrument.DistributionSummary.Builder b = io.micrometer.core.instrument.DistributionSummary.builder(metric.getName());
             metric.getLabels().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
-            b.serviceLevelObjectives(((Histogram) metric).getRanges());
-            b.register(AppRegistry.getResource(MeterRegistry.class)).record(value);
+            b.serviceLevelObjectives(((Histogram) metric).getRanges())
+                    .register(AppRegistry.getResource(MeterRegistry.class)).record(value);
         }
 
 
