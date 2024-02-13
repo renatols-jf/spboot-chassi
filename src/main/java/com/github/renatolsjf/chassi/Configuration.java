@@ -12,7 +12,7 @@ public class Configuration {
         LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE,
         VALIDATOR_FAIL_ON_EXECUTION_ERROR,
         CONTEXT_FORBID_UNAUTHORIZED_CREATION,
-        CONTEXT_ALLOW_EXT_TRANSACTION_UPDATE;
+        CONTEXT_ALLOW_CORRELATION_ID_UPDATE;
     }
 
     Map<Properties, Object> configData = new EnumMap<>(Properties.class);
@@ -48,9 +48,9 @@ public class Configuration {
                 .getOrDefault(Properties.CONTEXT_FORBID_UNAUTHORIZED_CREATION, Boolean.TRUE);
     }
 
-    public Boolean allowContextExternalTransactionUpdate() {
+    public Boolean allowContextCorrelationIdUpdate() {
         return (Boolean) this.configData
-                .getOrDefault(Properties.CONTEXT_ALLOW_EXT_TRANSACTION_UPDATE, Boolean.TRUE);
+                .getOrDefault(Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE, Boolean.TRUE);
     }
 
 }

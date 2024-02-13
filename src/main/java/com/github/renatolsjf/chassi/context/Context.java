@@ -3,6 +3,7 @@ package com.github.renatolsjf.chassi.context;
 import com.github.renatolsjf.chassi.Chassi;
 import com.github.renatolsjf.chassi.context.data.LoggingAttribute;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class Context {
         }
     }
 
-    public static Context initialize(String transactionId, String extTransactionid) {
+    public static Context initialize(String transactionId, String correlationId) {
         Context c = tlContext.get();
         if (c != null) {
             throw new InvalidContextStateException("A context already exists for current request");
@@ -35,7 +36,7 @@ public class Context {
                 }
             }
 
-            c = new Context(transactionId, extTransactionid);
+            c = new Context(transactionId, correlationId);
             tlContext.set(c);
             return c;
 
@@ -49,7 +50,7 @@ public class Context {
     //--------------
 
     private String transactionId = UUID.randomUUID().toString();
-    private String extTransactionid;
+    private String correlationId;
     private String action;
     private Map<String, String> requestContext = new HashMap<>();
 
@@ -63,18 +64,21 @@ public class Context {
             this.transactionId = transactionId;
         }
     }
-    private Context(String transactionId, String extTransactionid) {
+    private Context(String transactionId, String correlationId) {
         this(transactionId);
-        this.extTransactionid = extTransactionid;
+        this.correlationId = correlationId;
     }
 
     public String getTransactionId() { return this.transactionId; }
-    public String getExtTransactionid() { return this.extTransactionid; }
+    public String getCorrelationId() { return this.correlationId; }
     public Long getElapsedTime() { return System.currentTimeMillis() - this.requestStartingTime; }
+    public Duration getRequestDuration() {
+        return Duration.ofMillis(this.getElapsedTime());
+    }
 
-    public Context withExtTransactionId(String extTransactionid) {
-        if (Chassi.getInstance().getConfig().allowContextExternalTransactionUpdate()) {
-            this.extTransactionid = extTransactionid;
+    public Context withCorrelationId(String correlationId) {
+        if (Chassi.getInstance().getConfig().allowContextCorrelationIdUpdate()) {
+            this.correlationId = correlationId;
         }
         return this;
     }
@@ -127,7 +131,7 @@ public class Context {
         }
 
         loggingAttributes.put("transactionId", () -> this.transactionId);
-        loggingAttributes.put("extTransactionId", () -> this.extTransactionid);
+        loggingAttributes.put("correlationId", () -> this.correlationId);
         loggingAttributes.put("action", () -> this.action);
         loggingAttributes.put("elapsedTime", () -> this.getElapsedTime().toString());
         loggingAttributes.put("operationTimes", () -> {

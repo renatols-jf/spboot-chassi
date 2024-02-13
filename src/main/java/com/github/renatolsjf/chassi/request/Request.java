@@ -1,5 +1,7 @@
 package com.github.renatolsjf.chassi.request;
 
+import com.github.renatolsjf.chassi.Chassi;
+import com.github.renatolsjf.chassi.MetricRegistry;
 import com.github.renatolsjf.chassi.context.AppRegistry;
 import com.github.renatolsjf.chassi.context.Context;
 import com.github.renatolsjf.chassi.context.ContextCreator;
@@ -17,6 +19,9 @@ public abstract class Request {
 
     @Classified(IgnoringCypher.class)
     protected Context context;
+
+    @Classified(IgnoringCypher.class)
+    protected RequestOutcome outcome;
 
     protected Request(String action, String transactionId, String extTransactionId) {
         this(action, transactionId, extTransactionId, Collections.emptyMap());
@@ -51,16 +56,17 @@ public abstract class Request {
                     .attach("result", "success")
                     .log();
 
-            ApplicationHealthEngine.addContextBasedRequestData(this.context);
+            //ApplicationHealthEngine.addContextBasedRequestData(this.context);
+            this.outcome = RequestOutcome.SUCCESS;
 
             return m;
 
         } catch (Exception e) {
 
-            RequestOutcome outcome = this.resolveError(e);
-            ApplicationHealthEngine.addContextBasedRequestData(this.context,
-                    outcome == RequestOutcome.CLIENT_ERROR,
-                    outcome == RequestOutcome.SERVER_ERROR);
+            this.outcome = this.resolveError(e);
+            //ApplicationHealthEngine.addContextBasedRequestData(this.context,
+                    //outcome == RequestOutcome.CLIENT_ERROR,
+                    //outcome == RequestOutcome.SERVER_ERROR);
 
             String errorMessage = e.getClass().getSimpleName();
             if (e.getMessage() != null) {
@@ -70,12 +76,19 @@ public abstract class Request {
             this.context.createLogger()
                     .error("Completed request {} with error: {}", this.getClass().getSimpleName(),
                             errorMessage, e)
-                    .attach("result", outcome.toString())
+                    .attach("result", this.outcome.toString())
                     .log();
 
             throw e;
 
         } finally {
+
+            Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_seconds")
+                    .withLabel("action", context.getAction())
+                    .withLabel("outcome", this.outcome.toString())
+                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                    .observe(context.getRequestDuration().toSeconds());
+
             Context.clear();
         }
     }
