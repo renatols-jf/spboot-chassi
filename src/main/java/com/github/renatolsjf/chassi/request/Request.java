@@ -52,10 +52,7 @@ public abstract class Request {
     public final Media process() {
         try {
 
-            Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
-                    .withTag("action", context.getAction())
-                    .buildGauge()
-                    .inc();
+            Chassi.getInstance().getApplicationHealthEngine().operationStarted();
 
             this.context.createLogger()
                     .info("Starting request: {}", this.getClass().getSimpleName())
@@ -69,7 +66,6 @@ public abstract class Request {
                     .attach("result", "success")
                     .log();
 
-            //ApplicationHealthEngine.addContextBasedRequestData(this.context);
             this.outcome = RequestOutcome.SUCCESS;
 
             return m;
@@ -77,9 +73,6 @@ public abstract class Request {
         } catch (Exception e) {
 
             this.outcome = this.resolveError(e);
-            //ApplicationHealthEngine.addContextBasedRequestData(this.context,
-                    //outcome == RequestOutcome.CLIENT_ERROR,
-                    //outcome == RequestOutcome.SERVER_ERROR);
 
             String errorMessage = e.getClass().getSimpleName();
             if (e.getMessage() != null) {
@@ -95,36 +88,8 @@ public abstract class Request {
             throw e;
 
         } finally {
-
-            if (Chassi.getInstance().getConfig().exportRequestDurationMetricByType()) {
-
-                context.getOperationTimeByType().entrySet().stream().forEach(entry ->
-                        Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
-                                .withTag("action", context.getAction())
-                                .withTag("outcome", this.outcome.toString().toLowerCase())
-                                .withTag("timer_type", entry.getKey())
-                                .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                                .observe(entry.getValue())
-
-                );
-
-            } else {
-
-                Chassi.getInstance().getMetricRegistry().createBuilder("operation_request_millis")
-                        .withTag("action", context.getAction())
-                        .withTag("outcome", this.outcome.toString().toLowerCase())
-                        .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                        .observe(context.getElapsedMillis());
-
-            }
-
-            Chassi.getInstance().getMetricRegistry().createBuilder("operation_active_requests")
-                    .withTag("action", context.getAction())
-                    .buildGauge()
-                    .dec();
-
+            Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome.toString());
             Context.clear();
-
         }
     }
 

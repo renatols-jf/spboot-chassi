@@ -1,5 +1,6 @@
 package com.github.renatolsjf.chassi.monitoring;
 
+import com.github.renatolsjf.chassi.ApplicationHealthEngine;
 import com.github.renatolsjf.chassi.monitoring.request.RequestData;
 import com.github.renatolsjf.chassi.monitoring.request.internal.EmptyContextBasedRequestData;
 import com.github.renatolsjf.chassi.monitoring.request.internal.MetricMultiRequestData;
@@ -15,7 +16,7 @@ public class ApplicationMetrics implements Renderable {
     private List<RequestData> requests = new ArrayList<>();
 
     public ApplicationMetrics(List<String> internalOperations, List<String> restOperations) {
-        List<RequestData> rd = ApplicationHealthEngine.getSnapshot();
+        /*List<RequestData> rd = ApplicationHealthEngine.getSnapshot();
 
         internalOperations.forEach(op -> {
 
@@ -46,7 +47,7 @@ public class ApplicationMetrics implements Renderable {
                             "service", tags[1],
                             "type", "rest")));
 
-        });
+        });*/
 
 
     }

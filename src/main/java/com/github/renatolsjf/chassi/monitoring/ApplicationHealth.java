@@ -1,5 +1,6 @@
 package com.github.renatolsjf.chassi.monitoring;
 
+import com.github.renatolsjf.chassi.ApplicationHealthEngine;
 import com.github.renatolsjf.chassi.monitoring.request.MultiRequestData;
 import com.github.renatolsjf.chassi.monitoring.request.RequestData;
 import com.github.renatolsjf.chassi.monitoring.request.internal.EmptyContextBasedRequestData;
@@ -19,7 +20,7 @@ public class ApplicationHealth implements Renderable {
 
     public ApplicationHealth(List<String> internalActions, List<String> restOperations) {
 
-        List<RequestData> requestList = ApplicationHealthEngine.getSnapshot();
+        /*List<RequestData> requestList = ApplicationHealthEngine.getSnapshot();
 
         List<RequestData> rd = new ArrayList<>();
         internalActions.forEach(s -> {
@@ -76,7 +77,7 @@ public class ApplicationHealth implements Renderable {
                 HealthMultiRequestData.PRINT_ALL);
 
         this.requests.add(appRequestData);
-        this.requests.add(rIntegrations);
+        this.requests.add(rIntegrations);*/
     }
 
     @Override

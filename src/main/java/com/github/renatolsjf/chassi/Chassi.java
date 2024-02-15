@@ -6,6 +6,7 @@ public class Chassi {
 
     private Configuration config = new Configuration();
     private MetricRegistry metricRegistry = new MetricRegistry();
+    private ApplicationHealthEngine applicationHealthEngine = new ApplicationHealthEngine();
 
     private Chassi() {}
 
@@ -15,6 +16,10 @@ public class Chassi {
 
     public MetricRegistry getMetricRegistry() {
         return this.metricRegistry;
+    }
+
+    public ApplicationHealthEngine getApplicationHealthEngine() {
+        return this.applicationHealthEngine;
     }
 
     public void setConfig(Configuration config) {
