@@ -1,5 +1,6 @@
 package com.github.renatolsjf.chassi;
 
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -14,7 +15,8 @@ public class Configuration {
         CONTEXT_FORBID_UNAUTHORIZED_CREATION,
         CONTEXT_ALLOW_CORRELATION_ID_UPDATE,
         METRIC_REQUEST_DURATION_HISTOGRAM_RANGES,
-        METRIC_EXPORT_REQUEST_DURATION_BY_TYPE
+        METRIC_EXPORT_REQUEST_DURATION_BY_TYPE,
+        HEALTH_TIME_WINDOW_SECONDS
     }
 
     Map<Properties, Object> configData = new EnumMap<>(Properties.class);
@@ -63,6 +65,11 @@ public class Configuration {
     public Boolean exportRequestDurationMetricByType() {
         return (Boolean) this.configData
                 .getOrDefault(Properties.METRIC_EXPORT_REQUEST_DURATION_BY_TYPE, Boolean.TRUE);
+    }
+
+    public Long healthTimeWindowInSeconds() {
+        return (Long) this.configData
+                .getOrDefault(Properties.HEALTH_TIME_WINDOW_SECONDS, Duration.ofMinutes(5).toSeconds());
     }
 
 }

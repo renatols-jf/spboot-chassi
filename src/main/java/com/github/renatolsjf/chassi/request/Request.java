@@ -88,7 +88,7 @@ public abstract class Request {
             throw e;
 
         } finally {
-            Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome.toString());
+            Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
             Context.clear();
         }
     }

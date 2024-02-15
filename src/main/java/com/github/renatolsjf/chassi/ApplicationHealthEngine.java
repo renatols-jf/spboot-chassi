@@ -2,11 +2,13 @@ package com.github.renatolsjf.chassi;
 
 
 import com.github.renatolsjf.chassi.context.Context;
+import com.github.renatolsjf.chassi.request.RequestOutcome;
 
 public class ApplicationHealthEngine {
 
     private String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
     private String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_millis";
+    private String OPERATION_HEALTH_METRIC_NAME = "operation_health";
 
     ApplicationHealthEngine() {}
 
@@ -17,7 +19,7 @@ public class ApplicationHealthEngine {
                 .inc();
     }
 
-    public void operationEnded(String outcome) {
+    public void operationEnded(RequestOutcome outcome) {
 
         Context context = Context.forRequest();
         if (Chassi.getInstance().getConfig().exportRequestDurationMetricByType()) {
@@ -25,7 +27,7 @@ public class ApplicationHealthEngine {
             context.getOperationTimeByType().entrySet().stream().forEach(entry ->
                     Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
                             .withTag("action", context.getAction())
-                            .withTag("outcome", outcome.toLowerCase())
+                            .withTag("outcome", outcome.toString().toLowerCase())
                             .withTag("timer_type", entry.getKey())
                             .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                             .observe(entry.getValue())
@@ -36,7 +38,7 @@ public class ApplicationHealthEngine {
 
             Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
                     .withTag("action", context.getAction())
-                    .withTag("outcome", outcome.toLowerCase())
+                    .withTag("outcome", outcome.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedMillis());
 
