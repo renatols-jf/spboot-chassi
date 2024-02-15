@@ -1,91 +1,116 @@
 package com.github.renatolsjf.chassi.monitoring;
 
-import com.github.renatolsjf.chassi.ApplicationHealthEngine;
-import com.github.renatolsjf.chassi.monitoring.request.MultiRequestData;
-import com.github.renatolsjf.chassi.monitoring.request.RequestData;
-import com.github.renatolsjf.chassi.monitoring.request.internal.EmptyContextBasedRequestData;
-import com.github.renatolsjf.chassi.monitoring.request.internal.HealthMultiRequestData;
-import com.github.renatolsjf.chassi.rendering.Media;
-import com.github.renatolsjf.chassi.rendering.Renderable;
 
-import java.util.ArrayList;
+import com.github.renatolsjf.chassi.Chassi;
+import com.github.renatolsjf.chassi.MetricRegistry;
+import com.github.renatolsjf.chassi.context.Context;
+import com.github.renatolsjf.chassi.request.RequestOutcome;
+import com.github.renatolsjf.chassi.util.RollingTimedWindowList;
+
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class ApplicationHealth implements Renderable {
+public class ApplicationHealth {
 
-    private List<RequestData> requests = new ArrayList<>();
+    private static final String OPERATION_HEALTH_METRIC_NAME = "operation_health";
 
-    public ApplicationHealth(List<String> internalActions, List<String> restOperations) {
+    private Map<String, List<OperationData>> operationDataMap = new HashMap();
+    private Duration dataDuration;
+    private MetricRegistry metricRegistry;
 
-        /*List<RequestData> requestList = ApplicationHealthEngine.getSnapshot();
-
-        List<RequestData> rd = new ArrayList<>();
-        internalActions.forEach(s -> {
-            List<RequestData> requestsForAction = requestList.stream().filter(
-                    r -> r.belongsTo(s)).collect(Collectors.toList());
-
-            if (requestsForAction.isEmpty()) {
-                requestsForAction.add(new EmptyContextBasedRequestData());
-            }
-
-            rd.add(new HealthMultiRequestData(requestsForAction, s.toLowerCase(),
-                    "operation", null, null,
-                    HealthMultiRequestData.PRINT_ALL));
-        });
-
-        MultiRequestData rIntegrations = new HealthMultiRequestData(null, null,
-                "rest", "integrations",
-                HealthMultiRequestData.PRINT_NONE);
-
-        Map<String, MultiRequestData> restRequests = new HashMap<>();
-        restOperations.forEach(op -> {
-
-            String[] tags = op.split("\\.");
-            List<RequestData> requestsForAction = requestList.stream().filter(
-                    r -> r.belongsTo(tags)).collect(Collectors.toList());
-
-            MultiRequestData rdGroup = restRequests.get(tags[0]);
-            if (rdGroup == null) {
-                rdGroup = new HealthMultiRequestData(tags[0], "group", "services",
-                        null, HealthMultiRequestData.PRINT_STATUS
-                        | HealthMultiRequestData.PRINT_LOAD);
-                restRequests.put(tags[0], rdGroup);
-                rIntegrations.add(rdGroup);
-            }
-
-            MultiRequestData rdService = restRequests.get(tags[0] + "." + tags[1]);
-            if (rdService == null) {
-                rdService = new HealthMultiRequestData(tags[1], "service", "operations",
-                        null, HealthMultiRequestData.PRINT_STATUS
-                        | HealthMultiRequestData.PRINT_LOAD);
-                restRequests.put(tags[0] + "." + tags[1], rdService);
-                rdGroup.add(rdService);
-            }
-
-            MultiRequestData rdOperation = new HealthMultiRequestData(requestsForAction, tags[2],
-                    "operation", null, null,
-                    HealthMultiRequestData.PRINT_ALL);
-            rdService.add(rdOperation);
-
-        });
-
-        MultiRequestData appRequestData = new HealthMultiRequestData(rd, null, null,
-                "operations", "application",
-                HealthMultiRequestData.PRINT_ALL);
-
-        this.requests.add(appRequestData);
-        this.requests.add(rIntegrations);*/
+    public ApplicationHealth(Duration dataDuration, MetricRegistry metricRegistry) {
+        this.dataDuration = dataDuration;
+        this.metricRegistry = metricRegistry;
     }
 
-    @Override
-    public Media render(Media media) {
-        for (RequestData rd: this.requests) {
-            media = rd.render(media);
+    public void create(String operation, boolean success, boolean clientFault, boolean serverFault, long durationInMillis) {
+        List<OperationData> operationDataList = this.ensureOperationDataListForOperation(operation);
+        operationDataList.add(new OperationData(operation, success, clientFault, serverFault, durationInMillis));
+    }
+
+    public void success(String operation, long durationInMillis) {
+        List<OperationData> operationDataList = this.ensureOperationDataListForOperation(operation);
+        operationDataList.add(new OperationData(operation, true, false, false, durationInMillis));
+    }
+
+    public void clientFault(String operation, long durationInMillis) {
+        List<OperationData> operationDataList = this.ensureOperationDataListForOperation(operation);
+        operationDataList.add(new OperationData(operation, false, true, false, durationInMillis));
+    }
+
+    public void serverFault(String operation, long durationInMillis) {
+        List<OperationData> operationDataList = this.ensureOperationDataListForOperation(operation);
+        operationDataList.add(new OperationData(operation, false, false, true, durationInMillis));
+    }
+
+    private List<OperationData> ensureOperationDataListForOperation(String operation) {
+
+        if (operation == null) {
+            throw new NullPointerException("Operation is null");
         }
-        return media;
+
+        List<OperationData> operationDataList = this.operationDataMap.get(operation);
+        if (operationDataList == null) {
+            synchronized(this) {
+                operationDataList = this.operationDataMap.get(operation);
+                if (operationDataList == null) {
+
+                    operationDataList = new RollingTimedWindowList<>(dataDuration);
+                    this.operationDataMap.put(operation, operationDataList);
+
+                    this.metricRegistry.createBuilder(OPERATION_HEALTH_METRIC_NAME)
+                            .withTag("action", operation)
+                            .buildTrackingGauge()
+                            .track(new OperationHealhObservableTask(operationDataList));
+
+                }
+            }
+        }
+
+        return operationDataList;
+
     }
 
 }
+
+class OperationData {
+
+    String operationName;
+    boolean success;
+    boolean clientFault;
+    boolean serverFault;
+    long durationInMillis;
+
+    OperationData(String operationName, boolean success, boolean clientFault, boolean serverFault, long durationInMillis) {
+        this.operationName = operationName;
+        this.success = success;
+        this.clientFault = clientFault;
+        this.serverFault = serverFault;
+        this.durationInMillis = durationInMillis;
+    }
+
+}
+
+class OperationHealhObservableTask implements ObservableTask {
+
+    private final List<OperationData> operationDataList;
+
+    OperationHealhObservableTask(List<OperationData> operationDataList) {
+        this.operationDataList = operationDataList;
+    }
+
+    @Override
+    public double getCurrentValue() {
+        if (this.operationDataList.isEmpty()) {
+            return 100;
+        } else {
+            long c = this.operationDataList.stream().filter(od -> od.success).count();
+            double s = this.operationDataList.size();
+            double v = (c / s) * 100d;
+            return Math.round(v);
+        }
+    }
+}
+

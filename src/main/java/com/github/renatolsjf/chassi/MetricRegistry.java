@@ -37,6 +37,19 @@ public class MetricRegistry implements MetricListener {
             return this.registerMetric(Gauge.class);
         }
 
+        public TrackingGauge buildTrackingGauge() {
+
+            TrackingGauge trackingGauge = this.registerMetric(TrackingGauge.class);
+
+            io.micrometer.core.instrument.Gauge.Builder b = io.micrometer.core.instrument.Gauge.builder(
+                    trackingGauge.getName(), ()-> trackingGauge.getValue());
+            trackingGauge.getTags().entrySet().forEach(e -> b.tag(e.getKey(), e.getValue()));
+            b.register(AppRegistry.getResource(MeterRegistry.class));
+
+            return trackingGauge;
+
+        }
+
         public Histogram buildHistogram() {
             return this.registerMetric(Histogram.class);
         }

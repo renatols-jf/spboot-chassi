@@ -56,8 +56,11 @@ public class RollingTimedWindowList<E> implements List<E> {
     }
 
     @Override
-    public Iterator<E> iterator() {
-        throw new UnsupportedOperationException("Unsupported operation");
+    public synchronized Iterator<E> iterator() {
+        this.roll();
+        List<E> backupList = new ArrayList<>();
+        backupList.addAll(this.backingList);
+        return backupList.iterator();
     }
 
     @Override
@@ -203,7 +206,10 @@ public class RollingTimedWindowList<E> implements List<E> {
 
     @Override
     public ListIterator<E> listIterator() {
-        throw new UnsupportedOperationException("Unsupported operation");
+        this.roll();
+        List<E> backupList = new ArrayList<>();
+        backupList.addAll(this.backingList);
+        return backupList.listIterator();
     }
 
     @Override

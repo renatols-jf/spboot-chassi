@@ -2,13 +2,16 @@ package com.github.renatolsjf.chassi;
 
 
 import com.github.renatolsjf.chassi.context.Context;
+import com.github.renatolsjf.chassi.monitoring.ApplicationHealth;
 import com.github.renatolsjf.chassi.request.RequestOutcome;
 
 public class ApplicationHealthEngine {
 
     private String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
     private String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_millis";
-    private String OPERATION_HEALTH_METRIC_NAME = "operation_health";
+
+    private ApplicationHealth applicationHealth;
+
 
     ApplicationHealthEngine() {}
 
@@ -48,6 +51,14 @@ public class ApplicationHealthEngine {
                 .withTag("action", context.getAction())
                 .buildGauge()
                 .dec();
+
+        if (applicationHealth == null) {
+            this.applicationHealth = new ApplicationHealth(
+                    Chassi.getInstance().getConfig().healthTimeWindowDuration(), Chassi.getInstance().getMetricRegistry());
+        }
+
+        this.applicationHealth.create(context.getAction(), outcome.isSuccessful(),
+                outcome.isClientFault(), outcome.isServerFault(), context.getElapsedMillis());
 
     }
 

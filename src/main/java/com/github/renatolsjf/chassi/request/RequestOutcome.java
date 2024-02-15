@@ -15,15 +15,15 @@ public enum RequestOutcome {
         this.serverFault = serverFault;
     }
 
-    private boolean isSuccessful() {
+    public boolean isSuccessful() {
         return this.successful;
     }
 
-    private boolean isClientFault() {
+    public boolean isClientFault() {
         return this.clientFault;
     }
 
-    private boolean isServerFault() {
+    public boolean isServerFault() {
         return this.serverFault;
     }
 
