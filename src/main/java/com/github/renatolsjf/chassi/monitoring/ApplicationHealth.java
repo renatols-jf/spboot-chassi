@@ -14,6 +14,7 @@ public class ApplicationHealth implements Renderable {
     private static final String OPERATION_HEALTH_METRIC_NAME = "operation_health";
 
     private Map<String, List<OperationData>> operationDataMap = new HashMap();
+    private Set<String> operationSet = new TreeSet<>();
     private Duration dataDuration;
     private MetricRegistry metricRegistry;
 
@@ -59,6 +60,7 @@ public class ApplicationHealth implements Renderable {
                 operationDataList = this.operationDataMap.get(operation);
                 if (operationDataList == null) {
 
+                    this.operationSet.add(operation);
                     operationDataList = new RollingTimedWindowList<>(dataDuration);
                     this.operationDataMap.put(operation, operationDataList);
 
@@ -87,16 +89,30 @@ public class ApplicationHealth implements Renderable {
         int applicationClientErrorCount = 0;
         int applicationServerErrorCount = 0;
 
-        for (Map.Entry<String, List<OperationData>> entry: set) {
+        for (String operation: operationSet) {
+
+            List<OperationData> operationDataList = operationDataMap.get(operation);
+            if (operationDataList == null || operationDataList.isEmpty()) {
+                OperationSummary os = new OperationSummary();
+                summaryList.add(os);
+                os.name = operation;
+                os.health = 100;
+                os.requestCount = 0;
+                os.successCount = 0;
+                os.clientErrorCount = 0;
+                os.serverErrorCount = 0;
+                os.operationTimes = new HashMap<>();
+                continue;
+            }
 
             int requestCount = 0;
             int successCount = 0;
             int clientErrorCount = 0;
             int serverErrorCount = 0;
-            double operationHealth = new OperationHealhObservableTask(entry.getValue()).getCurrentValue();
+            double operationHealth = new OperationHealhObservableTask(operationDataList).getCurrentValue();
 
             Map<String, List<Long>> operationTimes = new HashMap<>();
-            for (OperationData operationData: entry.getValue()) {
+            for (OperationData operationData: operationDataList) {
                 ++requestCount;
                 successCount += operationData.success ? 1 : 0;
                 clientErrorCount += operationData.clientFault ? 1 : 0;
@@ -121,7 +137,7 @@ public class ApplicationHealth implements Renderable {
 
             OperationSummary os = new OperationSummary();
             summaryList.add(os);
-            os.name = entry.getKey();
+            os.name = operation;
             os.health = operationHealth;
             os.requestCount = requestCount;
             os.successCount = successCount;
