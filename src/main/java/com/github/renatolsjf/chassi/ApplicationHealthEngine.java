@@ -58,8 +58,16 @@ public class ApplicationHealthEngine {
         }
 
         this.applicationHealth.create(context.getAction(), outcome.isSuccessful(),
-                outcome.isClientFault(), outcome.isServerFault(), context.getElapsedMillis());
+                outcome.isClientFault(), outcome.isServerFault(), context.getElapsedMillis(), context.getOperationTimeByType());
 
+    }
+
+    public ApplicationHealth getCurrentApplicationHealth() {
+        if (applicationHealth == null) {
+            this.applicationHealth = new ApplicationHealth(
+                    Chassi.getInstance().getConfig().healthTimeWindowDuration(), Chassi.getInstance().getMetricRegistry());
+        }
+        return this.applicationHealth;
     }
 
 }
