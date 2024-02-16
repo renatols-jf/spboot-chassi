@@ -1,12 +1,12 @@
 package com.github.renatolsjf.chassi.request;
 
 import com.github.renatolsjf.chassi.Chassi;
-import com.github.renatolsjf.chassi.MetricRegistry;
 import com.github.renatolsjf.chassi.context.AppRegistry;
 import com.github.renatolsjf.chassi.context.Context;
 import com.github.renatolsjf.chassi.context.ContextCreator;
 import com.github.renatolsjf.chassi.context.data.Classified;
 import com.github.renatolsjf.chassi.context.data.cypher.IgnoringCypher;
+import com.github.renatolsjf.chassi.monitoring.request.HealthIgnore;
 import com.github.renatolsjf.chassi.rendering.Media;
 import com.github.renatolsjf.chassi.rendering.transforming.MediaTransformerFactory;
 
@@ -50,9 +50,14 @@ public abstract class Request {
     protected <T> T requestResource(Class<T> clazz) { return AppRegistry.getResource(clazz); }
 
     public final Media process() {
+
+        boolean healthIgnore = this.getClass().isAnnotationPresent(HealthIgnore.class);
+
         try {
 
-            Chassi.getInstance().getApplicationHealthEngine().operationStarted();
+            if (!healthIgnore) {
+                Chassi.getInstance().getApplicationHealthEngine().operationStarted();
+            }
 
             this.context.createLogger()
                     .info("Starting request: {}", this.getClass().getSimpleName())
@@ -88,8 +93,12 @@ public abstract class Request {
             throw e;
 
         } finally {
-            Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
+
+            if (!healthIgnore) {
+                Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
+            }
             Context.clear();
+
         }
     }
 

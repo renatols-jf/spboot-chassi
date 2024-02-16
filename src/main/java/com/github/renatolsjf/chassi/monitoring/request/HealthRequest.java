@@ -8,6 +8,7 @@ import com.github.renatolsjf.chassi.request.RequestOutcome;
 import java.util.List;
 import java.util.Map;
 
+@HealthIgnore
 public class HealthRequest extends Request {
 
     public HealthRequest(String action, String transactionId, String correlationId,
