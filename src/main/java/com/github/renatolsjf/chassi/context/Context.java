@@ -8,6 +8,19 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Represents a context for a given request. The idea is to store information that needs to be available to the whole
+ * request duration but is, most likely, not domain related. That's the case for fields like a transaction id and
+ * correlation id. They generally need to be available for logging and API calls, but it does not make sense
+ * to use them as parameters for domain methods.
+ *
+ * The application expects a context to exist during a request lifecycle. In case of absence, an error is likely to be thrown.
+ * Be it as it may, by default, a context can not be created anywhere. It's necessary to annotate the calling as a ContextCreator
+ * @see com.github.renatolsjf.chassi.context.ContextCreator
+ *
+ * The currently implementation nas no support for NIO. A relatively easy solution is to implement a snapshot, which holds a context object
+ * and clears the context ThreadLocal. A restore method then would reinitialize it. A less manual solution would likely require code manipulation.
+ */
 public class Context {
 
     private static ThreadLocal<Context> tlContext = new ThreadLocal<>();

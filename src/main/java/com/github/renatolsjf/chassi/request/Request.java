@@ -14,6 +14,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A request is the base class to represent a unit of processing. One may think of it as a unit of behavior.
+ * It deals with common concerns like metrics, logging, and context initialization. The idea is to abstract
+ * concerns not linked to the domain leaving the implementations free to implement behavior specific to the application domain.
+ *
+ * A request is entrypoint agnostic. It does not matter whether we are receiving an HTTP call, dequeuing a message, or some other sort of
+ * communication mean. This is so because we generally see information generated (e.g. metrics) related to the entrypoint and
+ * we desire those information to be related solely to the behavior.
+ */
 @ContextCreator
 public abstract class Request {
 
