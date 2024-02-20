@@ -74,7 +74,15 @@ Request is an abstract class and needs to be extended to provide any functionali
 The idea is for the superclass to control application behavior, while the subclass
 controls domain behavior.
 
-There are a few constructors available, but we will approach only the most complete:
+The domain logic is to be implemented in the method `doProcess()`. At this point,
+you might want to access Spring-managed objects, such as services. 
+There are two ways of doing so:
+- `this.requestResource(MyService.class)` in which you provide the class you are expecting. 
+  This is a syntatic sugar available only inside requests.
+- `AppRegistry.getResource(MyService.class)` in which you provide the class you are expecting.
+  This can be called anywhere.
+
+There are a few request constructors available, but we will approach only the most complete:
 
 ```
 public Request(String operation, String transactionId, String correlationId, List<String> projection,
