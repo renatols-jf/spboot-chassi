@@ -187,7 +187,7 @@ you will be doing so needs to be annotated with
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
 
-##Logging
+## Logging
 Logging can be done by requesting an 
 [ApplicationLogger](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ApplicationLogger.java)
 from the context: `ApplicationLogger logger = Context.forRequest().createLogger()`.
