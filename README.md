@@ -526,6 +526,19 @@ providing the following parameters:
 - `operation`: It's used to identify to whom the service being called belongs to.
   It's the third of a three-layered identification. I generally use a name for the
   operation being requested, e.g., Authorization.
+  
+- `uri`: self-explanatory; the URI being called.
+
+- `headers`: A `Map<String, String>` with header information. Can be null.
+
+- `body`: A `Map<String, Object>` with body information. Can be null.
+
+- `HttpMethod`: The desired HTTP method.
+
+`RestOperation#create` can also be replaced with `RestOperation#get`,
+`RestOperation#post`, `RestOperation#patch`, `RestOperation#put` or
+`RestOperation#delete` - these do not need the `HttpMethod` parameter.
+
 
 
 # README.MD IN CONSTRUCTION
