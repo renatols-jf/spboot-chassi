@@ -30,8 +30,73 @@ get rid of data holders, I strive to use them the least possible.
 
 The whole framework is based on the idea that all that happens within an application
 request is connected to its current context. Data validation is not static, and 
-neither is data transformation. Based on that validation and transformations can be
-created based on operations.
+neither is data transformation. The current context is available to the application 
+anytime and can be used to transform and validate data, among other things.
 
-The idea is to lessen the quantity of boilerplate code written and enable developers
-to focus on domain behavior. 
+#Usage
+This is a Spring Boot framework, and it will most likely need to access Spring-managed
+objects and dependency injection. A new interaction mechanism will be provided in
+future releases, but currently, this project's main package needs to be scanned by
+Spring. This is done by adding the `ComponentScan` annotation to the application, 
+as in:
+
+```
+@SpringBootApplication
+@ComponentScan("io.github.renatolsjf")
+public class DemoApplication {
+```
+
+`@SpringBootApplication` adds `@ComponentScan` for the application's main package,
+but I've seen issues with this when adding another package. 
+So you might need to add it again, as in:
+
+```
+@SpringBootApplication
+@ComponentScan("com.example.demo")
+@ComponentScan("io.github.renatolsjf")
+public class DemoApplication {
+```
+
+##Request
+[Request](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/request/Request.java) 
+is a unit of behavior. Everything that happens in the application should be
+within a request. It automatically provides a means to log the request, update application
+metrics, and some other useful application behavior. The idea is to think of a request
+as a unit of processing, no matter the entry point. An HTTPS call should be mapped to
+a request, just as a message consumed from a queue.
+
+Request is an abstract class and needs to be extended to provide any functionality.
+The idea is for the superclass to control application behavior, while the subclass
+controls domain behavior.
+
+There are a few constructors available, but we will approach only the most complete:
+
+```
+public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   Map<String, String> requestContextEntries)
+```
+
+###operation
+Operation is the name given to the request or unit of behavior. While we might
+have some more generic request implementations, it is expected that the subclass
+initializes this value without it actually being one of its constructor parameters:
+
+```
+public CalculateMarginRequest(String transactionId, String correlationId, List<String> projection,
+                   Map<String, String> requestContextEntries) {
+    super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries);                  
+}
+```
+
+This operation name will be the same used elsewhere to assert validations and
+transformations, so it's probably a good idea to use a constant.
+
+###transactionId
+A unique identifier given to the transaction. The idea is to serve as an identifier
+so a transaction can be traced through the various services. If a null 
+transactionId is provided, a UUID4 will be created.
+
+###correlationId
+An external identifier given by an application outside the scope of 
+the internal services. It enables the identification of every transaction or request
+served with that corelationId.
