@@ -11,8 +11,8 @@ set of tests is written, this project's version will be labeled as less than 1.0
 
 #What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
-applications. It deals with a few common distributed (or not sou distributed) 
-applications concerns:
+applications. It deals with a few common concerns for distributed 
+(or not so distributed) applications:
 
 - Logging
 - Metrics and monitoring
@@ -21,4 +21,9 @@ applications concerns:
 - Data transformation
 
 #Context
-I created this project 
+I created this project based on the experiences I had while developing microservices
+in the last couple of years or so, and also based on the reading I've done so far.
+It's not uncommon for application needs to be ignored in favor of domain behavior, 
+and the little code that exists is generally duplicated in many places. Also, I have
+seen my fair share of anemic models, and while I understand it's never so simple to
+get rid of data holders, I strive to use them the least possible.
