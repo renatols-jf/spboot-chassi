@@ -244,9 +244,15 @@ are in order:
 and 
 [Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Renderable.java)
 are the main components of rendering. Every request terminates with render information,
-even if there is nothing to render. If no information is to be returned, just return
-`Media.empty()` from `Request#doProcess`. One of the main goals of the rendering framework
-is to avoid the creation of DTOs.
+even if there is nothing to render.  One of the main goals of the rendering framework
+is to avoid the creation of DTOs. You should terminate `Request#doProcess`
+with one of the following:
+
+- `Media.ofRenderable(aRenderable)` providing a single instance of `Renderable` to render.
+- `Media.ofCollection(aRenderableCollection)` providing a collection of `Renderables` to render.
+- `Media.empty()` to render nothing.
+
+
 
 ### Renderable
 Renderable denotes an object that can be rendered, it governs what and how is
@@ -440,5 +446,27 @@ Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).re
    ]
 }
 ```
+
+### Media
+It's the means by which the information will be recorded. You never create a
+Media object, instead you call `Media.ofRenderable`, `Media.ofCollection`, or
+`Media.empty`. A call to `Media#render` actually exports the object information.
+
+This is an area that can be improved upon. Render returns an `Object`, which is either
+a `Map` for single instances or a `List` for collections. Spring Boot will 
+return this without any issues, but a more powerful abstraction is a good idea.
+
+### Transforming
+Transforming is the means by which an output is transformed into another. It can be
+called manually or initialized automatically according to the context. Currently,
+the only context transformation available is the projection one.
+
+Transformations can be done using 
+[TransformingPath](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/transforming/TransformingPath.java),
+an implementation of [MediaTransformer](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/MediaTransformer.java),
+and [MediaContent](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/MediaContent.java).
+This is a part of the framework that needs to evolve, so I'll not write more 
+information on this topic at the moment. An example will be available in the
+sample project, though.
 
 # README.MD IN CONSTRUCTION
