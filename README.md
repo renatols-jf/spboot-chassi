@@ -206,7 +206,8 @@ are in order:
   
 - The logging level methods do not actually log the information but rather wait
   for the `log()` call. That is because we might want to add some extra information
-  to the log. Besides the fields present in the context, information related only
+  to the log. In a future release, the need of `log()` will be removed when
+  extra information is not needed. Besides the fields present in the context, information related only
   to that message can also be logged:
     - `Context.forRequest().createLogger().log(message).attach("name", "Andrew").log()`
       will create a new field named "name" only for this message.
@@ -228,5 +229,12 @@ are in order:
           which will print only if the field has a value or not.
         2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/IgnoringCypher.java) 
           which will completely ignore that field.
+           
+## Rendering
+[Media](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Media.java)
+and 
+[Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Renderable.java)
+are the main components of rendering. Every request terminates with render information,
+even if there is nothing to render.
 
 # README.MD IN CONSTRUCTION
