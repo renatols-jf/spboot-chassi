@@ -509,5 +509,23 @@ the following parameters:
 Every validation type also accepts a message parameter, which will override the 
 default error message in case of a validation error.
 
+## API integrations - HTTP(s) calls
+Each HTTP request should be made using the 
+[RestOperation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/RestOperation.java) 
+class. To create a `RestOperation` you should call `RestOperation#create` 
+providing the following parameters:
+
+- `group`: It's used to identify to whom the service being called belongs.
+  It's the first of a three-layered identification. I generally use the company
+  or team responsible for the service.
+  
+- `service`: It's used to identify to whom the service being called belongs to.
+  It's the second of a three-layered identification. I generally use the actual
+  service name being called.
+  
+- `operation`: It's used to identify to whom the service being called belongs to.
+  It's the third of a three-layered identification. I generally use a name for the
+  operation being requested, e.g., Authorization.
+
 
 # README.MD IN CONSTRUCTION
