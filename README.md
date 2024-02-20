@@ -469,4 +469,45 @@ This is a part of the framework that needs to evolve, so I'll not write more
 information on this topic at the moment. An example will be available in the
 sample project, though.
 
+## Validation
+Any class that implements 
+[Validatable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/Validatable.java)
+can be validated simply by calling `myValidatableInstance.validate()`. This will trigger
+an object lookup for any nested `Validatable` objects to validate all of them.
+
+To configure validations, you have to annotate `Validatable` fields or 
+methods with 
+[@Validation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Validation.java).
+A field or a method can have multiple validations configured. A `Validation` accepts
+the following parameters:
+
+- `operation`: indicates to which operations this validation applies. It can be empty,
+  a single operation, or multiple operations. If a field or method has more than
+  one `Validation`, all of those that have no operation configured or that have
+  the current operation in its operation's list, will be applied.
+  
+- `nullable`([@Nullable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Nullable.java)):
+  indicates whether a field or return of method can be null. Accepted values are:
+    - `CAN_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
+      in which the value can either be null or not.
+    - `CANT_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CANT_BE_NULL))`:
+      in which the value cannot be null.
+    - `MUST_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
+      in which the value must be null.
+- `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Minimum.java)):
+  indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`. 
+  Currently, a minimum value of 0 disables the validation. In a future release, 
+  this will be changed to `Integer.MIN_VALUE`.
+- `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/OneOf.java)):
+  indicates that a field's value must be equal to one of the provided values -
+  `@Validation(oneOf = @OneOf({"Ryan", "Andrew"}))`. Currently, it supports only
+  `String` values, but it will be expanded in a future release.
+- `pattern`([@Pattern](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Pattern.java))  :
+  indicates that a `String` must match a provided Regex -
+  `@Validation(pattern = @Pattern("^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"))`
+  
+Every validation type also accepts a message parameter, which will override the 
+default error message in case of a validation error.
+
+
 # README.MD IN CONSTRUCTION
