@@ -74,7 +74,8 @@ Request is an abstract class and needs to be extended to provide any functionali
 The idea is for the superclass to control application behavior, while the subclass
 controls domain behavior.
 
-The domain logic is to be implemented in the method `doProcess()`. At this point,
+The domain logic is to be implemented in the method `doProcess()` - 
+it should **NEVER** be called directly, instead, `process()` should. At this point,
 you might want to access Spring-managed objects, such as services. 
 There are two ways of doing so:
 - `this.requestResource(MyService.class)` in which you provide the class you are expecting. 
@@ -243,6 +244,7 @@ are in order:
 and 
 [Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Renderable.java)
 are the main components of rendering. Every request terminates with render information,
-even if there is nothing to render.
+even if there is nothing to render. If no information is to be returned, just return
+`Media.empty()` from `Request#doProcess`
 
 # README.MD IN CONSTRUCTION
