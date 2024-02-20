@@ -169,10 +169,13 @@ depends on the logging configuration.
 [Context](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/Context.java)
 is the source of information for the current processing/request. It stores 
 information like the operation in execution and the transactionId. It is
-used by the framework to initiate transformations and validations.
+used by the framework to initiate transformations and validations. It also stores
+information like elapsed time by type, which will be treated later in this
+document.
 
 It is initialized automatically as soon as a request object is created and
-it's detroyed as soon as a request finishes. 
+it's detroyed as soon as a request finishes. A context can be obtained
+anywhere calling `Context.forRequest`
 As a rule of thumb, we don't want to initialize the context manually elsewhere, 
 so calling `Context.initialize` outside of a request will result in an error.
 You also cannot call it manually inside a request, as it will result in an error
@@ -183,5 +186,47 @@ you will be doing so needs to be annotated with
 [@ContextCreator](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ContextCreator.java).
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
+
+##Logging
+Logging can be done by requesting an 
+[ApplicationLogger](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ApplicationLogger.java)
+from the context: `ApplicationLogger logger = Context.forRequest().createLogger()`.
+With an ApplicationLogger instance, you can use the default logging levels to log
+information, as is: `logger.info(message, param1, param2).log()`. A few observations
+are in order:
+
+- Any log level provides two arguments: a message and an object varargs. Any varargs
+  present will replace `{}` inside the message. 
+  `logger.info("{} is greater than {}", number2, number1).log` 
+  will result in "2 is greater than 1" being logged.
+  
+- `ApplicationLogger#error` also provides an exception argument. This will result
+  in the stack trace being logged. Currently, framework exceptions are logged
+  with their stack traces. A future release will allow this to be disabled.
+  
+- The logging level methods do not actually log the information but rather wait
+  for the `log()` call. That is because we might want to add some extra information
+  to the log. Besides the fields present in the context, information related only
+  to that message can also be logged:
+    - `Context.forRequest().createLogger().log(message).attach("name", "Andrew").log()`
+      will create a new field named "name" only for this message.
+    - `Context.forRequest().createLogger().log(message).attachMap(aMap).log()`
+      will create as many new fields as keys available in the map. This method
+      also supports a String varargs to log only the desired fields.
+    - `Context.forRequest().createLogger().log(message).attachObject(anObject).log()`
+      will create as many fields as are available in the object. Again, you
+      could filter the object providing only the keys you desire to log, but
+      there is another approach for objects. You can annotate any field in a
+      Class that you don't want to log as 
+      [@Classified](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/Classified.java).
+      This will create automatic transformations that will be applied to the field
+      before exportation. You need to provide a 
+      [ClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/ClassifiedCypher.java)
+      implementation to the annotation. This strategy is used by the request as it logs
+      its information. You can create yours or use one of the available:
+        1. [HiddenClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/HiddenClassifiedCypher.java)
+          which will print only if the field has a value or not.
+        2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/IgnoringCypher.java) 
+          which will completely ignore that field.
 
 # README.MD IN CONSTRUCTION
