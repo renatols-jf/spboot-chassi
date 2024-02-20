@@ -539,6 +539,17 @@ providing the following parameters:
 `RestOperation#post`, `RestOperation#patch`, `RestOperation#put` or
 `RestOperation#delete` - these do not need the `HttpMethod` parameter.
 
+To make the HTTP call, simply call `RestOperation#call`. Two implementations
+are available: one that accepts a return type and one that accepts a return type
+and an error type. If no return type is expected, a null value can be passed. If
+an spefic error type is not expected, using the `RestOperation#call` without
+the error type will result in errors being initialized in a simple `Map`. 
+In the event of an error, either a 
+[ClientErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/ClientErrorOperationException.java) or a
+[ServerErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/ServerErrorOperationException.java)
+will be thrown. Both are implementations of `StatusRestOperationException`,
+which provides `getBody()` to get the parsed error.
+
 
 
 # README.MD IN CONSTRUCTION
