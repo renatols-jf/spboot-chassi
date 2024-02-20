@@ -430,7 +430,6 @@ Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).re
 ```
 {
    "name":"Andrew",
-   "greeting":"Hi! My name is Andrew",
    "echoes":[
       {
          "echo":"what they said"
