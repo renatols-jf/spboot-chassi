@@ -88,7 +88,7 @@ initializes this value without it actually being one of its constructor paramete
 
 ```
 public CalculateMarginRequest(String transactionId, String correlationId, List<String> projection,
-                   Map<String, String> requestContextEntries) {
+                   Map<String, String> requestContextEntries) extends Request {
     super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries);                  
 }
 ```
