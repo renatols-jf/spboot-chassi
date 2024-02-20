@@ -1,4 +1,4 @@
-#spboot-chassi
+# spboot-chassi
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -14,7 +14,7 @@ the request context. A simple solution is to add methods to take a snapshot of
 the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
 
-#What is this project?
+# What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
 applications. It deals with a few common concerns for distributed 
 (or not so distributed) applications:
@@ -25,7 +25,7 @@ applications. It deals with a few common concerns for distributed
 - Data validation
 - Data transformation
 
-#Motivation
+# Motivation
 I created this project based on the experiences I had while developing microservices
 in the last couple of years or so, and also based on the reading I've done so far.
 It's not uncommon for application needs to be ignored in favor of domain behavior, 
@@ -38,7 +38,7 @@ request is connected to its current context. Data validation is not static, and
 neither is data transformation. The current context is available to the application 
 anytime and can be used to transform and validate data, among other things.
 
-#Usage
+# Usage
 This is a Spring Boot framework, and it will most likely need to access Spring-managed
 objects and dependency injection. A new interaction mechanism will be provided in
 future releases, but currently, this project's main package needs to be scanned by
@@ -62,7 +62,7 @@ So you might need to add it again, as in:
 public class DemoApplication {
 ```
 
-##Request
+## Request
 [Request](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/request/Request.java) 
 is a unit of behavior. Everything that happens in the application should be
 within a request. It automatically provides a means to log the request, update application
@@ -81,7 +81,7 @@ public Request(String operation, String transactionId, String correlationId, Lis
                    Map<String, String> requestContextEntries)
 ```
 
-###operation
+### operation
 Operation is the name given to the request or unit of behavior. While we might
 have some more generic request implementations, it is expected that the subclass
 initializes this value without it actually being one of its constructor parameters:
@@ -96,17 +96,17 @@ public CalculateMarginRequest(String transactionId, String correlationId, List<S
 This operation name will be the same used elsewhere to assert validations and
 transformations, so it's probably a good idea to use a constant.
 
-###transactionId
+### transactionId
 A unique identifier given to the transaction. The idea is to serve as an identifier
 so a transaction can be traced through the various services. If a null 
 transactionId is provided, a UUID4 will be created.
 
-###correlationId
+### correlationId
 An external identifier given by an application outside the scope of 
 the internal services. It enables the identification of every transaction or request
 served with that corelationId.
 
-###projection
+### projection
 Projection exists as a means to tackle stamp coupling. There are services that generate
 big payloads as a response, and clients that need only a specific portion of that
 response. This could lead to traffic overcharges, the need to map unnecessary fields,
@@ -156,7 +156,7 @@ the projection `["aField", "anObject.f2", "aList.f3"]` will yield:
 }
 ```
 
-###requestContextEntries
+### requestContextEntries
 We might want to log information that is not available to the current
 service, but is used to identify messages in the service chain. Initializing this
 map will make every entry* in it be logged with each message during the request
@@ -165,7 +165,7 @@ duration.
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
 
-##Context
+## Context
 [Context](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/Context.java)
 is the source of information for the current processing/request. It stores 
 information like the operation in execution and the transactionId. It is
@@ -184,4 +184,4 @@ you will be doing so needs to be annotated with
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
 
-#README.MD IN CONSTRUCTION
+# README.MD IN CONSTRUCTION
