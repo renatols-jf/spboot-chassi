@@ -245,6 +245,47 @@ and
 [Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Renderable.java)
 are the main components of rendering. Every request terminates with render information,
 even if there is nothing to render. If no information is to be returned, just return
-`Media.empty()` from `Request#doProcess`
+`Media.empty()` from `Request#doProcess`. One of the main goals of the rendering framework
+is to avoid the creation of DTOs.
+
+Renderable denotes an object that can be rendered, it governs what and how is
+rendered or exported. There two ways to mark a class as renderable:
+implementing `Renderable` or implementing `FieldRenderable`.
+
+`Renderable` provides a render method in which the desired information is exported:
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassi.rendering.Media;
+import io.github.renatolsjf.chassi.rendering.Renderable;
+
+public class Greeter implements Renderable {
+    
+    private final String name;
+    
+    public Greeter(String name) {
+        this.name = name;
+    }
+    
+    public String greet() {
+        return "Hi! My name is: " + this.name;
+    }
+    
+    @Override
+    public Media render(Media media) {
+        return media.print(name, this.name)
+                .print("greeting", this.greet());
+    }
+    
+}
+```
+
+Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
+```
+{
+   "name": "Andrew",
+   "greeting": "Hi! My name is Andrew"
+}
+```
 
 # README.MD IN CONSTRUCTION
