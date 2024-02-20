@@ -39,7 +39,7 @@ neither is data transformation. The current context is available to the applicat
 anytime and can be used to transform and validate data, among other things.
 
 # Usage
-This is a Spring Boot framework, and it will most likely need to access Spring-managed
+This is a Spring Boot framework, and it will need to access Spring-managed
 objects and dependency injection. A new interaction mechanism will be provided in
 future releases, but currently, this project's main package needs to be scanned by
 Spring. This is done by adding the `ComponentScan` annotation to the application, 
