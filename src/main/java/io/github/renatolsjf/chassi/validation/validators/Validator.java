@@ -104,9 +104,9 @@ public abstract class Validator<T> {
 
         List<Validation> validations = Arrays.stream(method.getAnnotationsByType(Validation.class))
                 .filter(v -> {
-                    String[] actions = v.action();
-                    return actions == null || actions.length == 0
-                            || Arrays.asList(actions).contains(Context.forRequest().getAction());
+                    String[] operations = v.operation();
+                    return operations == null || operations.length == 0
+                            || Arrays.asList(operations).contains(Context.forRequest().getOperation());
                 })
                 .collect(Collectors.toList());
 
@@ -148,9 +148,9 @@ public abstract class Validator<T> {
 
         List<Validation> validations = Arrays.stream(field.getAnnotationsByType(Validation.class))
                 .filter(v -> {
-                    String[] actions = v.action();
-                    return actions == null || actions.length == 0
-                            || Arrays.asList(actions).contains(Context.forRequest().getAction());
+                    String[] operations = v.operation();
+                    return operations == null || operations.length == 0
+                            || Arrays.asList(operations).contains(Context.forRequest().getOperation());
                 })
                 .collect(Collectors.toList());
 

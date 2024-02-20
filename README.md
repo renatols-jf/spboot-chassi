@@ -27,3 +27,11 @@ It's not uncommon for application needs to be ignored in favor of domain behavio
 and the little code that exists is generally duplicated in many places. Also, I have
 seen my fair share of anemic models, and while I understand it's never so simple to
 get rid of data holders, I strive to use them the least possible.
+
+The whole framework is based on the idea that all that happens within an application
+request is connected to its current context. Data validation is not static, and 
+neither is data transformation. Based on that validation and transformations can be
+created based on operations.
+
+The idea is to lessen the quantity of boilerplate code written and enable developers
+to focus on domain behavior. 

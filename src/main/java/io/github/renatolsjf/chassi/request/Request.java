@@ -32,24 +32,24 @@ public abstract class Request {
     @Classified(IgnoringCypher.class)
     protected RequestOutcome outcome;
 
-    public Request(String action, String transactionId, String correlationId) {
-        this(action, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap());
+    public Request(String operation, String transactionId, String correlationId) {
+        this(operation, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap());
     }
 
-    public Request(String action, String transactionId, String correlationId, List<String> projection) {
-        this(action, transactionId, correlationId, projection, Collections.emptyMap());
+    public Request(String operation, String transactionId, String correlationId, List<String> projection) {
+        this(operation, transactionId, correlationId, projection, Collections.emptyMap());
     }
 
-    public Request(String action, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
-        this(action, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
+    public Request(String operation, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
+        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
     }
 
-    public Request(String action, String transactionId, String correlationId, List<String> projection,
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
-        this.context = Context.initialize(transactionId, correlationId).withAction(action).withProjection(projection);
+        this.context = Context.initialize(transactionId, correlationId).withOperation(operation).withProjection(projection);
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
     }
 

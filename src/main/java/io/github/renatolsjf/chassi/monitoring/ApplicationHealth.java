@@ -65,7 +65,7 @@ public class ApplicationHealth implements Renderable {
                     this.operationDataMap.put(operation, operationDataList);
 
                     this.metricRegistry.createBuilder(OPERATION_HEALTH_METRIC_NAME)
-                            .withTag("action", operation)
+                            .withTag("operation", operation)
                             .buildTrackingGauge()
                             .track(new OperationHealhObservableTask(operationDataList));
 

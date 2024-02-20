@@ -11,9 +11,9 @@ import java.util.Map;
 @HealthIgnore
 public class HealthRequest extends Request {
 
-    public HealthRequest(String action, String transactionId, String correlationId,
+    public HealthRequest(String operation, String transactionId, String correlationId,
                          List<String> projection, Map<String, String> requestContextEntries) {
-        super(action, transactionId, correlationId, projection, requestContextEntries);
+        super(operation, transactionId, correlationId, projection, requestContextEntries);
     }
 
     @Override

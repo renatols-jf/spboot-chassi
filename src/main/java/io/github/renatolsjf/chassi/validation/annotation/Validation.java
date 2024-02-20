@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Validations.class)
 public @interface Validation {
-    String[] action() default {};
+    String[] operation() default {};
     Nullable nullable() default @Nullable;
     Minimum minimum() default @Minimum;
     OneOf oneOf() default @OneOf;

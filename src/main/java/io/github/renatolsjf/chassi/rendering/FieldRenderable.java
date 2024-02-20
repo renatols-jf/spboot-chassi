@@ -40,10 +40,10 @@ public interface FieldRenderable extends Renderable {
 
                             RenderConfig mostSuitableConfig = null;
                             for (RenderConfig config: configs) {
-                                String[] actions = config.action();
-                                if (mostSuitableConfig == null && actions.length == 0) {
+                                String[] operations = config.operation();
+                                if (mostSuitableConfig == null && operations.length == 0) {
                                     mostSuitableConfig = config;
-                                } else if (Arrays.asList(actions).contains(Context.forRequest().getAction())) {
+                                } else if (Arrays.asList(operations).contains(Context.forRequest().getOperation())) {
                                     mostSuitableConfig = config;
                                     break;
                                 }

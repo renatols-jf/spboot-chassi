@@ -7,8 +7,10 @@ import io.github.renatolsjf.chassi.request.RequestOutcome;
 
 public class ApplicationHealthEngine {
 
-    private String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
-    private String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_millis";
+    private static final String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
+    private static final String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_millis";
+
+    private static final String OPERATION_TAG_NAME = "operation";
 
     private ApplicationHealth applicationHealth;
 
@@ -17,7 +19,7 @@ public class ApplicationHealthEngine {
 
     public void operationStarted() {
         Chassi.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
-                .withTag("action", Context.forRequest().getAction())
+                .withTag(OPERATION_TAG_NAME, Context.forRequest().getOperation())
                 .buildGauge()
                 .inc();
     }
@@ -29,7 +31,7 @@ public class ApplicationHealthEngine {
 
             context.getOperationTimeByType().entrySet().stream().forEach(entry ->
                     Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
-                            .withTag("action", context.getAction())
+                            .withTag(OPERATION_TAG_NAME, context.getOperation())
                             .withTag("outcome", outcome.toString().toLowerCase())
                             .withTag("timer_type", entry.getKey())
                             .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
@@ -40,7 +42,7 @@ public class ApplicationHealthEngine {
         } else {
 
             Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
-                    .withTag("action", context.getAction())
+                    .withTag(OPERATION_TAG_NAME, context.getOperation())
                     .withTag("outcome", outcome.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedMillis());
@@ -48,7 +50,7 @@ public class ApplicationHealthEngine {
         }
 
         Chassi.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
-                .withTag("action", context.getAction())
+                .withTag(OPERATION_TAG_NAME, context.getOperation())
                 .buildGauge()
                 .dec();
 
@@ -57,7 +59,7 @@ public class ApplicationHealthEngine {
                     Chassi.getInstance().getConfig().healthTimeWindowDuration(), Chassi.getInstance().getMetricRegistry());
         }
 
-        this.applicationHealth.create(context.getAction(), outcome.isSuccessful(),
+        this.applicationHealth.create(context.getOperation(), outcome.isSuccessful(),
                 outcome.isClientFault(), outcome.isServerFault(), context.getElapsedMillis(), context.getOperationTimeByType());
 
     }

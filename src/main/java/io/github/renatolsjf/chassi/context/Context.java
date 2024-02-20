@@ -63,7 +63,7 @@ public class Context {
 
     private String transactionId = UUID.randomUUID().toString();
     private String correlationId;
-    private String action;
+    private String operation;
     private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
 
@@ -113,8 +113,8 @@ public class Context {
         return this;
     }
 
-    public Context withAction(String action) {
-        this.action = action;
+    public Context withOperation(String operation) {
+        this.operation = operation;
         return this;
     }
 
@@ -136,8 +136,8 @@ public class Context {
         return this.requestContext;
     }
 
-    public String getAction() {
-        return this.action;
+    public String getOperation() {
+        return this.operation;
     }
 
     public Context recordOperationTime(String tag, long operationTime) {
@@ -181,7 +181,7 @@ public class Context {
 
         loggingAttributes.put("transactionId", () -> this.transactionId);
         loggingAttributes.put("correlationId", () -> this.correlationId);
-        loggingAttributes.put("action", () -> this.action);
+        loggingAttributes.put("operation", () -> this.operation);
         loggingAttributes.put("elapsedTime", () -> this.getElapsedMillis().toString());
         loggingAttributes.put("operationTimes", () -> {
             Map<String, Long> operationTimes = this.getOperationTimeByType();
