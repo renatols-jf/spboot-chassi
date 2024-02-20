@@ -288,4 +288,65 @@ Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")
 }
 ```
 
+You can also render nested renderables of collections of renderables:
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassi.rendering.Media;
+import io.github.renatolsjf.chassi.rendering.Renderable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Greeter implements Renderable {
+
+    private final String name;
+    List<Echo> echoes = new ArrayList<>();
+
+    public Greeter(String name) {
+        this.name = name;
+        this.echoes.add(new Echo());
+        this.echoes.add(new Echo());
+    }
+
+    public String greet() {
+        return "My name is: " + this.name;
+    }
+
+    @Override
+    public Media render(Media media) {
+        return media.print(name, this.name)
+                .print("greeting", this.greet())
+                .forkCollection("echoes", this.echoes);
+    }
+
+}
+
+class Echo implements Renderable {
+    @Override
+    public Media render(Media media) {
+        return media.print("echo", "what they said");
+    }
+}
+```
+
+Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
+```
+{
+   "name":"Andrew",
+   "greeting":"Hi! My name is Andrew",
+   "echoes":[
+      {
+         "echo":"what they said"
+      },
+      {
+         "echo":"what they said"
+      }
+   ]
+}
+```
+
+A single `Renderable` can be nested using `Media#forkRenderable` instead of
+`Media#forkCollection`
+
 # README.MD IN CONSTRUCTION
