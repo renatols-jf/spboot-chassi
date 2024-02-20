@@ -9,6 +9,11 @@ any issues. I'll continue to use it as it evolves, and I don't expect any
 downsides to it. Be it as it may, a test suite is needed. Until a comprehensive 
 set of tests is written, this project's version will be labeled as less than 1.0.0.
 
+Also, this project does not currently support NIO as it uses ThreadLocal to control
+the request context. A simple solution is to add methods to take a snapshot of
+the context and reinitialize after the NIO code. A more automatic solution would
+require greater effort. Be it as it may, the snapshot is also not supported yet.
+
 #What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
 applications. It deals with a few common concerns for distributed 
@@ -20,7 +25,7 @@ applications. It deals with a few common concerns for distributed
 - Data validation
 - Data transformation
 
-#Context
+#Motivation
 I created this project based on the experiences I had while developing microservices
 in the last couple of years or so, and also based on the reading I've done so far.
 It's not uncommon for application needs to be ignored in favor of domain behavior, 
@@ -100,3 +105,81 @@ transactionId is provided, a UUID4 will be created.
 An external identifier given by an application outside the scope of 
 the internal services. It enables the identification of every transaction or request
 served with that corelationId.
+
+###projection
+Projection exists as a means to tackle stamp coupling. There are services that generate
+big payloads as a response, and clients that need only a specific portion of that
+response. This could lead to traffic overcharges, the need to map unnecessary fields,
+among other issues.
+
+Each request supports a list of field names that will be automatically filtered
+before the response is given. Nestesd fields are represented with dots. 
+So, if a request returns the following json:
+
+```
+{
+   "aField":"aValue",
+   "anotherField":true,
+   "anObject":{
+      "f1":12,
+      "f2":null
+   },
+   "aList":[
+      {
+         "f3":false,
+         "f4":"Andrew"
+      },
+      {
+         "f3":true,
+         "f4":"Ryan"
+      }
+   ]
+}
+```
+
+the projection `["aField", "anObject.f2", "aList.f3"]` will yield: 
+
+```
+{
+   "aField":"aValue",
+   "anObject":{
+      "f2":null
+   },
+   "aList":[
+      {
+         "f3":false
+      },
+      {
+         "f3":true
+      }
+   ]
+}
+```
+
+###requestContextEntries
+We might want to log information that is not available to the current
+service, but is used to identify messages in the service chain. Initializing this
+map will make every entry* in it be logged with each message during the request
+duration.
+
+*Entries are logged in their own fields; exportation of fields other than message
+depends on the logging configuration.
+
+##Context
+[Context](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/Context.java)
+is the source of information for the current processing/request. It stores 
+information like the operation in execution and the transactionId. It is
+used by the framework to initiate transformations and validations.
+
+It is initialized automatically as soon as a request object is created and
+it's detroyed as soon as a request finishes. 
+As a rule of thumb, we don't want to initialize the context manually elsewhere, 
+so calling `Context.initialize` outside of a request will result in an error.
+You also cannot call it manually inside a request, as it will result in an error
+since the context already exists.
+
+If you absolutely need to create a context outside of a request, the class in which
+you will be doing so needs to be annotated with 
+[@ContextCreator](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ContextCreator.java).
+This will enable a context to be created. If a context already exists, an error will
+still be thrown.
