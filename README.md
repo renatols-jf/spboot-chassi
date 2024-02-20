@@ -248,6 +248,7 @@ even if there is nothing to render. If no information is to be returned, just re
 `Media.empty()` from `Request#doProcess`. One of the main goals of the rendering framework
 is to avoid the creation of DTOs.
 
+### Renderable
 Renderable denotes an object that can be rendered, it governs what and how is
 rendered or exported. There two ways to mark a class as renderable:
 implementing `Renderable` or implementing `FieldRenderable`.
@@ -280,7 +281,7 @@ public class Greeter implements Renderable {
 }
 ```
 
-Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
+Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
 ```
 {
    "name": "Andrew",
@@ -330,7 +331,7 @@ class Echo implements Renderable {
 }
 ```
 
-Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
+Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
 ```
 {
    "name":"Andrew",
@@ -348,5 +349,97 @@ Rendering the following class (calling `Media.ofRenderable(new Greeter("Andrew")
 
 A single `Renderable` can be nested using `Media#forkRenderable` instead of
 `Media#forkCollection`
+
+### FieldRenderable
+`FieldRenderable` does not require an implementation for `Renderable#render`.
+It walks the object inheritance tree and prints each class' fields up to `Object.class`
+
+The rendering can be customized using 
+[@RenderConfig](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderConfig.java).
+`RenderConfig` supports the following attributes:
+
+- `operation`: indicates to which operations this configuration applies. It can be empty,
+  a single operation, or multiple operations. A field can have more than one `RenderConfig`.
+  If that's the case, the most suitable configuration will be applied. That is the
+  first configuration which has the current operation listed or a configuration
+  which has no operations configured.
+- `policy` ([@RenderPolicy](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderPolicy.java)):
+  indicates whether the field will be rendered or ignored. This can be configured via
+  `RenderPolicy.Policy` as in `@RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.RENDER))` 
+  or `@RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.IGNORE))`. The default 
+  behavior is to render.
+- `alias`([@RenderAlias](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderAlias.java)): 
+  provides an alias for the current field: 
+  `@RenderConfig(alias = @RenderAlias("anAlias"))`
+- `transformer`([@RenderTransform](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderTransform.java)):
+  provides an implementation of 
+  [RenderTransformer](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderTransformer.java)
+  that will transform the field value:
+  `@RenderConfig(transformer = @RenderTransform(MyTransformer.class))`
+  
+Currently, there is no way to print nested renderables or a collection 
+of nested renderables - this will be add in a future release. 
+They should be configured not to be printed or some sort of workaround should
+be done. You can override the `FieldRenderable` default behavior as follows:
+
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassi.rendering.FieldRenderable;
+import io.github.renatolsjf.chassi.rendering.Media;
+import io.github.renatolsjf.chassi.rendering.Renderable;
+import io.github.renatolsjf.chassi.rendering.config.RenderConfig;
+import io.github.renatolsjf.chassi.rendering.config.RenderPolicy;
+import io.github.renatolsjf.chassi.rendering.config.RenderTransform;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Greeter implements FieldRenderable {
+
+    private final String name;
+    @RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.IGNORE))
+    List<Echo> echoes = new ArrayList<>();
+
+    public Greeter(String name) {
+        this.name = name;
+        this.echoes.add(new Echo());
+        this.echoes.add(new Echo());
+    }
+
+    public String greet() {
+        return "My name is: " + this.name;
+    }
+
+    @Override
+    public Media render(Media media) {
+        return FieldRenderable.super.render(media)
+                .forkCollection("echoes", this.echoes);
+    }
+
+}
+
+class Echo implements Renderable {
+    @Override
+    public Media render(Media media) {
+        return media.print("echo", "what they said");
+    }
+}
+```
+Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
+```
+{
+   "name":"Andrew",
+   "greeting":"Hi! My name is Andrew",
+   "echoes":[
+      {
+         "echo":"what they said"
+      },
+      {
+         "echo":"what they said"
+      }
+   ]
+}
+```
 
 # README.MD IN CONSTRUCTION
