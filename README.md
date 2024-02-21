@@ -758,8 +758,41 @@ public class MetricDemo {
 ```
 
 ## Built-in metrics
-Each time a request is executed, a few pre-defined metrics are created as the operation runs.
+Each time a request is executed, a few pre-defined metrics are created as the operation runs:
 
+- A `Gauge` called `operation_active_requests`. It stores how many requests are running. 
+  It increases as soon as a request starts and decreases as soon as the request finishes.
+  It uses the current `operation` as a `tag`.
+  
+- A `Gauge` called `operation_health`. It stores the current health of a given operation.
+  It uses the current `operation` as a `tag`.
+
+- A `Histogram`, named `operation_request_time`. It stores the time taken for each request, 
+  in milliseconds, in buckets. It uses as a `tag`: the current `operation`, the `outcome`
+  of the request (success, client_error, or server_error), and the `timer_type`. More information
+  on `timer_type` is provided in [Timing operations and timer types](#timing-operations-and-timer-types) section.
+
+
+Here is how those metrics are exported to Prometheus:
+```
+operation_health{operation="DEMO_OPERATION",} 100.0
+operation_active_requests{operation="DEMO_OPERATION",} 0.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="200.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="500.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="1000.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="2000.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="5000.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="10000.0",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",le="+Inf",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 1.0
+operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
+operation_request_time_max{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
+```
+
+## Timing operations and timer types
+TODO
+
+## FALAR DAS METRICAS DE INTEGRAÇÃO
 ## TODO allow extra tags to automatic metrics -> useful for application name, instance.
 ## TODO create summary
 ## TODO labels

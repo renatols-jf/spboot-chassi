@@ -8,7 +8,7 @@ import io.github.renatolsjf.chassis.request.RequestOutcome;
 public class ApplicationHealthEngine {
 
     private static final String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
-    private static final String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_millis";
+    private static final String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_time";
 
     private static final String OPERATION_TAG_NAME = "operation";
 
