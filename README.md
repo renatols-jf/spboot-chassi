@@ -1038,3 +1038,4 @@ in the future.
 - Create some kind of label structure to override default names for metrics, tags, and logging fields.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
 - Create mechanism to work with Java NIO.
+- Implement distributed tracing.
