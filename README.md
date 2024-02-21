@@ -63,7 +63,7 @@ public class DemoApplication {
 ```
 
 ## Request
-[Request](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/request/Request.java) 
+[Request](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Request.java) 
 is a unit of behavior. Everything that happens in the application should be
 within a request. It automatically provides a means to log the request, update application
 metrics, and some other useful application behavior. The idea is to think of a request
@@ -175,7 +175,7 @@ duration.
 depends on the logging configuration.
 
 ## Context
-[Context](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/Context.java)
+[Context](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/Context.java)
 is the source of information for the current processing/request. It stores 
 information like the operation in execution and the transactionId. It is
 used by the framework to initiate transformations and validations. It also stores
@@ -192,13 +192,13 @@ since the context already exists.
 
 If you absolutely need to create a context outside of a request, the class in which
 you will be doing so needs to be annotated with 
-[@ContextCreator](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ContextCreator.java).
+[@ContextCreator](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ContextCreator.java).
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
 
 ## Logging
 Logging can be done by requesting an 
-[ApplicationLogger](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/ApplicationLogger.java)
+[ApplicationLogger](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ApplicationLogger.java)
 from the context: `ApplicationLogger logger = Context.forRequest().createLogger()`.
 With an ApplicationLogger instance, you can use the default logging levels to log
 information, as is: `logger.info(message, param1, param2).log()`. A few observations
@@ -228,21 +228,21 @@ are in order:
       could filter the object providing only the keys you desire to log, but
       there is another approach for objects. You can annotate any field in a
       Class that you don't want to log as 
-      [@Classified](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/Classified.java).
+      [@Classified](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/Classified.java).
       This will create automatic transformations that will be applied to the field
       before exportation. You need to provide a 
-      [ClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/ClassifiedCypher.java)
+      [ClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/ClassifiedCypher.java)
       implementation to the annotation. This strategy is used by the request as it logs
       its information. You can create yours or use one of the available:
-        1. [HiddenClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/HiddenClassifiedCypher.java)
+        1. [HiddenClassifiedCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/HiddenClassifiedCypher.java)
           which will print only if the field has a value or not.
-        2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/context/data/cypher/IgnoringCypher.java) 
+        2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/IgnoringCypher.java) 
           which will completely ignore that field.
            
 ## Rendering
-[Media](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Media.java)
+[Media](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Media.java)
 and 
-[Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/Renderable.java)
+[Renderable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Renderable.java)
 are the main components of rendering. Every request terminates with render information,
 even if there is nothing to render.  One of the main goals of the rendering framework
 is to avoid the creation of DTOs. You should terminate `Request#doProcess`
@@ -263,8 +263,8 @@ implementing `Renderable` or implementing `FieldRenderable`.
 ```
 package com.example.demo;
 
-import io.github.renatolsjf.chassi.rendering.Media;
-import io.github.renatolsjf.chassi.rendering.Renderable;
+import io.github.renatolsjf.chassis.rendering.Media;
+import io.github.renatolsjf.chassis.rendering.Renderable;
 
 public class Greeter implements Renderable {
     
@@ -299,8 +299,8 @@ You can also render nested renderables of collections of renderables:
 ```
 package com.example.demo;
 
-import io.github.renatolsjf.chassi.rendering.Media;
-import io.github.renatolsjf.chassi.rendering.Renderable;
+import io.github.renatolsjf.chassis.rendering.Media;
+import io.github.renatolsjf.chassis.rendering.Renderable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -361,7 +361,7 @@ A single `Renderable` can be nested using `Media#forkRenderable` instead of
 It walks the object inheritance tree and prints each class' fields up to `Object.class`
 
 The rendering can be customized using 
-[@RenderConfig](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderConfig.java).
+[@RenderConfig](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderConfig.java).
 `RenderConfig` supports the following attributes:
 
 - `operation`: indicates to which operations this configuration applies. It can be empty,
@@ -369,17 +369,17 @@ The rendering can be customized using
   If that's the case, the most suitable configuration will be applied. That is the
   first configuration which has the current operation listed or a configuration
   which has no operations configured.
-- `policy` ([@RenderPolicy](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderPolicy.java)):
+- `policy` ([@RenderPolicy](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderPolicy.java)):
   indicates whether the field will be rendered or ignored. This can be configured via
   `RenderPolicy.Policy` as in `@RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.RENDER))` 
   or `@RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.IGNORE))`. The default 
   behavior is to render.
-- `alias`([@RenderAlias](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderAlias.java)): 
+- `alias`([@RenderAlias](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderAlias.java)): 
   provides an alias for the current field: 
   `@RenderConfig(alias = @RenderAlias("anAlias"))`
-- `transformer`([@RenderTransform](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderTransform.java)):
+- `transformer`([@RenderTransform](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderTransform.java)):
   provides an implementation of 
-  [RenderTransformer](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/config/RenderTransformer.java)
+  [RenderTransformer](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderTransformer.java)
   that will transform the field value:
   `@RenderConfig(transformer = @RenderTransform(MyTransformer.class))`
   
@@ -391,12 +391,12 @@ be done. You can override the `FieldRenderable` default behavior as follows:
 ```
 package com.example.demo;
 
-import io.github.renatolsjf.chassi.rendering.FieldRenderable;
-import io.github.renatolsjf.chassi.rendering.Media;
-import io.github.renatolsjf.chassi.rendering.Renderable;
-import io.github.renatolsjf.chassi.rendering.config.RenderConfig;
-import io.github.renatolsjf.chassi.rendering.config.RenderPolicy;
-import io.github.renatolsjf.chassi.rendering.config.RenderTransform;
+import io.github.renatolsjf.chassis.rendering.FieldRenderable;
+import io.github.renatolsjf.chassis.rendering.Media;
+import io.github.renatolsjf.chassis.rendering.Renderable;
+import io.github.renatolsjf.chassis.rendering.config.RenderConfig;
+import io.github.renatolsjf.chassis.rendering.config.RenderPolicy;
+import io.github.renatolsjf.chassis.rendering.config.RenderTransform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -462,22 +462,22 @@ called manually or initialized automatically according to the context. Currently
 the only context transformation available is the projection one.
 
 Transformations can be done using 
-[TransformingPath](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/transforming/TransformingPath.java),
+[TransformingPath](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/transforming/TransformingPath.java),
 an implementation of [MediaTransformer](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/MediaTransformer.java),
-and [MediaContent](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/rendering/MediaContent.java).
+and [MediaContent](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/MediaContent.java).
 This is a part of the framework that needs to evolve, so I'll not write more 
 information on this topic at the moment. An example will be available in the
 sample project, though.
 
 ## Validation
 Any class that implements 
-[Validatable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/Validatable.java)
+[Validatable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/Validatable.java)
 can be validated simply by calling `myValidatableInstance.validate()`. This will trigger
 an object lookup for any nested `Validatable` objects to validate all of them.
 
 To configure validations, you have to annotate `Validatable` fields or 
 methods with 
-[@Validation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Validation.java).
+[@Validation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Validation.java).
 A field or a method can have multiple validations configured. A `Validation` accepts
 the following parameters:
 
@@ -486,7 +486,7 @@ the following parameters:
   one `Validation`, all of those that have no operation configured or that have
   the current operation in its operation's list, will be applied.
   
-- `nullable`([@Nullable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Nullable.java)):
+- `nullable`([@Nullable](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Nullable.java)):
   indicates whether a field or return of method can be null. Accepted values are:
     - `CAN_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
       in which the value can either be null or not.
@@ -494,15 +494,15 @@ the following parameters:
       in which the value cannot be null.
     - `MUST_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
       in which the value must be null.
-- `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Minimum.java)):
+- `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Minimum.java)):
   indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`. 
   Currently, a minimum value of 0 disables the validation. In a future release, 
   this will be changed to `Integer.MIN_VALUE`.
-- `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/OneOf.java)):
+- `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/OneOf.java)):
   indicates that a field's value must be equal to one of the provided values -
   `@Validation(oneOf = @OneOf({"Ryan", "Andrew"}))`. Currently, it supports only
   `String` values, but it will be expanded in a future release.
-- `pattern`([@Pattern](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/validation/annotation/Pattern.java))  :
+- `pattern`([@Pattern](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Pattern.java))  :
   indicates that a `String` must match a provided Regex -
   `@Validation(pattern = @Pattern("^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"))`
   
@@ -511,7 +511,7 @@ default error message in case of a validation error.
 
 ## API integrations - HTTP(s) calls
 Each HTTP request should be made using the 
-[RestOperation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/RestOperation.java) 
+[RestOperation](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/RestOperation.java) 
 class. To create a `RestOperation` you should call `RestOperation#create` 
 providing the following parameters:
 
@@ -545,8 +545,8 @@ and an error type. If no return type is expected, a null value can be passed. If
 an spefic error type is not expected, using the `RestOperation#call` without
 the error type will result in errors being initialized in a simple `Map`. 
 In the event of an error, either a 
-[ClientErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/ClientErrorOperationException.java) or a
-[ServerErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassi/integration/ServerErrorOperationException.java)
+[ClientErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ClientErrorOperationException.java) or a
+[ServerErrorOperationException](https://github.com/renatols-jf/spboot-chassi/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ServerErrorOperationException.java)
 will be thrown. Both are implementations of `StatusRestOperationException`,
 which provides `getBody()` to get the parsed error.
 
