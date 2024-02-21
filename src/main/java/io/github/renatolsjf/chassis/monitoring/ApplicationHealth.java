@@ -148,9 +148,7 @@ public class ApplicationHealth implements Renderable {
         }
 
         OperationSummary aos = new OperationSummary();
-        aos.health = summaryList.size() > 0
-                ? summaryList.stream().mapToDouble(os -> os.health).sum() / summaryList.size()
-                : 100;
+        aos.health = summaryList.stream().mapToDouble(os -> os.health).min().orElse(100d);
         aos.requestCount = applicationRequestCount;
         aos.successCount = applicationSuccessCount;
         aos.clientErrorCount = applicationClientErrorCount;

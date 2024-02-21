@@ -805,10 +805,64 @@ integration_request_time_sum{group="GOOGLE",operation="SEARCH",outcome="200",ser
 integration_request_time_max{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
 ```
 
+## Built-in health information
+The application has a default `HealthRequest` that exports health information in `json`.
+It exports health percentage, request count, quantiles for the time taken for each type, and
+result count by type. It does so by each operation, and also aggregates as application information.
+The application health is not a median. Instead, it reflects the health of the worst operation.
+
+```
+{
+   "application":{
+      "health":100.0,
+      "load":{
+         "requestCount":1,
+         "requestTime":{
+            "internal":{
+               "quantiles":{
+                  "0.5":13,
+                  "0.95":13,
+                  "0.99":13
+               }
+            }
+         }
+      },
+      "result":{
+         "success":1,
+         "clientError":0,
+         "serverError":0
+      }
+   },
+   "operations":[
+      {
+         "name":"DEMO_OPERATION",
+         "health":100.0,
+         "load":{
+            "requestCount":1,
+            "requestTime":{
+               "internal":{
+                  "quantiles":{
+                     "0.5":13,
+                     "0.95":13,
+                     "0.99":13
+                  }
+               }
+            }
+         },
+         "result":{
+            "success":1,
+            "clientError":0,
+            "serverError":0
+         }
+      }
+   ]
+}
+```
+
 ## Timing operations and timer types
 TODO
 
-
+## TODO config: application health as median instead of worst 
 ## TODO allow extra tags to automatic metrics -> useful for application name, instance.
 ## TODO create summary
 ## TODO labels
