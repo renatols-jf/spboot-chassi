@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.github.renatols-jf</groupId>
-	<artifactId>spboot-chassi</artifactId>
+	<artifactId>spboot-chassis</artifactId>
 	<version>0.0.1</version>
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>Multipurpose microservice chassi for spring boot</description>
-	<url>https://github.com/renatols-jf/spboot-chassi</url>
+	<description>Multipurpose microservice chassis for spring boot</description>
+	<url>https://github.com/renatols-jf/spboot-chassis</url>
 	<packaging>jar</packaging>
 
 	<developers>
@@ -27,9 +27,9 @@
 	</licenses>
 
 	<scm>
-		<connection>scm:git:git://github.com/renatols-jf/spboot-chassi.git</connection>
-		<developerConnection>scm:git:ssh://github.com:renatols-jf/spboot-chassi.git</developerConnection>
-		<url>http://github.com/renatols-jf/spboot-chassi/tree/master</url>
+		<connection>scm:git:git://github.com/renatols-jf/spboot-chassis.git</connection>
+		<developerConnection>scm:git:ssh://github.com:renatols-jf/spboot-chassis.git</developerConnection>
+		<url>http://github.com/renatols-jf/spboot-chassis/tree/master</url>
 	</scm>
 
 	<parent>
