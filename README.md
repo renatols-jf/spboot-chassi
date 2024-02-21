@@ -1007,6 +1007,15 @@ configurations as in use:
 - `allowContextCorrelationIdUpdate`: Defaults to `true`. Governs whether a `correlationId` can be
   updated after the context has been initialized.
   
+- `monitoringRequestDurationRanges`: Defaults to `new double[]{200, 500, 1000, 2000, 5000, 10000}`.
+  Govern the default `Histogram` buckets for request duration in milliseconds.
+  
+- `exportRequestDurationMetricByType`: Defaults to `true`. Governs whether `Histogram` metrics
+  for request duration will be tagged with timer types.
+  
+- `healthTimeWindowDuration`: Defaults to 5 minutes. Governs the maximum age of requests
+  to be used in health calculations.
+
 
 ## TODO config: export attached fields in their own
 ## TODO config: application health as median instead of worst 
