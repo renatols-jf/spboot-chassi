@@ -550,7 +550,7 @@ In the event of an error, either a
 will be thrown. Both are implementations of `StatusRestOperationException`,
 which provides `getBody()` to get the parsed error.
 
-Using `RestOperation` will provide automatic logging and metrics creation for the 
+Using `RestOperation` provides automatic logging and metrics creation for the 
 call. These will be configurable in a future release.
 
 ## Monitoring
