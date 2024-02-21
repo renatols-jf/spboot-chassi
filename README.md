@@ -770,7 +770,7 @@ Each time a request is executed, a few pre-defined metrics are created as the op
 - A `Histogram`, named `operation_request_time`. It stores the time taken for each request, 
   in milliseconds, in buckets. It uses as a `tag`: the current `operation`, the `outcome`
   of the request (success, client_error, or server_error), and the `timer_type`. More information
-  on `timer_type` is provided in [Timing operations and timer types](#timing-operations-and-timer-types) section.
+  on `timer_type` is provided in [Timing operations and timer classification](#timing-operations-and-timer-classification) section.
   
 - If a `RestOperation` is executed, a `Histogram` named `integration_request_time`.
   It stores the time taken for each HTTP call, in milliseconds, in buckets. 
@@ -859,8 +859,95 @@ The application health is not a median. Instead, it reflects the health of the w
 }
 ```
 
-## Timing operations and timer types
-TODO
+## Timing operations and timer classification
+The framework enables us to classify the time taken while processing an operation. 
+The classification is done using a simple `String` as a `Tag`. To measure the time for a block of code, 
+we use [TimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/TimedOperation.java).
+
+A `TimedOperation` will record the time it took automatically to the `Context`. 
+You can tag the `TimedOperation` however you like, using `new TimedOperation(myTag)`, or using one of two
+pre-defined tags: http `TimedOperation.http()`, used for HTTP calls, and db `TimedOperation.db()`,
+used for database calls. 
+
+`TimedOperation.http()` is used internally in `RestOperation`, and
+`TimedOperation.db()` has to manually wrap a database call. It's not uncommon for database calls
+to be automatic, having only the interface for the `Repository` created. To avoid wrapping in TimedOperation
+a call to the repository everywhere it's referenced, you can create a delegate
+for such cases:
+
+```
+package com.example.demo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface DemoRepositoryDelegate extends JpaRepository<Demo, String> {
+    List<Demo> findAllByStatus(Demo.Status status);
+    Optional<Demo> findByAField(String aFieldValue);
+}
+```
+
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class DemoRepository {
+
+    @Autowired
+    private DemoRepositoryDelegate demoRepositoryDelegate;
+
+    public List<Demo> findUnfinishedDemos() {
+        return TimedOperation.<List<Demo>>db()
+                .execute(() -> this.demoRepositoryDelegate.findAllByStatus(Demo.Status.UNFINISHED));
+    }
+
+    public Optional<Demo> findByAField(String aFieldValue) {
+        return TimedOperation.<Optional<Demo>>db()
+                .execute(() -> this.demoRepositoryDelegate.findByAField(aFieldValue));
+    }
+
+    public void saveDemo(Demo demoData) {
+        TimedOperation.db().run(() -> this.demoRepositoryDelegate.save(demoData));
+    }
+
+    public void deleteDemo(Demo demoData) {
+        TimedOperation.db().run(() -> this.demoRepositoryDelegate.delete(demoData));
+    }
+
+}
+
+```
+A timed operation can be executed in two ways: `run` and `execute`. `run` expects a 
+`java.lang.Runnable` and has no return type, while `execute` expects a `TimedOperation.Executable` 
+and returns whatever type the generic call was made with. In a future release, 
+`TimedOperation.Executable` will be dropped in favor of `java.concurrent.Callable`. 
+
+To run:
+```
+new TimedOperation("aTagValue").run(() -> System.out.println("I ran!"));
+```
+or
+```
+TimedOperation.db().run(() -> System.out.println("Pretend I am a database call!"));
+```
+
+To execute:
+```
+List<String> aList = new TimedOperation<List<String>>("aTagValue").execute(() -> Collections.emptyList());
+```
+or
+```
+List<String> aList = TimedOperation.<List<String>>http().execute(() -> Collections.emptyList()); //Pretend this is an HTTP request!
+```
 
 ## TODO config: application health as median instead of worst 
 ## TODO allow extra tags to automatic metrics -> useful for application name, instance.
