@@ -252,7 +252,28 @@ are in order:
           which will print only if the field has a value or not.
         2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/IgnoringCypher.java) 
           which will completely ignore that field.
-           
+
+Fields added via `attach` will **NOT** be exported in their own fields. Intead, they will be groupped
+in a field called `context`. A future release will provide a configuration to change this behavior.
+```
+        Context.forRequest().withRequestContextEntry("fixedField", "Present in all messages!")
+                .createLogger()
+                .info("A message")
+                .attach("aField", "aValue")
+                .attach("anotherField", "anotherValue")
+                .log();
+
+        Context.forRequest()
+                .createLogger()
+                .info("A  second message")
+                .attach("aThridField", "aThirdValue")
+                .log();
+```
+will log: 
+```
+{"@timestamp":"2024-02-21T15:25:36.382-03:00","message":"A message","logger_name":"com.example.demo.DemoRequest","level":"INFO","context":"{\"anotherField\":\"anotherValue\",\"aField\":\"aValue\"}","fixedField":"Present in all messages!","operationTimes":"{internal=8, total=8}","operation":"DEMO_OPERATION","transactionId":"c52fa6c6-a5d9-4a39-961c-f832f232da57","elapsedTime":"8","application":"demo-application"}
+{"@timestamp":"2024-02-21T15:25:36.382-03:00","message":"A  second message","logger_name":"com.example.demo.DemoRequest","level":"INFO","context":"{\"aThridField\":\"aThirdValue\"}","fixedField":"Present in all messages!","operationTimes":"{internal=8, total=8}","operation":"DEMO_OPERATION","transactionId":"c52fa6c6-a5d9-4a39-961c-f832f232da57","elapsedTime":"8","application":"demo-application"}
+```
 ## Rendering
 [Media](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Media.java)
 and 
@@ -948,6 +969,22 @@ or
 List<String> aList = TimedOperation.<List<String>>http().execute(() -> Collections.emptyList()); //Pretend this is an HTTP request!
 ```
 
+## Configuration
+Although a configuration module exists and is accessible via `Chassis.getInstance().getConfig()`,
+currently no changes to the configurations can be made. Be it as it may, the following 
+configurations as in use:
+
+- `useCallingClassNameForLogging`: Defaults to `true`. Governs whether the stack trace will be 
+  used or not to initialize the logging class. When creating an `ApplicationLogger`, 
+  you can provide a class or not to be exported as the logger name. In case where no class is provided,
+  as in `Context.forRequest().createLogger()`, this configuration will be used to initialize
+  the class. If it's true, the class will be the calling class. If it's false, it will
+  always be `ApplicatonLogger`.
+  
+- `printLoggingContextAsJson`: Defaults to `true`. Governs whether the `context` field present
+  in log messages will be exported as `json`.
+
+## TODO config: export attached fields in their own
 ## TODO config: application health as median instead of worst 
 ## TODO allow extra tags to automatic metrics -> useful for application name, instance.
 ## TODO create summary

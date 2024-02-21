@@ -31,7 +31,7 @@ public class Configuration {
                 .getOrDefault(Properties.LOGGER_PRINT_CONTEXT_AS_JSON, Boolean.TRUE);
     }
 
-    //Não habilitar, ainda não trata coleções
+    //Can't enable as it does not treat collections. But this might not even be needed anymore.
     public Boolean explodeLoggingAttachedObjects() {
         return (Boolean) this.configData
                 .getOrDefault(Properties.LOGGER_EXPLODE_ATTACHED_OBJECTS, Boolean.FALSE);
