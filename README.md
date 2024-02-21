@@ -1,4 +1,4 @@
-# spboot-chassi
+# spboot-chassis
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
