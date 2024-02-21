@@ -571,7 +571,13 @@ call. These will be configurable in a future release.
 ## Monitoring
 This framework exports metrics to Prometheus automatically using the Spring actuator.
 It provides a facade for metrics, which will reflect in the Spring/Micrometer `MeterRegistry`.
-Currently, there are 4 metrics that can be created:
+
+### Metric types and creation
+Metrics are created with the help of `MetricRegistry` - not  the same as `MeterRegistry` from
+Spring/Micrometer. There is no need to store references to the created metrics. Each time
+you try to build a `Metric`, the `MetricRegistry` will either create a new
+one or return an existing `Metric` in case it's the same type and has the same name and
+same tags as the one requested. Currently, there are 4 metrics that can be created:
 
 - `Counter`: A counter, as the name says, counts something. As long as the application
   is running, its value never resets.
@@ -749,8 +755,12 @@ public class MetricDemo {
 
     }
 }
-```  
+```
 
+## Built-in metrics
+Each time a request is executed, a few pre-defined metrics are created as the operation runs.
+
+## TODO allow extra tags to automatic metrics -> useful for application name, instance.
 ## TODO create summary
 ## TODO labels
 ## TODO allow time metrics to be in seconds
