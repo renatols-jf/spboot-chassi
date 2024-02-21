@@ -39,6 +39,20 @@ neither is data transformation. The current context is available to the applicat
 anytime and can be used to transform and validate data, among other things.
 
 # Usage
+To use this project, you need to update your pom.xml if using Maven
+```
+<dependency>
+    <groupId>io.github.renatols-jf</groupId>
+    <artifactId>spboot-chassis</artifactId>
+    <version>0.0.2</version>
+</dependency>
+```
+
+or your build.gradle if using Gradle
+```
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.2'
+```
+
 This is a Spring Boot framework, and it will need to access Spring-managed
 objects and dependency injection. A new interaction mechanism will be provided in
 future releases, but currently, this project's main package needs to be scanned by
@@ -555,5 +569,6 @@ Using `RestOperation` provides automatic logging and metrics creation for the
 call. These will be configurable in a future release.
 
 ## Monitoring
+Monitoring is
 
 # README.MD UNDER CONSTRUCTION
