@@ -765,7 +765,7 @@ public class MetricDemo {
         Exported to Prometheus as:
         a_histogram_bucket{aTagName="aTagValue",le="0.1",} 0.0
         a_histogram_bucket{aTagName="aTagValue",le="0.2",} 0.0
-        a_histogram_bucket{aTagName="aTagValue",le="0.5",} 0.0
+        a_histogram_bucket{aTagName="aTagValue",le="0.5",} 1.0
         a_histogram_bucket{aTagName="aTagValue",le="1.0",} 1.0
         a_histogram_bucket{aTagName="aTagValue",le="5.0",} 1.0
         a_histogram_bucket{aTagName="aTagValue",le="10.0",} 1.0
