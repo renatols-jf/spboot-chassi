@@ -1043,3 +1043,4 @@ in the future.
 - Implement yml configuration for things like validations, and more.
 - Create a circuit breaker or failsafe structure that can be used to wrap calls.
 - Implement structure to enable A/B testing.
+- Enable external configuration initialization, be it from yml or from some tool.
