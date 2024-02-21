@@ -1044,3 +1044,6 @@ in the future.
 - Create a circuit breaker or failsafe structure that can be used to wrap calls.
 - Implement structure to enable A/B testing.
 - Enable external configuration initialization, be it from yml or from some tool.
+- Dynamic validation rule loading from a datasource.
+- Cross-field or cross-concern validation.
+- Creation of behavior flows usings yml or other configuration tools. Possibly a fork project.
