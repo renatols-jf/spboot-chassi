@@ -16,7 +16,7 @@ public class HistogramBucket implements Comparable<HistogramBucket> {
     }
 
     public void increaseCountIfInRange(double value) {
-        if (le >= value) {
+        if (Double.compare(le, value) > 0) {
             this.inc();
         }
     }

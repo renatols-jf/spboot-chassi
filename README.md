@@ -569,6 +569,189 @@ Using `RestOperation` provides automatic logging and metrics creation for the
 call. These will be configurable in a future release.
 
 ## Monitoring
-Monitoring is
+This framework exports metrics to Prometheus automatically using the Spring actuator.
+It provides a facade for metrics, which will reflect in the Spring/Micrometer `MeterRegistry`.
+Currently, there are 4 metrics that can be created:
 
+- `Counter`: A counter, as the name says, counts something. As long as the application
+  is running, its value never resets.
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassis.Chassis;
+
+public class MetricDemo {
+
+    public MetricDemo() {
+
+        /*
+        Increases the value by 1
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_counter")
+                .withTag("aTagName", "aTagValue")
+                .buildCounter()
+                .inc();
+        /*
+        Increases the value by the desired amount
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_counter")
+                .withTag("aTagName", "aTagValue")
+                .buildCounter()
+                .inc(2d);
+
+        /*
+        Exported to Prometheus as:
+        a_counter_total{aTagName="aTagValue",} 3.0
+         */
+    }
+
+}
+  ```
+- `Gauge`: A gauge stores a value that can be changed as desired.
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassis.Chassis;
+
+public class MetricDemo {
+    public MetricDemo() {
+        /*
+        Increases the value by 1
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .inc();
+        /*
+        Increases the value by the desired amount
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .inc(2d);
+
+        /*
+        Decreases the value by the desired amount
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .dec();
+
+        /*
+        Decreases the value by the desired amount
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .dec(2d);
+
+        /*
+        Sets the value to the current timestamp
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .setToCurrentTime();
+
+        /*
+        Sets the value to the desired amount
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildGauge()
+                .set(2d);
+        
+        /*
+        Expord to Prometheus as:
+        a_gauge{aTagName="aTagValue",} 2.0
+         */
+
+    }
+}
+```  
+
+- `TrackingGauge`: A `TrackingGauge` is fundamentally the same as a `Gauge`. It
+  differs in the way the measurement is done. You don't change its value
+  manually. Instead, it tracks an `ObservableTask` object.
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.monitoring.ObservableTask;
+
+public class MetricDemo {
+    public MetricDemo() {
+
+        /*
+        Tracks the desired task
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_tracking_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildTrackingGauge()
+                .track(() -> 2); //or .track(new Task());
+
+        /*
+        Tracks the desired task with a WeakReference. As soon as the WeakReference is cleared
+        the metric will measure 0. Since the new task is not referenced anywhere else,
+        this metric will default to 0 as soon as the garbage collector runs.
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_tracking_gauge")
+                .withTag("aTagName", "aTagValue")
+                .buildTrackingGauge()
+                .weakTrack(new Task()); //or .weakTrack(() -> 2);
+        
+        /*
+        Exported to Prometheus as:
+        a_tracking_gauge{aTagName="aTagValue",} 100.0
+         */
+
+    }
+}
+
+class Task implements ObservableTask {
+    @Override
+    public double getCurrentValue() {
+        return 100;
+    }
+}
+```  
+- `Histogram`: histogram counts distributions along a defined range. It can be used to
+  calculate quantiles on Prometheus.
+```
+package com.example.demo;
+
+import io.github.renatolsjf.chassis.Chassis;
+
+public class MetricDemo {
+    public MetricDemo() {
+
+        /*
+        Creates a histogram with bucket values of 0.1, 0.2, 0.5, 1, 5, and 10
+         */
+        Chassis.getInstance().getMetricRegistry().createBuilder("a_histogram")
+                .withTag("aTagName", "aTagValue")
+                .buildHistogram(.1d, .2d, .5d, 1d, 5d, 10d)
+                .observe(.255d);
+        
+        /*
+        Exported to Prometheus as:
+        a_histogram_bucket{aTagName="aTagValue",le="0.1",} 0.0
+        a_histogram_bucket{aTagName="aTagValue",le="0.2",} 0.0
+        a_histogram_bucket{aTagName="aTagValue",le="0.5",} 0.0
+        a_histogram_bucket{aTagName="aTagValue",le="1.0",} 1.0
+        a_histogram_bucket{aTagName="aTagValue",le="5.0",} 1.0
+        a_histogram_bucket{aTagName="aTagValue",le="10.0",} 1.0
+        a_histogram_bucket{aTagName="aTagValue",le="+Inf",} 1.0
+        a_histogram_count{aTagName="aTagValue",} 1.0
+        a_histogram_sum{aTagName="aTagValue",} 0.255
+         */
+
+    }
+}
+```  
+
+## TODO create summary
+## TODO labels
+## TODO allow time metrics to be in seconds
 # README.MD UNDER CONSTRUCTION
