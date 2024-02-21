@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.context;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,7 +110,7 @@ public class ApplicationLogger {
         });
 
         String contextString;
-        if (Chassi.getInstance().getConfig().printLoggingContextAsJson()) {
+        if (Chassis.getInstance().getConfig().printLoggingContextAsJson()) {
             try {
                 contextString = objectWriter.writeValueAsString(extraFields);
             } catch (JsonProcessingException e) {

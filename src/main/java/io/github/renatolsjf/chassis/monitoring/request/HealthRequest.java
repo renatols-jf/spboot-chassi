@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.monitoring.request;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.request.Request;
 import io.github.renatolsjf.chassis.request.RequestOutcome;
@@ -18,7 +18,7 @@ public class HealthRequest extends Request {
 
     @Override
     protected Media doProcess() {
-        return Media.ofRenderable(Chassi.getInstance().getApplicationHealthEngine().getCurrentApplicationHealth());
+        return Media.ofRenderable(Chassis.getInstance().getApplicationHealthEngine().getCurrentApplicationHealth());
     }
 
     @Override

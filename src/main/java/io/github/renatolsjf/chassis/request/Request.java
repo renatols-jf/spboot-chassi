@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.request;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.AppRegistry;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.context.ContextCreator;
@@ -65,7 +65,7 @@ public abstract class Request {
         try {
 
             if (!healthIgnore) {
-                Chassi.getInstance().getApplicationHealthEngine().operationStarted();
+                Chassis.getInstance().getApplicationHealthEngine().operationStarted();
             }
 
             this.context.createLogger()
@@ -104,7 +104,7 @@ public abstract class Request {
         } finally {
 
             if (!healthIgnore) {
-                Chassi.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
+                Chassis.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
             }
             Context.clear();
 

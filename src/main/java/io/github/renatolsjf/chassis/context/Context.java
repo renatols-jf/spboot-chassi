@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.context;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 
@@ -40,7 +40,7 @@ public class Context {
             throw new InvalidContextStateException("A context already exists for current request");
         } else {
 
-            if (Chassi.getInstance().getConfig().forbidUnauthorizedContextCreation()) {
+            if (Chassis.getInstance().getConfig().forbidUnauthorizedContextCreation()) {
                 Class<?> callingClass = StackWalker.getInstance(
                         StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass();
                 if (!(callingClass.isAnnotationPresent(ContextCreator.class))) {
@@ -107,7 +107,7 @@ public class Context {
     }
 
     public Context withCorrelationId(String correlationId) {
-        if (Chassi.getInstance().getConfig().allowContextCorrelationIdUpdate()) {
+        if (Chassis.getInstance().getConfig().allowContextCorrelationIdUpdate()) {
             this.correlationId = correlationId;
         }
         return this;
@@ -147,7 +147,7 @@ public class Context {
     }
 
     public ApplicationLogger createLogger() {
-        if (Chassi.getInstance().getConfig().useCallingClassNameForLogging()) {
+        if (Chassis.getInstance().getConfig().useCallingClassNameForLogging()) {
             return new ApplicationLogger(StackWalker.getInstance(
                     StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass(),
                     this.createFixedLogginAttributes());
@@ -173,7 +173,7 @@ public class Context {
     private Map<String, LoggingAttribute> createFixedLogginAttributes() {
 
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
-        boolean overrideDefaultAttributes = Chassi.getInstance().getConfig().allowDefaultLoggingAttributesOverride();
+        boolean overrideDefaultAttributes = Chassis.getInstance().getConfig().allowDefaultLoggingAttributesOverride();
 
         if (!overrideDefaultAttributes) {
             this.requestContext.entrySet().forEach(e -> loggingAttributes.put(e.getKey(), () -> e.getValue()));

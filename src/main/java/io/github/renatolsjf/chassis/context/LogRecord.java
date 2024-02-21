@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.context;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.ClassifiedCypher;
 import io.vavr.control.Try;
@@ -68,7 +68,7 @@ public class LogRecord {
 
     public LogRecord attachObject(final Object value, String... fieldToPrint) {
         return this.attachObject(value, this.recordData,
-                Chassi.getInstance().getConfig().explodeLoggingAttachedObjects(), fieldToPrint);
+                Chassis.getInstance().getConfig().explodeLoggingAttachedObjects(), fieldToPrint);
     }
 
     private LogRecord attachObject(final Object value, Map<String, Object> container,

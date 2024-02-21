@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.validation.validators;
 
-import io.github.renatolsjf.chassis.Chassi;
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.ValidatorExcutionException;
@@ -22,7 +22,7 @@ public abstract class Validator<T> {
     private boolean failOnError;
 
     protected Validator(T validatable) {
-        this(validatable, Chassi.getInstance().getConfig().validatorFailOnExecutionError());
+        this(validatable, Chassis.getInstance().getConfig().validatorFailOnExecutionError());
     }
 
     protected Validator(T validatable, boolean failOnError) {

@@ -18,7 +18,7 @@ public class ApplicationHealthEngine {
     ApplicationHealthEngine() {}
 
     public void operationStarted() {
-        Chassi.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
+        Chassis.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
                 .withTag(OPERATION_TAG_NAME, Context.forRequest().getOperation())
                 .buildGauge()
                 .inc();
@@ -27,10 +27,10 @@ public class ApplicationHealthEngine {
     public void operationEnded(RequestOutcome outcome) {
 
         Context context = Context.forRequest();
-        if (Chassi.getInstance().getConfig().exportRequestDurationMetricByType()) {
+        if (Chassis.getInstance().getConfig().exportRequestDurationMetricByType()) {
 
             context.getOperationTimeByType().entrySet().stream().forEach(entry ->
-                    Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
+                    Chassis.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
                             .withTag(OPERATION_TAG_NAME, context.getOperation())
                             .withTag("outcome", outcome.toString().toLowerCase())
                             .withTag("timer_type", entry.getKey())
@@ -41,7 +41,7 @@ public class ApplicationHealthEngine {
 
         } else {
 
-            Chassi.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
+            Chassis.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
                     .withTag(OPERATION_TAG_NAME, context.getOperation())
                     .withTag("outcome", outcome.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
@@ -49,14 +49,14 @@ public class ApplicationHealthEngine {
 
         }
 
-        Chassi.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
+        Chassis.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
                 .withTag(OPERATION_TAG_NAME, context.getOperation())
                 .buildGauge()
                 .dec();
 
         if (applicationHealth == null) {
             this.applicationHealth = new ApplicationHealth(
-                    Chassi.getInstance().getConfig().healthTimeWindowDuration(), Chassi.getInstance().getMetricRegistry());
+                    Chassis.getInstance().getConfig().healthTimeWindowDuration(), Chassis.getInstance().getMetricRegistry());
         }
 
         this.applicationHealth.create(context.getOperation(), outcome.isSuccessful(),
@@ -67,7 +67,7 @@ public class ApplicationHealthEngine {
     public ApplicationHealth getCurrentApplicationHealth() {
         if (applicationHealth == null) {
             this.applicationHealth = new ApplicationHealth(
-                    Chassi.getInstance().getConfig().healthTimeWindowDuration(), Chassi.getInstance().getMetricRegistry());
+                    Chassis.getInstance().getConfig().healthTimeWindowDuration(), Chassis.getInstance().getMetricRegistry());
         }
         return this.applicationHealth;
     }

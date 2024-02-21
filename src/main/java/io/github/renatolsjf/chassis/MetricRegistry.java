@@ -57,7 +57,7 @@ public class MetricRegistry implements MetricListener {
         public Histogram buildHistogram(HistogramRanges range) {
             switch (range) {
                 case REQUEST_DURATION:
-                    return this.buildHistogram(Chassi.getInstance().getConfig().monitoringRequestDurationRanges());
+                    return this.buildHistogram(Chassis.getInstance().getConfig().monitoringRequestDurationRanges());
                 default:
                     return this.registerMetric(Histogram.class);
             }

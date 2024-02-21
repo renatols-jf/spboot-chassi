@@ -1,14 +1,14 @@
 package io.github.renatolsjf.chassis;
 
-public class Chassi {
+public class Chassis {
 
-    private static Chassi instance = new Chassi();
+    private static Chassis instance = new Chassis();
 
     private Configuration config = new Configuration();
     private MetricRegistry metricRegistry = new MetricRegistry();
     private ApplicationHealthEngine applicationHealthEngine = new ApplicationHealthEngine();
 
-    private Chassi() {}
+    private Chassis() {}
 
     public Configuration getConfig() {
         return this.config;
@@ -28,7 +28,7 @@ public class Chassi {
         }
     }
 
-    public static Chassi getInstance() {
+    public static Chassis getInstance() {
         return instance;
     }
 
