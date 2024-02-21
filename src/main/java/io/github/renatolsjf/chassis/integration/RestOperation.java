@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class RestOperation {
 
-    private static final String REQUEST_DURATION_METRIC_NAME = "integration_request_millis";
+    private static final String REQUEST_DURATION_METRIC_NAME = "integration_request_time";
 
     private static final String REQUEST_DURATION_METRIC_TYPE_TAG = "type";
     private static final String REQUEST_DURATION_METRIC_GROUP_TAG = "group";

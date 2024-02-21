@@ -771,6 +771,12 @@ Each time a request is executed, a few pre-defined metrics are created as the op
   in milliseconds, in buckets. It uses as a `tag`: the current `operation`, the `outcome`
   of the request (success, client_error, or server_error), and the `timer_type`. More information
   on `timer_type` is provided in [Timing operations and timer types](#timing-operations-and-timer-types) section.
+  
+- If a `RestOperation` is executed, a `Histogram` named `integration_request_time`.
+  It stores the time taken for each HTTP call, in milliseconds, in buckets. 
+  It uses as a `tag`: the `group` for the `RestOperation`, the `service` for the `RestOperation`
+  the `operation` for the `RestOperation`, `outcome` which is either an `Http Status Code` or
+  `connection_error`, and `type`, which is always `rest`.
 
 
 Here is how those metrics are exported to Prometheus:
@@ -787,12 +793,22 @@ operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer
 operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 1.0
 operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
 operation_request_time_max{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="200.0",} 0.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="500.0",} 0.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="1000.0",} 1.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="2000.0",} 1.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="5000.0",} 1.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="10000.0",} 1.0
+integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="+Inf",} 1.0
+integration_request_time_count{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 1.0
+integration_request_time_sum{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
+integration_request_time_max{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
 ```
 
 ## Timing operations and timer types
 TODO
 
-## FALAR DAS METRICAS DE INTEGRAÇÃO
+
 ## TODO allow extra tags to automatic metrics -> useful for application name, instance.
 ## TODO create summary
 ## TODO labels
