@@ -277,8 +277,7 @@ will log:
 ## Rendering
 [Media](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Media.java)
 and 
-[Renderable](https://github.com/renatols-jf/spboot-chassis
-/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Renderable.java)
+[Renderable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Renderable.java)
 are the main components of rendering. Every request terminates with render information,
 even if there is nothing to render.  One of the main goals of the rendering framework
 is to avoid the creation of DTOs. You should terminate `Request#doProcess`
