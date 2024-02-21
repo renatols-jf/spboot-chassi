@@ -1016,11 +1016,24 @@ configurations as in use:
 - `healthTimeWindowDuration`: Defaults to 5 minutes. Governs the maximum age of requests
   to be used in health calculations.
 
+# Next Steps
+A few future updates have been thought of. Having said that, this does not neither represent
+an order of priority nor a commitment. These are just a few items that might be done
+in the future.
 
-## TODO config: export attached fields in their own
-## TODO config: application health as median instead of worst 
-## TODO allow extra tags to automatic metrics -> useful for application name, instance.
-## TODO create summary
-## TODO labels
-## TODO allow time metrics to be in seconds
-# README.MD UNDER CONSTRUCTION
+- Enable configuration changes.
+- Create a configuration to not log stack traces.
+- Create a configuration to log attached fields in their own fields.
+- Allow for `FieldRenderable` to print nested `Renderable` objects.
+- Replace `@Minimum` ignore value from 0 to `Integer.MIN_VALUE`
+- Allow for `@OneOf` to accept values other than `String`.
+- Create further validations, such as the maximum value permitted, and the minimum and the maximum size.
+- Create a configuration to have some level of control in automatic logs and metrics.  
+- Remove the need to call `.log()` for messages that have no attachment.  
+- Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
+- Replace `TimedOperation.Executable` with `java.concurrent.Callable`.
+- Create a configuration to calculate application health as a media instead of worst.
+- Allow extra tags in automatic metrics.
+- Create a summary type metric;
+- Create some kind of label structure to override default names for metrics, tags, and logging fields.
+- Allow request duration metrics to be collected in measurements different from milliseconds.  
