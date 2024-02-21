@@ -67,7 +67,7 @@ public class Context {
     private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
 
-    private ApplicationLogger logger = new ApplicationLogger(this.createFixedLogginAttributes());
+    private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
 
     private long requestStartingTime = System.currentTimeMillis();
     private Map<String, Long> operationTimeCounter = new HashMap<>();
@@ -150,14 +150,14 @@ public class Context {
         if (Chassis.getInstance().getConfig().useCallingClassNameForLogging()) {
             return new ApplicationLogger(StackWalker.getInstance(
                     StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass(),
-                    this.createFixedLogginAttributes());
+                    this.createFixedLoggingAttributes());
         } else {
             return this.logger;
         }
     }
 
     public ApplicationLogger createLogger(Class<?> clazz) {
-        return new ApplicationLogger(clazz, this.createFixedLogginAttributes());
+        return new ApplicationLogger(clazz, this.createFixedLoggingAttributes());
     }
 
     public Map<String, Long> getOperationTimeByType() {
@@ -170,7 +170,7 @@ public class Context {
         return times;
     }
 
-    private Map<String, LoggingAttribute> createFixedLogginAttributes() {
+    private Map<String, LoggingAttribute> createFixedLoggingAttributes() {
 
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
         boolean overrideDefaultAttributes = Chassis.getInstance().getConfig().allowDefaultLoggingAttributesOverride();

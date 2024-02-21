@@ -983,6 +983,30 @@ configurations as in use:
   
 - `printLoggingContextAsJson`: Defaults to `true`. Governs whether the `context` field present
   in log messages will be exported as `json`.
+  
+- `allowDefaultLoggingAttributesOverride`: Defaults fo `false`. Governs whether automatic logging
+  attributes, such as `transactionId`, can have their value replaced with a call for 
+  `Context#withRequestContextEntry` as in
+  `Context.forRequest.withRequestContextEntry("transactionId", aNewValue)`.
+  
+- `validatorFailOnExecutionError`: Defaults to `true`. Governs whether an unexpected error
+  in a validation attempt results in an exception. Every validation that fails for not matching
+  the annotations for the current operation will result in an exception. For whatever
+  reason, an exception can happen in the middle of the validation attempt. Let's say a method
+  that is being validated throws an exception. If this configuration is true, the validation 
+  will not happen, and an exception will be thrown. If this configuration is false, the validation
+  will not happen, but it will be ignored, and if no other validation fails, the `Validatable`
+  would be deemed valid.
+  
+- `forbidUnauthorizedContextCreation`: Defatuls to `true`. `Context.initialize` can't be called
+  anywhere to create a `Context`. Allowing the `Context` creation is error-prone and, in almost
+  all cases, not needed. If this configuration is true, unless the class in which 
+  `Context.initialize` is being called is annotated with `@ContextCreator`, an exception will
+  be thrown.
+
+- `allowContextCorrelationIdUpdate`: Defaults to `true`. Governs whether a `correlationId` can be
+  updated after the context has been initialized.
+  
 
 ## TODO config: export attached fields in their own
 ## TODO config: application health as median instead of worst 

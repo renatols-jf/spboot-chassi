@@ -39,7 +39,7 @@ public class Configuration {
 
     public Boolean allowDefaultLoggingAttributesOverride() {
         return (Boolean) this.configData
-                .getOrDefault(Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE, Boolean.TRUE);
+                .getOrDefault(Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE, Boolean.FALSE);
     }
 
     public Boolean validatorFailOnExecutionError() {

@@ -3,7 +3,7 @@ package io.github.renatolsjf.chassis.validation.validators;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.validation.ValidationException;
-import io.github.renatolsjf.chassis.validation.ValidatorExcutionException;
+import io.github.renatolsjf.chassis.validation.ValidatorExecutionException;
 import io.github.renatolsjf.chassis.validation.annotation.Validation;
 
 import java.lang.reflect.AccessibleObject;
@@ -125,7 +125,7 @@ public abstract class Validator<T> {
             value = method.invoke(this.validatable);
         } catch (InvocationTargetException e) {
             if (this.failOnError) {
-                throw new ValidatorExcutionException("Error while processing validation "
+                throw new ValidatorExecutionException("Error while processing validation "
                         + "for method " + method.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getCause().getMessage(), e.getCause());
             } else {
@@ -133,7 +133,7 @@ public abstract class Validator<T> {
             }
         } catch (Exception e) {
             if (this.failOnError) {
-                throw new ValidatorExcutionException("Error while processing validation "
+                throw new ValidatorExecutionException("Error while processing validation "
                         + "for method " + method.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getMessage(), e);
             } else {
@@ -167,7 +167,7 @@ public abstract class Validator<T> {
             value = field.get(this.validatable);
         } catch (Exception e) {
             if (this.failOnError) {
-                throw new ValidatorExcutionException("Error while processing validation "
+                throw new ValidatorExecutionException("Error while processing validation "
                         + "for field " + field.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getMessage(), e);
             } else {
