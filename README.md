@@ -1039,3 +1039,7 @@ in the future.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
 - Create mechanism to work with Java NIO.
 - Implement distributed tracing.
+- Implement default validators.
+- Implement yml configuration for things like validations, and more.
+- Create a circuit breaker or failsafe structure that can be used to wrap calls.
+- Implement structure to enable A/B testing.
