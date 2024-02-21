@@ -1046,4 +1046,5 @@ in the future.
 - Enable external configuration initialization, be it from yml or from some tool.
 - Dynamic validation rule loading from a datasource.
 - Cross-field or cross-concern validation.
-- Creation of behavior flows usings yml or other configuration tools. Possibly a fork project.
+- Creation of behavior flows usings yml or other configuration tools. Possibly another project 
+that uses this one as lib.
