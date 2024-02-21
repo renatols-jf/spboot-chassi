@@ -871,9 +871,8 @@ used for database calls.
 
 `TimedOperation.http()` is used internally in `RestOperation`, and
 `TimedOperation.db()` has to manually wrap a database call. It's not uncommon for database calls
-to be automatic, having only the interface for the `Repository` created. To avoid wrapping in TimedOperation
-a call to the repository everywhere it's referenced, you can create a delegate
-for such cases:
+to be automatic, having only the interface for the `Repository` created. To avoid every call
+to the repository in `TimedOperation`, you can create a delegate for such cases:
 
 ```
 package com.example.demo;
