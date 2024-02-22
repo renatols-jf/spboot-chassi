@@ -9,6 +9,7 @@ import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
+import io.github.renatolsjf.chassis.validation.ValidationException;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,9 +55,25 @@ public abstract class Request {
     }
 
     protected abstract Media doProcess();
-    protected abstract RequestOutcome resolveError(Throwable t);
+    protected abstract RequestOutcome doResolveError(Throwable t);
 
     protected <T> T requestResource(Class<T> clazz) { return AppRegistry.getResource(clazz); }
+
+    protected RequestOutcome resolveError(Throwable t) {
+
+        RequestOutcome requestOutcome;
+        if (t instanceof ValidationException) {
+            return RequestOutcome.CLIENT_ERROR;
+        } else {
+            requestOutcome = this.doResolveError(t);
+        }
+
+        if (requestOutcome == null) {
+            requestOutcome = RequestOutcome.SERVER_ERROR;
+        }
+        return requestOutcome;
+
+    }
 
     public final Media process() {
 
