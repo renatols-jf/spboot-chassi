@@ -511,7 +511,9 @@ a `Map` for single instances or a `List` for collections. Spring Boot will
 return this without any issues, but a more powerful abstraction is a good idea.
 
 ### Transforming
-Transforming is the means by which an output is transformed into another. It can be
+Transforming is the means by which an output is transformed into another. This is **NOT**
+the same as `@RenderTransform` from `@RenderConfig`. `@RenderTransform` applies to a single
+field, while this operation applies to the whole data. It can be
 called manually or initialized automatically according to the context. Currently,
 the only context transformation available is the projection one.
 
@@ -519,9 +521,9 @@ Transformations can be done using
 [TransformingPath](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/transforming/TransformingPath.java),
 an implementation of [MediaTransformer](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/MediaTransformer.java),
 and [MediaContent](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/MediaContent.java).
-This is a part of the framework that needs to evolve, so I'll not write more 
-information on this topic at the moment. An example will be available in the
-sample project, though.
+Currently, very little support exists for this type of transformation. This is a part of the 
+framework that needs to evolve, so I'll not write more information on this topic for now. 
+You are probably better off not using it at the moment.
 
 ## Validation
 Any class that implements 
