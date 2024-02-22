@@ -32,7 +32,7 @@ public class HealthRequest extends Request {
     }
 
     @Override
-    protected RequestOutcome resolveError(Throwable t) {
+    protected RequestOutcome doResolveError(Throwable t) {
         return RequestOutcome.SERVER_ERROR;
     }
 }
