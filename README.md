@@ -778,7 +778,11 @@ public class MetricDemo {
 ```
 
 ## Built-in metrics
-Each time a request is executed, a few pre-defined metrics are created as the operation runs:
+Each time a request is executed, a few pre-defined metrics are created as the operation runs. If
+a request should not count towards application health, as the health request itself does not,
+the request class should be annotated with 
+[@HealthIgnore](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/request/HealthIgnore.java).
+If the request does not have that annotation, the following metrics will be generated:
 
 - A `Gauge` called `operation_active_requests`. It stores how many requests are running. 
   It increases as soon as a request starts and decreases as soon as the request finishes.
