@@ -260,7 +260,8 @@ are in order:
       before exportation. You need to provide a 
       [ClassifiedCypher](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/ClassifiedCypher.java)
       implementation to the annotation. This strategy is used by the request as it logs
-      its information. You can create yours or use one of the available:
+      its information. You can create yours or use one of the available (if none is specified,
+      `IgnoringCypher` will be used):
         1. [HiddenClassifiedCypher](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/HiddenClassifiedCypher.java)
           which will print only if the field has a value or not.
         2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/IgnoringCypher.java) 
