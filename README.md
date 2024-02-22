@@ -1069,8 +1069,10 @@ in the future.
 - Create some kind of label structure to override default names for metrics, tags, and logging fields.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
 - Create mechanism to work with Java NIO.
-- Creat a configuration to not swallow rendering transformation errors, which is currently
+- Create a configuration to not swallow rendering transformation errors, which is currently
   being done.
+- Create a configuration to control whether an exception in a request will be wrapped in
+  a `RequestException` that holds the original exception, and the outcome of the request.
 - Implement distributed tracing.
 - Implement default validators.
 - Implement yml configuration for things like validations, and more.
