@@ -433,7 +433,7 @@ The rendering can be customized using
 - `transformer`([@RenderTransform](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderTransform.java)):
   provides an implementation of 
   [RenderTransformer](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/config/RenderTransformer.java)
-  that will transform the field value:
+  that will transform the field value (`RenderTransformer` **MUST** have a public no args constructor):
   `@RenderConfig(transformer = @RenderTransform(MyTransformer.class))`
   
 Currently, there is no way to print nested renderables or a collection 
