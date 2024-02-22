@@ -244,7 +244,7 @@ class OperationHealhObservableTask implements ObservableTask {
         if (this.operationDataList.isEmpty()) {
             return 100;
         } else {
-            long c = this.operationDataList.stream().filter(od -> od.success).count();
+            long c = this.operationDataList.stream().filter(od -> !(od.serverFault)).count();
             double s = this.operationDataList.size();
             double v = (c / s) * 100d;
             return Math.round(v);
