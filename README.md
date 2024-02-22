@@ -106,8 +106,8 @@ The idea is to identify the outcome based on the exception thrown. `Request#reso
 called first. It checks if the `Throwable` is an instance of `ValidationException`, in which case
 it sets the outcome as `RequestOutcome.CLIENT_ERROR`. If it is not, it defers the decision to
 `Request#doResolveError`, which is abstract and must be implemented. In the case that 
-`Request#doResolveError` return nulls (this **SHOULD NOT** happen), it sets the outcome as
-`RequestOutcome.SERVER_ERROR`.
+`Request#doResolveError` return nulls (this **SHOULD NOT** happen), `Request#resolveError` 
+sets the outcome as `RequestOutcome.SERVER_ERROR`.
 
 There are a few request constructors available, but we will approach only the most complete:
 
