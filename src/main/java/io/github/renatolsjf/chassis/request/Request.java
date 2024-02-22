@@ -41,9 +41,19 @@ public abstract class Request {
         this(operation, transactionId, correlationId, projection, Collections.emptyMap());
     }
 
+    public Request(String operation, String transactionId, String correlationId, String requestContextEntries) {
+        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
+    }
+
     public Request(String operation, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
         this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
     }
+
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   String requestContextEntries) {
+        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation());
+    }
+
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
