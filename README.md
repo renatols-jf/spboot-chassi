@@ -195,7 +195,11 @@ the projection `["aField", "anObject.f2", "aList.f3"]` will yield:
 We might want to log information that is not available to the current
 service, but is used to identify messages in the service chain. Initializing this
 map will make every entry* in it be logged with each message during the request
-duration.
+duration. The entries can also be supplied as a `String`, separating key from value
+using `:` and separating entries using `;`, as in `aKey:aValue;anotherKey:anotherValue`.
+It's highly recommended to use 
+[EntryResolver](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/EntryResolver.java)
+to do conversions if needed, though.
 
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
