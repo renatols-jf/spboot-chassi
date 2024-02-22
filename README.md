@@ -1066,7 +1066,7 @@ in the future.
 - Create some kind of label structure to override default names for metrics, tags, and logging fields.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
 - Create mechanism to work with Java NIO.
-- Implement a configuration to not swallow rendering transformation errors, which is currently
+- Creat a configuration to not swallow rendering transformation errors, which is currently
   being done.
 - Implement distributed tracing.
 - Implement default validators.
