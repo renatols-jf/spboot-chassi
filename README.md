@@ -271,7 +271,7 @@ are in order:
         2. [IgnoringCypher](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/data/cypher/IgnoringCypher.java) 
           which will completely ignore that field.
 
-Fields added via `attach` will **NOT** be exported in their own fields. Intead, they will be groupped
+Fields added via `attach` will **NOT** be exported in their own fields. Instead, they will be grouped
 in a field called `context`. A future release will provide a configuration to change this behavior.
 ```
         Context.forRequest().withRequestContextEntry("fixedField", "Present in all messages!")
