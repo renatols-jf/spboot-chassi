@@ -97,6 +97,18 @@ There are two ways of doing so:
 - `AppRegistry.getResource(MyService.class)` in which you provide the class you are expecting.
   This can be called anywhere.
 
+After a request is finished, it must set its `RequestOutcome`. If no exception is thrown, the
+request is deemed successful, and `RequestOutcome.SUCCESS` is initialized automatically.
+There are two methods used to realize the final outcome in the case of an exception:
+`Request#resolveError` and `Request#doResolveError` - both receive a `Throwable` as a parameter.
+
+The idea is to identify the outcome based on the exception thrown. `Request#resolveError` is
+called first. It checks if the `Throwable` is an instance of `ValidationException`, in which case
+it sets the outcome as `RequestOutcome.CLIENT_ERROR`. If it is not, it defers the decision to
+`Request#doResolveError`, which is abstract and must be implemented. In the case that 
+`Request#doResolveError` return nulls (this **SHOULD NOT** happen), it sets the outcome as
+`RequestOutcome.SERVER_ERROR`.
+
 There are a few request constructors available, but we will approach only the most complete:
 
 ```
