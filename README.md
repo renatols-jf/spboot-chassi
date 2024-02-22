@@ -833,7 +833,7 @@ integration_request_time_max{group="GOOGLE",operation="SEARCH",outcome="200",ser
 The application has a default `HealthRequest` that exports health information in `json`.
 It exports health percentage, request count, quantiles for the time taken for each type, and
 result count by type. It does so by each operation, and also aggregates as application information.
-The application health is not a median. Instead, it reflects the health of the worst operation.
+The application health is not an average. Instead, it reflects the health of the worst operation.
 
 ```
 {
