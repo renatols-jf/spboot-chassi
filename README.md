@@ -210,7 +210,8 @@ document.
 
 It is initialized automatically as soon as a request object is created and
 it's detroyed as soon as a request finishes. A context can be obtained
-anywhere calling `Context.forRequest`
+anywhere calling `Context.forRequest()`. Inside a request, a context is also an attribute
+and can be accessed directly by calling `context`.
 As a rule of thumb, we don't want to initialize the context manually elsewhere, 
 so calling `Context.initialize` outside of a request will result in an error.
 You also cannot call it manually inside a request, as it will result in an error
