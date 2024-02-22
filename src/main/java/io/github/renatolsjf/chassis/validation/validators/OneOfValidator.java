@@ -16,6 +16,10 @@ public class OneOfValidator extends DefaultValidator {
     @Override
     public void defaultValidation(String name, Object value, Validation validation) {
 
+        if (value == null) {
+            return;
+        }
+
         List<String> acceptedValues = Arrays.asList(validation.oneOf().value()).stream()
                 .map(s -> s.split(","))
                 .flatMap(a -> Arrays.stream(a))
