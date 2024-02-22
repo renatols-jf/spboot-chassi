@@ -972,6 +972,12 @@ or
 List<String> aList = TimedOperation.<List<String>>http().execute(() -> Collections.emptyList()); //Pretend this is an HTTP request!
 ```
 
+A negligible difference (of a few milliseconds) can be expected between the final log, prometheus
+output, and the health request output. That happens because these calculations happen at the end
+of the request, but the timer is still ticking. We could stop the timer as soon as the domain logic
+is over for this wrap-up to use a stopped timer, but this is part of the request after all. 
+Be it as it may, a future release will include a configuration to stop the timer.
+
 ## Configuration
 Although a configuration module exists and is accessible via `Chassis.getInstance().getConfig()`,
 currently no changes to the configurations can be made. Be it as it may, the following 
@@ -1037,6 +1043,7 @@ in the future.
 - Replace `TimedOperation.Executable` with `java.concurrent.Callable`.
 - Create a configuration to calculate application health as a media instead of worst.
 - Allow extra tags in automatic metrics.
+- Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)
 - Create a summary type metric;
 - Create some kind of label structure to override default names for metrics, tags, and logging fields.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
