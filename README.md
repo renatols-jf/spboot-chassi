@@ -981,7 +981,7 @@ Be it as it may, a future release will include a configuration to stop the timer
 ## Configuration
 Although a configuration module exists and is accessible via `Chassis.getInstance().getConfig()`,
 currently no changes to the configurations can be made. Be it as it may, the following 
-configurations as in use:
+configurations are in use:
 
 - `useCallingClassNameForLogging`: Defaults to `true`. Governs whether the stack trace will be 
   used or not to initialize the logging class. When creating an `ApplicationLogger`, 
