@@ -2,7 +2,7 @@
 
 # Changelist
 ## Unreleased
-- Enabled FieldRenderable to render nested renderables and collections of renderables.
+- Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
 
 # Discalimer
