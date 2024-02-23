@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 
 public class MinimumValidator extends DefaultValidator {
 
+    public static final int IGNORE_THRESHOLD = Integer.MIN_VALUE;
+
     protected MinimumValidator(Object validatable) {
         super(validatable);
     }
@@ -16,7 +18,7 @@ public class MinimumValidator extends DefaultValidator {
     public void defaultValidation(String name, Object value, Validation validation) {
 
         Minimum minimum = validation.minimum();
-        if (minimum.value() == 0) {
+        if (minimum.value() == IGNORE_THRESHOLD || value == null) {
             return;
         }
 

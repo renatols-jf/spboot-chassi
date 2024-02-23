@@ -3,6 +3,7 @@
 # Changelist
 ## Unreleased
 - Enabled FieldRenderable to render nested renderables and collections of renderables.
+- Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -495,9 +496,7 @@ the following parameters:
     - `MUST_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
       in which the value must be null.
 - `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Minimum.java)):
-  indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`. 
-  Currently, a minimum value of 0 disables the validation. In a future release, 
-  this will be changed to `Integer.MIN_VALUE`.
+  indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`.
 - `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/OneOf.java)):
   indicates that a field's value must be equal to one of the provided values -
   `@Validation(oneOf = @OneOf({"Ryan", "Andrew"}))`. Currently, it supports only
@@ -998,7 +997,6 @@ in the future.
 - Enable configuration changes.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
-- Replace `@Minimum` ignore value from 0 to `Integer.MIN_VALUE`
 - Allow for `@OneOf` to accept values other than `String`.
 - Create further validations, such as the maximum value permitted, and the minimum and the maximum size.
 - Create a configuration to have some level of control in automatic logs and metrics.  
