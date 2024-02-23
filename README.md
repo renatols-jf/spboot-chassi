@@ -1,5 +1,9 @@
 # spboot-chassis
 
+# Changelist
+## Unreleased
+- Enable FieldRenderable to render nested renderables and collections of renderables.
+
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
 best to solve any issues, but a few issues are to be expected. This also means there
@@ -407,7 +411,8 @@ Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).re
 ```
 
 A single `Renderable` can be nested using `Media#forkRenderable` instead of
-`Media#forkCollection`
+`Media#forkCollection`. As of version `0.0.3`, `Media#print` recognizes renderables and
+collections, removing the need to call `Media#forkRenderable` and `Media#forkCollection`.
 
 ### FieldRenderable
 `FieldRenderable` does not require an implementation for `Renderable#render`.
@@ -437,69 +442,8 @@ The rendering can be customized using
   args constructor and be a public class):
   `@RenderConfig(transformer = @RenderTransform(MyTransformer.class))`
   
-Currently, there is no way to print nested renderables or a collection 
-of nested renderables - this will be add in a future release. 
-They should be configured not to be printed or some sort of workaround should
-be done. You can override the `FieldRenderable` default behavior as follows:
-
-```
-package com.example.demo;
-
-import io.github.renatolsjf.chassis.rendering.FieldRenderable;
-import io.github.renatolsjf.chassis.rendering.Media;
-import io.github.renatolsjf.chassis.rendering.Renderable;
-import io.github.renatolsjf.chassis.rendering.config.RenderConfig;
-import io.github.renatolsjf.chassis.rendering.config.RenderPolicy;
-import io.github.renatolsjf.chassis.rendering.config.RenderTransform;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class Greeter implements FieldRenderable {
-
-    private final String name;
-    @RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.IGNORE))
-    List<Echo> echoes = new ArrayList<>();
-
-    public Greeter(String name) {
-        this.name = name;
-        this.echoes.add(new Echo());
-        this.echoes.add(new Echo());
-    }
-
-    public String greet() {
-        return "My name is: " + this.name;
-    }
-
-    @Override
-    public Media render(Media media) {
-        return FieldRenderable.super.render(media)
-                .forkCollection("echoes", this.echoes);
-    }
-
-}
-
-class Echo implements Renderable {
-    @Override
-    public Media render(Media media) {
-        return media.print("echo", "what they said");
-    }
-}
-```
-Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
-```
-{
-   "name":"Andrew",
-   "echoes":[
-      {
-         "echo":"what they said"
-      },
-      {
-         "echo":"what they said"
-      }
-   ]
-}
-```
+As of version `0.0.3`, `FieldRenderable` is able to render nested `Renderable` objects
+and collections.
 
 ### Media
 It's the means by which the information will be recorded. You never create a
