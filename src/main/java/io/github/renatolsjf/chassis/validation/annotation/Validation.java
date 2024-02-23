@@ -8,7 +8,8 @@ import java.lang.annotation.*;
 public @interface Validation {
     String[] operation() default {};
     Nullable nullable() default @Nullable;
-    Minimum minimum() default @Minimum;
+    Min min() default @Min;
+    Max max() default @Max;
     OneOf oneOf() default @OneOf;
     Pattern pattern() default @Pattern;
 }

@@ -6,7 +6,7 @@ public class ValidatorFactory {
 
     public static Validator createValidator(Object validatable) {
         return new NullableValidator(validatable)
-                .next(new MinimumValidator(validatable))
+                .next(new MinMaxValidator(validatable))
                 .next(new OneOfValidator(validatable))
                 .next(new PatternValidator(validatable));
     }

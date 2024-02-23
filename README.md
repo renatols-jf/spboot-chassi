@@ -5,6 +5,7 @@
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
 - Replaced `TimedOperation.Executable` with `java.concurrent.Callable`
+- Renamed `@Minimum` to `@Min` and added `@Max` validation
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -496,8 +497,10 @@ the following parameters:
       in which the value cannot be null.
     - `MUST_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
       in which the value must be null.
-- `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Minimum.java)):
-  indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`.
+- `min`([@Min](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Min.java)):
+  indicates the min value of the field - `@Validation(min = @Min(10))`.
+- `max`([@Max](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Max.java)):
+  indicates the max value of the field - `@Validation(max = @Max(10))`.
 - `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/OneOf.java)):
   indicates that a field's value must be equal to one of the provided values -
   `@Validation(oneOf = @OneOf({"Ryan", "Andrew"}))`. Currently, it supports only
@@ -998,7 +1001,7 @@ in the future.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
 - Allow for `@OneOf` to accept values other than `String`.
-- Create further validations, such as the maximum value permitted, and the minimum and the maximum size.
+- Create further validations, such as the maximum value permitted, and the minimun and the maximum size.
 - Create a configuration to have some level of control in automatic logs and metrics.  
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
