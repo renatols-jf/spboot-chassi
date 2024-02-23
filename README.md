@@ -1001,7 +1001,7 @@ in the future.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
 - Allow for `@OneOf` to accept values other than `String`.
-- Create further validations, such as the maximum value permitted, and the minimun and the maximum size.
+- Create further validations, such as the minimum and the maximum size.
 - Create a configuration to have some level of control in automatic logs and metrics.  
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
