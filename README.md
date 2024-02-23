@@ -4,7 +4,7 @@
 ## Unreleased
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
-- Replaced `TimedOperation.Executable` with `java.concurrent.Callble`
+- Replaced `TimedOperation.Executable` with `java.concurrent.Callable`
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
