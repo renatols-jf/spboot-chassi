@@ -2,7 +2,7 @@
 
 # Changelist
 ## Unreleased
-- Enable FieldRenderable to render nested renderables and collections of renderables.
+- Enabled FieldRenderable to render nested renderables and collections of renderables.
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -998,7 +998,6 @@ in the future.
 - Enable configuration changes.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
-- Allow for `FieldRenderable` to print nested `Renderable` objects.
 - Replace `@Minimum` ignore value from 0 to `Integer.MIN_VALUE`
 - Allow for `@OneOf` to accept values other than `String`.
 - Create further validations, such as the maximum value permitted, and the minimum and the maximum size.
