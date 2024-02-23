@@ -4,6 +4,7 @@
 ## Unreleased
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
+- Replaced `TimedOperation.Executable` with `java.concurrent.Callble`
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -914,9 +915,8 @@ public class DemoRepository {
 
 ```
 A timed operation can be executed in two ways: `run` and `execute`. `run` expects a 
-`java.lang.Runnable` and has no return type, while `execute` expects a `TimedOperation.Executable` 
-and returns whatever type the generic call was made with. In a future release, 
-`TimedOperation.Executable` will be dropped in favor of `java.concurrent.Callable`. 
+`java.lang.Runnable` and has no return type, while `execute` expects a `java.concurrent.Callable` 
+and returns whatever type the generic call was made with. 
 
 To run:
 ```
@@ -1002,7 +1002,6 @@ in the future.
 - Create a configuration to have some level of control in automatic logs and metrics.  
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
-- Replace `TimedOperation.Executable` with `java.concurrent.Callable`.
 - Create a configuration to calculate application health as a media instead of worst.
 - Allow extra tags in automatic metrics.
 - Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)
