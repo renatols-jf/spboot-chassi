@@ -6,6 +6,7 @@
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
 - Replaced `TimedOperation.Executable` with `java.concurrent.Callable`
 - Renamed `@Minimum` to `@Min` and added `@Max` validation
+- Added support for Custom Validators on `@Validation`
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
@@ -508,8 +509,11 @@ the following parameters:
 - `pattern`([@Pattern](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Pattern.java))  :
   indicates that a `String` must match a provided Regex -
   `@Validation(pattern = @Pattern("^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"))`
+- `custom`: array of [CustomValidator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/validators/CustomValidator.java).
+  Enables custom validators to be applied. Each `CustomValidator` implementation **MUST** have a 
+  public constructor that accepts a single `Validatable` parameter.
   
-Every validation type also accepts a message parameter, which will override the 
+Every validation type, except custom, also accepts a message parameter, which will override the 
 default error message in case of a validation error.
 
 ## API integrations - HTTP(s) calls

@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis.validation.validators;
 
+import io.github.renatolsjf.chassis.validation.Validatable;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.annotation.Validation;
 
@@ -7,14 +8,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OneOfValidator extends DefaultValidator {
+public class OneOfValidator extends Validator<Object> {
 
-    protected OneOfValidator(Object validatable) {
+    protected OneOfValidator(Validatable validatable) {
         super(validatable);
     }
 
     @Override
-    public void defaultValidation(String name, Object value, Validation validation) {
+    public void doValidate(String name, Object value, Validation validation) {
 
         if (value == null) {
             return;

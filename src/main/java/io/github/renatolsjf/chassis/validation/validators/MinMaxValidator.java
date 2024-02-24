@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis.validation.validators;
 
+import io.github.renatolsjf.chassis.validation.Validatable;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.annotation.Max;
 import io.github.renatolsjf.chassis.validation.annotation.Min;
@@ -7,17 +8,17 @@ import io.github.renatolsjf.chassis.validation.annotation.Validation;
 
 import java.math.BigDecimal;
 
-public class MinMaxValidator extends DefaultValidator {
+public class MinMaxValidator extends Validator<Object> {
 
     public static final long MIN_THRESHOLD = Long.MIN_VALUE;
     public static final long MAX_THRESHOLD = Long.MAX_VALUE;
 
-    protected MinMaxValidator(Object validatable) {
+    protected MinMaxValidator(Validatable validatable) {
         super(validatable);
     }
 
     @Override
-    public void defaultValidation(String name, Object value, Validation validation) {
+    public void doValidate(String name, Object value, Validation validation) {
 
         if (value == null) {
             return;
