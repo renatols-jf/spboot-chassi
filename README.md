@@ -1,7 +1,7 @@
 # spboot-chassis
 
 # Changelist
-## Unreleased
+## 0.0.3
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
 - Replaced `TimedOperation.Executable` with `java.concurrent.Callable`
@@ -52,7 +52,7 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
