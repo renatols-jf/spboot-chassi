@@ -22,7 +22,13 @@ public abstract class Media {
 
     public final Media print(String name, Object content) {
         if (this.printNull || content != null) {
-            doPrint(name, content);
+            if (content instanceof Renderable) {
+                return this.forkRenderable(name, (Renderable) content);
+            } else if (content instanceof Collection && ((Collection) content).stream().allMatch(o -> o instanceof Renderable)) {
+                return this.forkCollection(name, (Collection<? extends Renderable>) content);
+            } else {
+                doPrint(name, content);
+            }
         }
         return this;
     }

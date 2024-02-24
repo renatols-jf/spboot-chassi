@@ -3,15 +3,12 @@ package io.github.renatolsjf.chassis.monitoring.timing;
 import io.github.renatolsjf.chassis.context.Context;
 
 import java.time.Duration;
+import java.util.concurrent.Callable;
 
 public class TimedOperation<T> {
 
     public static final String HTTP_OPERATION = "http";
     public static final String DATABASE_OPERATION = "db";
-
-    public interface Executable {
-         Object execute();
-    }
 
     private final String tag;
     private long executionTime;
@@ -32,16 +29,20 @@ public class TimedOperation<T> {
         long l = System.currentTimeMillis();
         try {
             r.run();
+        } catch (Exception ex) {
+            throw new TimedOperationException(ex);
         } finally {
             this.executionTime = System.currentTimeMillis() - l;
             Context.forRequest().recordOperationTime(this.tag, this.executionTime);
         }
     }
 
-    public T execute(Executable e) {
+    public T execute(Callable<T> e) {
         long l = System.currentTimeMillis();
         try {
-            return (T) e.execute();
+            return e.call();
+        } catch (Exception ex) {
+            throw new TimedOperationException(ex);
         } finally {
             this.executionTime = System.currentTimeMillis() - l;
             Context.forRequest().recordOperationTime(this.tag, this.executionTime);

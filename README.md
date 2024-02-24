@@ -1,5 +1,13 @@
 # spboot-chassis
 
+# Changelist
+## 0.0.3
+- Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
+- Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
+- Replaced `TimedOperation.Executable` with `java.concurrent.Callable`
+- Renamed `@Minimum` to `@Min` and added `@Max` validation
+- Added support for Custom Validators on `@Validation`
+
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
 best to solve any issues, but a few issues are to be expected. This also means there
@@ -44,7 +52,7 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
@@ -407,7 +415,8 @@ Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).re
 ```
 
 A single `Renderable` can be nested using `Media#forkRenderable` instead of
-`Media#forkCollection`
+`Media#forkCollection`. As of version `0.0.3`, `Media#print` recognizes renderables and
+collections, removing the need to call `Media#forkRenderable` and `Media#forkCollection`.
 
 ### FieldRenderable
 `FieldRenderable` does not require an implementation for `Renderable#render`.
@@ -437,69 +446,8 @@ The rendering can be customized using
   args constructor and be a public class):
   `@RenderConfig(transformer = @RenderTransform(MyTransformer.class))`
   
-Currently, there is no way to print nested renderables or a collection 
-of nested renderables - this will be add in a future release. 
-They should be configured not to be printed or some sort of workaround should
-be done. You can override the `FieldRenderable` default behavior as follows:
-
-```
-package com.example.demo;
-
-import io.github.renatolsjf.chassis.rendering.FieldRenderable;
-import io.github.renatolsjf.chassis.rendering.Media;
-import io.github.renatolsjf.chassis.rendering.Renderable;
-import io.github.renatolsjf.chassis.rendering.config.RenderConfig;
-import io.github.renatolsjf.chassis.rendering.config.RenderPolicy;
-import io.github.renatolsjf.chassis.rendering.config.RenderTransform;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class Greeter implements FieldRenderable {
-
-    private final String name;
-    @RenderConfig(policy = @RenderPolicy(RenderPolicy.Policy.IGNORE))
-    List<Echo> echoes = new ArrayList<>();
-
-    public Greeter(String name) {
-        this.name = name;
-        this.echoes.add(new Echo());
-        this.echoes.add(new Echo());
-    }
-
-    public String greet() {
-        return "My name is: " + this.name;
-    }
-
-    @Override
-    public Media render(Media media) {
-        return FieldRenderable.super.render(media)
-                .forkCollection("echoes", this.echoes);
-    }
-
-}
-
-class Echo implements Renderable {
-    @Override
-    public Media render(Media media) {
-        return media.print("echo", "what they said");
-    }
-}
-```
-Rendering the above class (calling `Media.ofRenderable(new Greeter("Andrew")).render()`) will yield:
-```
-{
-   "name":"Andrew",
-   "echoes":[
-      {
-         "echo":"what they said"
-      },
-      {
-         "echo":"what they said"
-      }
-   ]
-}
-```
+As of version `0.0.3`, `FieldRenderable` is able to render nested `Renderable` objects
+and collections.
 
 ### Media
 It's the means by which the information will be recorded. You never create a
@@ -550,10 +498,10 @@ the following parameters:
       in which the value cannot be null.
     - `MUST_BE_NULL - @Validation(nullable = @Nullable(Nullable.NullableType.CAN_BE_NULL))`:
       in which the value must be null.
-- `minimum`([@Minimum](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Minimum.java)):
-  indicates the minimum value of the field - `@Validation(minimum = @Minimum(10))`. 
-  Currently, a minimum value of 0 disables the validation. In a future release, 
-  this will be changed to `Integer.MIN_VALUE`.
+- `min`([@Min](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Min.java)):
+  indicates the min value of the field - `@Validation(min = @Min(10))`.
+- `max`([@Max](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Max.java)):
+  indicates the max value of the field - `@Validation(max = @Max(10))`.
 - `oneOf` ([@OneOf](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/OneOf.java)):
   indicates that a field's value must be equal to one of the provided values -
   `@Validation(oneOf = @OneOf({"Ryan", "Andrew"}))`. Currently, it supports only
@@ -561,8 +509,11 @@ the following parameters:
 - `pattern`([@Pattern](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/annotation/Pattern.java))  :
   indicates that a `String` must match a provided Regex -
   `@Validation(pattern = @Pattern("^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"))`
+- `custom`: array of [CustomValidator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/validators/CustomValidator.java).
+  Enables custom validators to be applied. Each `CustomValidator` implementation **MUST** have a 
+  public constructor that accepts a single `Validatable` parameter.
   
-Every validation type also accepts a message parameter, which will override the 
+Every validation type, except custom, also accepts a message parameter, which will override the 
 default error message in case of a validation error.
 
 ## API integrations - HTTP(s) calls
@@ -971,9 +922,8 @@ public class DemoRepository {
 
 ```
 A timed operation can be executed in two ways: `run` and `execute`. `run` expects a 
-`java.lang.Runnable` and has no return type, while `execute` expects a `TimedOperation.Executable` 
-and returns whatever type the generic call was made with. In a future release, 
-`TimedOperation.Executable` will be dropped in favor of `java.concurrent.Callable`. 
+`java.lang.Runnable` and has no return type, while `execute` expects a `java.concurrent.Callable` 
+and returns whatever type the generic call was made with. 
 
 To run:
 ```
@@ -1054,15 +1004,13 @@ in the future.
 - Enable configuration changes.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
-- Allow for `FieldRenderable` to print nested `Renderable` objects.
-- Replace `@Minimum` ignore value from 0 to `Integer.MIN_VALUE`
 - Allow for `@OneOf` to accept values other than `String`.
-- Create further validations, such as the maximum value permitted, and the minimum and the maximum size.
+- Create further validations, such as the minimum and the maximum size.
 - Create a configuration to have some level of control in automatic logs and metrics.  
+- Display integration health on health check.  
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
-- Replace `TimedOperation.Executable` with `java.concurrent.Callable`.
-- Create a configuration to calculate application health as a media instead of worst.
+- Create a configuration to calculate application health as an average instead of worst.
 - Allow extra tags in automatic metrics.
 - Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)
 - Create a summary type metric;

@@ -1,18 +1,19 @@
 package io.github.renatolsjf.chassis.validation.validators;
 
+import io.github.renatolsjf.chassis.validation.Validatable;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.annotation.Validation;
 
 import java.util.regex.Pattern;
 
-public class PatternValidator extends DefaultValidator {
+public class PatternValidator extends Validator<Object> {
 
-    protected PatternValidator(Object validatable) {
+    protected PatternValidator(Validatable validatable) {
         super(validatable);
     }
 
     @Override
-    public void defaultValidation(String name, Object value, Validation validation) {
+    public void doValidate(String name, Object value, Validation validation) {
 
         String s = validation.pattern().value();
         if (s == null || s.isBlank() || value == null) {

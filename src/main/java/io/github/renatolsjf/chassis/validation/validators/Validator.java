@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis.validation.validators;
 
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
+import io.github.renatolsjf.chassis.validation.Validatable;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.ValidatorExecutionException;
 import io.github.renatolsjf.chassis.validation.annotation.Validation;
@@ -17,25 +18,27 @@ import java.util.stream.Collectors;
 
 public abstract class Validator<T> {
 
-    protected T validatable;
+    protected Validatable validatable;
     protected Validator previous;
-    private boolean failOnError;
+    protected boolean failOnError;
 
-    protected Validator(T validatable) {
-        this(validatable, Chassis.getInstance().getConfig().validatorFailOnExecutionError());
+    public Validator(Validatable validatable) {
+        this.validatable = validatable;
+        this.failOnError = Chassis.getInstance().getConfig().validatorFailOnExecutionError();
+        //this(validatable, Chassis.getInstance().getConfig().validatorFailOnExecutionError());
     }
 
-    protected Validator(T validatable, boolean failOnError) {
+    /*protected Validator(T validatable, boolean failOnError) {
         this.validatable = validatable;
         this.failOnError = failOnError;
-    }
+    }*/
 
     public Validator next(Validator otherValidator) {
         otherValidator.previous = this;
         return otherValidator;
     }
 
-    public final void validate() throws ValidationException {
+    public final void validate() {
 
         List<AccessibleObject> members = this.getValidationMembers(this.validatable.getClass());
         List<ValidationEntry> entries = new ArrayList<>(members.size());
@@ -57,18 +60,34 @@ public abstract class Validator<T> {
                     }
 
                 });
-        this.validate(entries);
+
+        this.validateEntries(entries);
 
     }
 
-    public final void validate(List<ValidationEntry> entries) {
-        if (this.previous != null) {
-            this.previous.validate(entries);
+    protected final void validateEntries(List<ValidationEntry> entries) {
+
+        if (entries == null || entries.isEmpty()) {
+            return;
         }
-        this.doValidate(entries);
+
+        if (this.previous != null) {
+            this.previous.validateEntries(entries);
+        }
+
+        entries.forEach(e -> {
+
+            String name = e.getName();
+            Object value = e.getValue();
+
+            for (Validation validation : e.getValidations()) {
+                this.doValidate(name, (T) value, validation);
+            }
+        });
+
     }
 
-    public abstract void doValidate(List<ValidationEntry> entries) throws ValidationException;
+    protected abstract void doValidate(String name, T value, Validation validation) throws ValidationException;
 
     private List<AccessibleObject> getValidationMembers(Class clazz) {
         List<AccessibleObject> members = new ArrayList<>();
@@ -129,6 +148,8 @@ public abstract class Validator<T> {
                         + "for method " + method.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getCause().getMessage(), e.getCause());
             } else {
+                Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
+                        method.getName(), this.validatable.getClass().getName(), e.getCause().getMessage()).log();
                 return null;
             }
         } catch (Exception e) {
@@ -137,6 +158,8 @@ public abstract class Validator<T> {
                         + "for method " + method.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getMessage(), e);
             } else {
+                Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
+                        method.getName(), this.validatable.getClass().getName(), e.getMessage()).log();
                 return null;
             }
         }
@@ -171,6 +194,8 @@ public abstract class Validator<T> {
                         + "for field " + field.getName() + " on class " + this.validatable.getClass().getName()
                         + ": " + e.getMessage(), e);
             } else {
+                Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
+                        name, this.validatable.getClass().getName(), e.getMessage()).log();
                 return null;
             }
         }

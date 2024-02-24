@@ -1,18 +1,19 @@
 package io.github.renatolsjf.chassis.validation.validators;
 
+import io.github.renatolsjf.chassis.validation.Validatable;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 import io.github.renatolsjf.chassis.validation.annotation.Nullable;
 import io.github.renatolsjf.chassis.validation.annotation.Validation;
 
-public class NullableValidator extends DefaultValidator {
+public class NullableValidator extends Validator<Object> {
 
-    protected NullableValidator(Object validatable) {
+    protected NullableValidator(Validatable validatable) {
         super(validatable);
     }
 
     @Override
 
-    public void defaultValidation(String name, Object value, Validation validation) throws ValidationException {
+    public void doValidate(String name, Object value, Validation validation) throws ValidationException {
         Nullable nullable = validation.nullable();
         switch (nullable.value()) {
             case CANT_BE_NULL:
