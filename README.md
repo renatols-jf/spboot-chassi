@@ -58,7 +58,7 @@ To use this project, you need to update your pom.xml if using Maven
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.2'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.3'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
