@@ -1007,6 +1007,7 @@ in the future.
 - Allow for `@OneOf` to accept values other than `String`.
 - Create further validations, such as the minimum and the maximum size.
 - Create a configuration to have some level of control in automatic logs and metrics.  
+- Display integration health on health check.  
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
 - Create a configuration to calculate application health as an average instead of worst.
