@@ -7,19 +7,14 @@ import io.github.renatolsjf.chassis.request.RequestOutcome;
 
 public class ApplicationHealthEngine {
 
-    private static final String ACTIVE_OPERATIONS_METRIC_NAME = "operation_active_requests";
-    private static final String OPERATION_TIME_MILLIS_METRIC_NAME = "operation_request_time";
-
-    private static final String OPERATION_TAG_NAME = "operation";
-
     private ApplicationHealth applicationHealth;
 
 
     ApplicationHealthEngine() {}
 
     public void operationStarted() {
-        Chassis.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
-                .withTag(OPERATION_TAG_NAME, Context.forRequest().getOperation())
+        Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_ACTIVE_OPERATIONS))
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), Context.forRequest().getOperation())
                 .buildGauge()
                 .inc();
     }
@@ -30,8 +25,8 @@ public class ApplicationHealthEngine {
         if (Chassis.getInstance().getConfig().exportRequestDurationMetricByType()) {
 
             context.getOperationTimeByType().entrySet().stream().forEach(entry ->
-                    Chassis.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
-                            .withTag(OPERATION_TAG_NAME, context.getOperation())
+                    Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
+                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
                             .withTag("outcome", outcome.toString().toLowerCase())
                             .withTag("timer_type", entry.getKey())
                             .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
@@ -41,16 +36,16 @@ public class ApplicationHealthEngine {
 
         } else {
 
-            Chassis.getInstance().getMetricRegistry().createBuilder(OPERATION_TIME_MILLIS_METRIC_NAME)
-                    .withTag(OPERATION_TAG_NAME, context.getOperation())
+            Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
+                    .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
                     .withTag("outcome", outcome.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedMillis());
 
         }
 
-        Chassis.getInstance().getMetricRegistry().createBuilder(ACTIVE_OPERATIONS_METRIC_NAME)
-                .withTag(OPERATION_TAG_NAME, context.getOperation())
+        Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_ACTIVE_OPERATIONS))
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
                 .buildGauge()
                 .dec();
 

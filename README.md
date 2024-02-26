@@ -1,6 +1,10 @@
 # spboot-chassis
 
 # Changelist
+
+## Unreleased
+- Added support for labels
+
 ## 0.0.3
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
 - Changed `@Minimum` ignore threshold to `Integer.MIN_VALUE`.
@@ -995,6 +999,23 @@ configurations are in use:
   
 - `healthTimeWindowDuration`: Defaults to 5 minutes. Governs the maximum age of requests
   to be used in health calculations.
+  
+## Labels
+Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
+a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
+The following fields are supported:
+- `logging.transactionId`: The name of the field under which the transactionId will be logged.
+- `logging.correlationId`: The name of the field under which the correlationId will be logged.
+- `logging.operation`: The name of the field under which the operation will be logged.
+- `logging.elapsedTime`: The name of the field under which the elapsed time will be logged.
+- `logging.operationTimes`: The name of the field under which the operation times will be logged.
+- `logging.context`: The name of the field under which the logging context will be logged.
+- `metrics.name.operationHealth`: The name of the metric created to display the operation health.
+- `metrics.name.activeOperations`: The name of the metric created to count active requests for an operation.
+- `metrics.name.operationTime`: The name of the metric created to display the time taken by an operation.
+- `metrics.tag.operation`: The name of the metric tag used to identify operations.
+
+
 
 # Next Steps
 A few future updates have been thought of. Having said that, this does not neither represent
@@ -1014,7 +1035,6 @@ in the future.
 - Allow extra tags in automatic metrics.
 - Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)
 - Create a summary type metric;
-- Create some kind of label structure to override default names for metrics, tags, and logging fields.
 - Allow request duration metrics to be collected in measurements different from milliseconds.  
 - Create mechanism to work with Java NIO.
 - Create a configuration to not swallow rendering transformation errors, which is currently

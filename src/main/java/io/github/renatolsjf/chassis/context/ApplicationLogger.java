@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis.context;
 
 import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -120,7 +121,7 @@ public class ApplicationLogger {
             contextString = extraFields.toString();
         }
 
-        MDC.put("context", contextString);
+        MDC.put(Chassis.getInstance().labels().getLabel(Labels.Field.LOGGING_CONTEXT), contextString);
 
     }
 

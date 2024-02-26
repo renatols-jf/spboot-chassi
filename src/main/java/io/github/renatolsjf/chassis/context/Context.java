@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis.context;
 
 import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 
@@ -172,18 +173,19 @@ public class Context {
 
     private Map<String, LoggingAttribute> createFixedLoggingAttributes() {
 
+        Chassis c = Chassis.getInstance();
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
-        boolean overrideDefaultAttributes = Chassis.getInstance().getConfig().allowDefaultLoggingAttributesOverride();
+        boolean overrideDefaultAttributes = c.getConfig().allowDefaultLoggingAttributesOverride();
 
         if (!overrideDefaultAttributes) {
             this.requestContext.entrySet().forEach(e -> loggingAttributes.put(e.getKey(), () -> e.getValue()));
         }
 
-        loggingAttributes.put("transactionId", () -> this.transactionId);
-        loggingAttributes.put("correlationId", () -> this.correlationId);
-        loggingAttributes.put("operation", () -> this.operation);
-        loggingAttributes.put("elapsedTime", () -> this.getElapsedMillis().toString());
-        loggingAttributes.put("operationTimes", () -> {
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRANSACTION_ID), () -> this.transactionId);
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_CORRELATION_ID), () -> this.correlationId);
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_OPERATION), () -> this.operation);
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_ELAPSED_TIME), () -> this.getElapsedMillis().toString());
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_OPERATION_TIME), () -> {
             Map<String, Long> operationTimes = this.getOperationTimeByType();
             operationTimes.put("total", this.getElapsedMillis());
             return operationTimes.toString();

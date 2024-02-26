@@ -1,6 +1,8 @@
 package io.github.renatolsjf.chassis.monitoring;
 
 
+import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.MetricRegistry;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
@@ -10,8 +12,6 @@ import java.time.Duration;
 import java.util.*;
 
 public class ApplicationHealth implements Renderable {
-
-    private static final String OPERATION_HEALTH_METRIC_NAME = "operation_health";
 
     private Map<String, List<OperationData>> operationDataMap = new HashMap();
     private Set<String> operationSet = new TreeSet<>();
@@ -64,8 +64,8 @@ public class ApplicationHealth implements Renderable {
                     operationDataList = new RollingTimedWindowList<>(dataDuration);
                     this.operationDataMap.put(operation, operationDataList);
 
-                    this.metricRegistry.createBuilder(OPERATION_HEALTH_METRIC_NAME)
-                            .withTag("operation", operation)
+                    this.metricRegistry.createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_HEALTH))
+                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), operation)
                             .buildTrackingGauge()
                             .track(new OperationHealhObservableTask(operationDataList));
 
