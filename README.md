@@ -1015,7 +1015,7 @@ The following fields are supported:
 - `metrics.name.operation-time`: The name of the metric created to display the time taken by an operation.
 - `metrics.tag.operation`: The name of the metric tag used to identify operations.
 - `metrics.tag.outcome`: The name of the metric tag used to identify the outcome.
-- `metrics.tag.timer-type`: The name of the metric tag used to identify the timer tye.
+- `metrics.tag.timer-type`: The name of the metric tag used to identify the timer type.
 
 
 
