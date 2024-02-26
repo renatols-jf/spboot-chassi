@@ -9,20 +9,23 @@ public class Labels {
 
     public enum Field {
 
-        LOGGING_TRANSACTION_ID("logging.transactionId:transactionId"),
-        LOGGING_CORRELATION_ID("logging.correlationId:correlationId"),
+        LOGGING_TRANSACTION_ID("logging.transaction-id:transactionId"),
+        LOGGING_CORRELATION_ID("logging.correlation-id:correlationId"),
         LOGGING_OPERATION("logging.operation:operation"),
-        LOGGING_ELAPSED_TIME("logging.elapsedTime:elapsedTime"),
-        LOGGING_OPERATION_TIME("logging.operationTimes:operationTimes"),
+        LOGGING_ELAPSED_TIME("logging.elapsed-time:elapsedTime"),
+        LOGGING_OPERATION_TIME("logging.operation-times:operationTimes"),
         LOGGING_CONTEXT("logging.context:context"),
 
-        METRICS_NAME_OPERATION_HEALTH("metrics.name.operationHealth:operation_health"),
-        METRICS_NAME_ACTIVE_OPERATIONS("metrics.name.activeOperations:operation_active_requests"),
-        METRICS_NAME_OPERATION_TIME("metrics.name.operationTime:operation_request_time"),
+        METRICS_NAME_OPERATION_HEALTH("metrics.name.operation-health:operation_health"),
+        METRICS_NAME_ACTIVE_OPERATIONS("metrics.name.active-operations:operation_active_requests"),
+        METRICS_NAME_OPERATION_TIME("metrics.name.operation-time:operation_request_time"),
 
-        METRICS_TAG_OPERATION("metrics.tag.operation:operation");
+        METRICS_TAG_OPERATION("metrics.tag.operation:operation"),
+        METRICS_TAG_OUTCOME("metrics.tag.outcome:outcome"),
+        METRICS_TAG_TIMER_TYPE("metrics.tag.timer-type:timer_type");
 
         private String key;
+        private String label;
 
         Field(String key) {
             this.key = key;
@@ -32,16 +35,27 @@ public class Labels {
             return this.key;
         }
 
+        void setLabel(String label) {
+            this.label = label;
+        }
+
+        String getLabel() {
+            return this.label;
+        }
+
     }
 
-    private Map<String, Object> labelData = new HashMap<>();
+    private Map<String, Object> labelData;
 
     Labels(Map<String, Object> labelData) {
         this.labelData = labelData;
     }
 
     public String getLabel(Field field) {
-        return this.getLabelOrDefault(field.getKey());
+        if (field.getLabel() == null) {
+            field.setLabel(this.getLabelOrDefault(field.getKey()));
+        }
+        return field.getLabel();
     }
 
     private String getLabelOrDefault(String key) {
@@ -58,7 +72,7 @@ public class Labels {
         Map<String, Object> m = this.labelData;
         Object toReturn = defaultLabel;
         for (String p: path) {
-            toReturn = m.get(p);
+            toReturn = this.doGet(m, p);
             if (toReturn == null) {
                 break;
             } else if ((toReturn instanceof Map)) {
@@ -74,6 +88,32 @@ public class Labels {
             return defaultLabel;
         }
 
+    }
+
+    //TODO this will need to be implemented somewhere else as other yaml stuff with have
+    //the same issue.
+    private Object doGet(Map<String, Object> m, String s) {
+        Object o = m.get(s);
+        if (o == null) {
+            o = m.get(s.replaceAll("-", "_"));
+        }
+
+        if (o == null) {
+            int idx;
+            String camelCase = s;
+            while ((idx = camelCase.indexOf("-")) != -1) {
+                if (idx == 0) {
+                    camelCase = camelCase.substring(1);
+                } else if (idx == camelCase.length()) {
+                    camelCase = camelCase.substring(0, camelCase.length() - 1);
+                } else {
+                    camelCase = camelCase.substring(0, idx) + camelCase.substring(idx + 1, idx + 2).toUpperCase() + camelCase.substring(idx + 2);
+                }
+            }
+            o = m.get(camelCase);
+        }
+
+        return o;
     }
 
     private DecodedKey decode(String toDecode) {

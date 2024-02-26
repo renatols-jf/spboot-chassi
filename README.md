@@ -1004,16 +1004,18 @@ configurations are in use:
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
 a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
 The following fields are supported:
-- `logging.transactionId`: The name of the field under which the transactionId will be logged.
-- `logging.correlationId`: The name of the field under which the correlationId will be logged.
+- `logging.transaction-id`: The name of the field under which the transactionId will be logged.
+- `logging.correlation-id`: The name of the field under which the correlationId will be logged.
 - `logging.operation`: The name of the field under which the operation will be logged.
-- `logging.elapsedTime`: The name of the field under which the elapsed time will be logged.
-- `logging.operationTimes`: The name of the field under which the operation times will be logged.
+- `logging.elapsed-time`: The name of the field under which the elapsed time will be logged.
+- `logging.operation-times`: The name of the field under which the operation times will be logged.
 - `logging.context`: The name of the field under which the logging context will be logged.
-- `metrics.name.operationHealth`: The name of the metric created to display the operation health.
-- `metrics.name.activeOperations`: The name of the metric created to count active requests for an operation.
-- `metrics.name.operationTime`: The name of the metric created to display the time taken by an operation.
+- `metrics.name.operation-health`: The name of the metric created to display the operation health.
+- `metrics.name.active-operations`: The name of the metric created to count active requests for an operation.
+- `metrics.name.operation-time`: The name of the metric created to display the time taken by an operation.
 - `metrics.tag.operation`: The name of the metric tag used to identify operations.
+- `metrics.tag.outcome`: The name of the metric tag used to identify the outcome.
+- `metrics.tag.timer-type`: The name of the metric tag used to identify the timer tye.
 
 
 

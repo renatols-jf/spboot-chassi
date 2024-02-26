@@ -27,8 +27,8 @@ public class ApplicationHealthEngine {
             context.getOperationTimeByType().entrySet().stream().forEach(entry ->
                     Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
                             .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
-                            .withTag("outcome", outcome.toString().toLowerCase())
-                            .withTag("timer_type", entry.getKey())
+                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), outcome.toString().toLowerCase())
+                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_TIMER_TYPE), entry.getKey())
                             .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                             .observe(entry.getValue())
 
@@ -38,7 +38,7 @@ public class ApplicationHealthEngine {
 
             Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
                     .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
-                    .withTag("outcome", outcome.toString().toLowerCase())
+                    .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), outcome.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedMillis());
 
