@@ -1,5 +1,7 @@
 package io.github.renatolsjf.chassis;
 
+import io.github.renatolsjf.chassis.util.CaseString;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +74,7 @@ public class Labels {
         Map<String, Object> m = this.labelData;
         Object toReturn = defaultLabel;
         for (String p: path) {
-            toReturn = this.doGet(m, p);
+            toReturn = CaseString.parse(p).getMapValue(m);
             if (toReturn == null) {
                 break;
             } else if ((toReturn instanceof Map)) {
@@ -88,32 +90,6 @@ public class Labels {
             return defaultLabel;
         }
 
-    }
-
-    //TODO this will need to be implemented somewhere else as other yaml stuff with have
-    //the same issue.
-    private Object doGet(Map<String, Object> m, String s) {
-        Object o = m.get(s);
-        if (o == null) {
-            o = m.get(s.replaceAll("-", "_"));
-        }
-
-        if (o == null) {
-            int idx;
-            String camelCase = s;
-            while ((idx = camelCase.indexOf("-")) != -1) {
-                if (idx == 0) {
-                    camelCase = camelCase.substring(1);
-                } else if (idx == camelCase.length()) {
-                    camelCase = camelCase.substring(0, camelCase.length() - 1);
-                } else {
-                    camelCase = camelCase.substring(0, idx) + camelCase.substring(idx + 1, idx + 2).toUpperCase() + camelCase.substring(idx + 2);
-                }
-            }
-            o = m.get(camelCase);
-        }
-
-        return o;
     }
 
     private DecodedKey decode(String toDecode) {
