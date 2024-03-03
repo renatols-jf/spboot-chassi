@@ -9,22 +9,45 @@ import java.util.Map;
 
 public class Labels {
 
+    public enum FieldType {
+        LOGGING("logging"),
+        METRICS_NAME("metrics.name"),
+        METRICS_TAG("metrics.tag");
+
+        private String description;
+
+        FieldType(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return this.description;
+        }
+
+        @Override
+        public String toString() {
+            return this.getDescription();
+        }
+
+
+    }
+
     public enum Field {
 
-        LOGGING_TRANSACTION_ID("logging.transaction-id:transactionId"),
-        LOGGING_CORRELATION_ID("logging.correlation-id:correlationId"),
-        LOGGING_OPERATION("logging.operation:operation"),
-        LOGGING_ELAPSED_TIME("logging.elapsed-time:elapsedTime"),
-        LOGGING_OPERATION_TIME("logging.operation-times:operationTimes"),
-        LOGGING_CONTEXT("logging.context:context"),
+        LOGGING_TRANSACTION_ID(FieldType.LOGGING + ".transaction-id:transactionId"),
+        LOGGING_CORRELATION_ID(FieldType.LOGGING + ".correlation-id:correlationId"),
+        LOGGING_OPERATION(FieldType.LOGGING + ".operation:operation"),
+        LOGGING_ELAPSED_TIME(FieldType.LOGGING + ".elapsed-time:elapsedTime"),
+        LOGGING_OPERATION_TIME(FieldType.LOGGING + ".operation-times:operationTimes"),
+        LOGGING_CONTEXT(FieldType.LOGGING + ".context:context"),
 
-        METRICS_NAME_OPERATION_HEALTH("metrics.name.operation-health:operation_health"),
-        METRICS_NAME_ACTIVE_OPERATIONS("metrics.name.active-operations:operation_active_requests"),
-        METRICS_NAME_OPERATION_TIME("metrics.name.operation-time:operation_request_time"),
+        METRICS_NAME_OPERATION_HEALTH(FieldType.METRICS_NAME + ".operation-health:operation_health"),
+        METRICS_NAME_ACTIVE_OPERATIONS(FieldType.METRICS_NAME + ".active-operations:operation_active_requests"),
+        METRICS_NAME_OPERATION_TIME(FieldType.METRICS_NAME + ".operation-time:operation_request_time"),
 
-        METRICS_TAG_OPERATION("metrics.tag.operation:operation"),
-        METRICS_TAG_OUTCOME("metrics.tag.outcome:outcome"),
-        METRICS_TAG_TIMER_TYPE("metrics.tag.timer-type:timer_type");
+        METRICS_TAG_OPERATION(FieldType.METRICS_TAG + ".operation:operation"),
+        METRICS_TAG_OUTCOME(FieldType.METRICS_TAG + ".outcome:outcome"),
+        METRICS_TAG_TIMER_TYPE(FieldType.METRICS_TAG + ".timer-type:timer_type");
 
         private String key;
         private String label;
@@ -45,6 +68,13 @@ public class Labels {
             return this.label;
         }
 
+        public static Field fromFieldType(FieldType fieldType, String suffix) {
+            return Arrays.stream(Field.values())
+                    .filter(f -> f.getKey().substring(0, f.getKey().indexOf(":")).equalsIgnoreCase(fieldType + "." + suffix))
+                    .findFirst()
+                    .orElse(null);
+        }
+
     }
 
     private Map<String, Object> labelData;
@@ -58,6 +88,20 @@ public class Labels {
             field.setLabel(this.getLabelOrDefault(field.getKey()));
         }
         return field.getLabel();
+    }
+
+    public String getLabel(FieldType fieldType, String suffix) {
+        return this.getLabel(fieldType, suffix, suffix);
+    }
+
+    public String getLabel(FieldType fieldType, String suffix, String defaultValue) {
+        if (fieldType == null || suffix == null || suffix.isBlank()) {
+            return defaultValue;
+        }
+        Field f = Field.fromFieldType(fieldType, suffix);
+        return f != null
+                ? this.getLabel(f)
+                : defaultValue;
     }
 
     private String getLabelOrDefault(String key) {
