@@ -22,10 +22,11 @@ any issues. I'll continue to use it as it evolves, and I don't expect any
 downsides to it. Be it as it may, a test suite is needed. Until a comprehensive 
 set of tests is written, this project's version will be labeled as less than 1.0.0.
 
-Also, this project does not currently support NIO as it uses ThreadLocal to control
+Also, this project does not currently support NIO (Spring Webflux)  as it uses ThreadLocal to control
 the request context. A simple solution is to add methods to take a snapshot of
 the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
+This is not related to the standard NIO Thread pool.
 
 # What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
