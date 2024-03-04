@@ -2,7 +2,7 @@
 
 # Changelist
 
-## Unreleased
+## 0.0.4
 - Added support for labels
 - Added health metric support for integrations
 
