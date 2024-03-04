@@ -828,49 +828,215 @@ The application health is not an average. Instead, it reflects the health of the
 
 ```
 {
-   "application":{
-      "health":100.0,
-      "load":{
-         "requestCount":1,
-         "requestTime":{
-            "internal":{
-               "quantiles":{
-                  "0.5":13,
-                  "0.95":13,
-                  "0.99":13
-               }
+    "application": {
+        "health": 0.0,
+        "load": {
+            "requestCount": 3,
+            "requestTime": {
+                "internal": {
+                    "quantiles": {
+                        "0.5": 2,
+                        "0.95": 5,
+                        "0.99": 5
+                    }
+                },
+                "http": {
+                    "quantiles": {
+                        "0.5": 574,
+                        "0.95": 1424,
+                        "0.99": 1424
+                    }
+                }
             }
-         }
-      },
-      "result":{
-         "success":1,
-         "clientError":0,
-         "serverError":0
-      }
-   },
-   "operations":[
-      {
-         "name":"DEMO_OPERATION",
-         "health":100.0,
-         "load":{
-            "requestCount":1,
-            "requestTime":{
-               "internal":{
-                  "quantiles":{
-                     "0.5":13,
-                     "0.95":13,
-                     "0.99":13
-                  }
-               }
+        },
+        "result": {
+            "success": 2,
+            "clientError": 0,
+            "serverError": 1
+        },
+        "operations": [
+            {
+                "name": "INTEGRATION_TEST_2",
+                "health": 0.0,
+                "load": {
+                    "requestCount": 1,
+                    "requestTime": {
+                        "internal": {
+                            "quantiles": {
+                                "0.5": 5,
+                                "0.95": 5,
+                                "0.99": 5
+                            }
+                        },
+                        "http": {
+                            "quantiles": {
+                                "0.5": 1424,
+                                "0.95": 1424,
+                                "0.99": 1424
+                            }
+                        }
+                    }
+                },
+                "result": {
+                    "success": 0,
+                    "clientError": 0,
+                    "serverError": 1
+                }
+            },
+            {
+                "name": "LOGGING_TEST",
+                "health": 100.0,
+                "load": {
+                    "requestCount": 1,
+                    "requestTime": {
+                        "internal": {
+                            "quantiles": {
+                                "0.5": 2,
+                                "0.95": 2,
+                                "0.99": 2
+                            }
+                        }
+                    }
+                },
+                "result": {
+                    "success": 1,
+                    "clientError": 0,
+                    "serverError": 0
+                }
+            },
+            {
+                "name": "INTEGRATION_TEST",
+                "health": 100.0,
+                "load": {
+                    "requestCount": 1,
+                    "requestTime": {
+                        "internal": {
+                            "quantiles": {
+                                "0.5": 2,
+                                "0.95": 2,
+                                "0.99": 2
+                            }
+                        },
+                        "http": {
+                            "quantiles": {
+                                "0.5": 574,
+                                "0.95": 574,
+                                "0.99": 574
+                            }
+                        }
+                    }
+                },
+                "result": {
+                    "success": 1,
+                    "clientError": 0,
+                    "serverError": 0
+                }
             }
-         },
-         "result":{
-            "success":1,
-            "clientError":0,
-            "serverError":0
-         }
-      }
-   ]
+        ]
+    },
+    "integration": {
+        "health": 100.0,
+        "load": {
+            "requestCount": 2,
+            "requestTime": {
+                "http": {
+                    "quantiles": {
+                        "0.5": 574,
+                        "0.95": 1424,
+                        "0.99": 1424
+                    }
+                }
+            }
+        },
+        "result": {
+            "200": 1,
+            "403": 1
+        },
+        "groups": [
+            {
+                "name": "GOOGLE",
+                "health": 100.0,
+                "load": {
+                    "requestCount": 2,
+                    "requestTime": {
+                        "http": {
+                            "quantiles": {
+                                "0.5": 574,
+                                "0.95": 1424,
+                                "0.99": 1424
+                            }
+                        }
+                    }
+                },
+                "result": {
+                    "200": 1,
+                    "403": 1
+                },
+                "services": [
+                    {
+                        "name": "SEARCH",
+                        "health": 100.0,
+                        "load": {
+                            "requestCount": 2,
+                            "requestTime": {
+                                "http": {
+                                    "quantiles": {
+                                        "0.5": 574,
+                                        "0.95": 1424,
+                                        "0.99": 1424
+                                    }
+                                }
+                            }
+                        },
+                        "result": {
+                            "200": 1,
+                            "403": 1
+                        },
+                        "operations": [
+                            {
+                                "name": "SEARCH_IMAGES",
+                                "health": 100.0,
+                                "load": {
+                                    "requestCount": 1,
+                                    "requestTime": {
+                                        "http": {
+                                            "quantiles": {
+                                                "0.5": 1424,
+                                                "0.95": 1424,
+                                                "0.99": 1424
+                                            }
+                                        }
+                                    }
+                                },
+                                "result": {
+                                    "403": 1
+                                }
+                            },
+                            {
+                                "name": "SEARCH",
+                                "health": 100.0,
+                                "load": {
+                                    "requestCount": 1,
+                                    "requestTime": {
+                                        "http": {
+                                            "quantiles": {
+                                                "0.5": 574,
+                                                "0.95": 574,
+                                                "0.99": 574
+                                            }
+                                        }
+                                    }
+                                },
+                                "result": {
+                                    "200": 1
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
 }
 ```
 
