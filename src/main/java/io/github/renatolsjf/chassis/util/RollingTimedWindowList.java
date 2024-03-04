@@ -14,10 +14,10 @@ public class RollingTimedWindowList<E> implements List<E> {
         this.windowDuration = windowDuration;
     }
 
-    private synchronized void roll() {
+    public synchronized boolean roll() {
 
         if (this.insertionTimeList.isEmpty()) {
-            return;
+            return false;
         }
 
         int obsoleteCount = 0;
@@ -33,6 +33,9 @@ public class RollingTimedWindowList<E> implements List<E> {
                 this.backingList.remove(0);
                 this.insertionTimeList.remove(0);
             }
+            return true;
+        } else {
+            return false;
         }
 
     }
