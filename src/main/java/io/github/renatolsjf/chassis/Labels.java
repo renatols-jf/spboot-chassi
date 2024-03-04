@@ -55,7 +55,7 @@ public class Labels {
         METRICS_TAG_SERVICE(FieldType.METRICS_TAG + ".service:service"),
         METRICS_TAG_GROUP(FieldType.METRICS_TAG + ".group:group"),
         METRICS_TAG_TYPE(FieldType.METRICS_TAG + ".type:type"),
-        METRICS_TAG_VALUE_HTTP_TYPE(FieldType.METRICS_TAG_VALUE + ".http.type:" + TimedOperation.HTTP_OPERATION);
+        METRICS_TAG_VALUE_HTTP_TYPE(FieldType.METRICS_TAG_VALUE + ".http-type:" + TimedOperation.HTTP_OPERATION);
 
         private String key;
         private String label;

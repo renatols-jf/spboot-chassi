@@ -1036,7 +1036,7 @@ The following fields are supported:
 - `metrics.tag.group`: The name of the metric tag used to identify the integration group.
 - `metrics.tag.service`: The name of the metric tag used to identify the integration service.
 - `metrics.tag.type`: The name of the metric tag used to identify the integration type.
-- `metrics.tag.value.http.type`: The name of the metric tag value used to identify the http integrations.
+- `metrics.tag.value.http-type`: The name of the metric tag value used to identify the http integrations.
 
 # Next Steps
 A few future updates have been thought of. Having said that, this does not neither represent
