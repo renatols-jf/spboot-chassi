@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.integration;
 
-public class UnauthorizedOperationException extends StatusRestOperationException {
+public class UnauthorizedOperationException extends ClientErrorOperationException {
 
     public UnauthorizedOperationException() { super(401); }
     public UnauthorizedOperationException(String message) { super(401, message); }

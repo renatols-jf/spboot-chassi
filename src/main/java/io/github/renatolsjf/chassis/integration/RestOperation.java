@@ -1,7 +1,6 @@
 package io.github.renatolsjf.chassis.integration;
 
 import io.github.renatolsjf.chassis.Chassis;
-import io.github.renatolsjf.chassis.MetricRegistry;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -108,6 +107,16 @@ public class RestOperation {
         return this;
     }
 
+    public RestOperation withConnectTimeout(Duration connectTimeOut) {
+        this.connectTimeOut = connectTimeOut;
+        return this;
+    }
+
+    public RestOperation withReadTimeOut(Duration readTimeOut) {
+        this.readTimeOut = readTimeOut;
+        return this;
+    }
+
     public ResponseEntity<String> callForResponseEntity() {
         return this.callForResponseEntity(Map.class);
     }
@@ -161,17 +170,11 @@ public class RestOperation {
                     .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                     .log();
 
-            /*ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
-                    duration, e.getStatusCode().value());*/
+            boolean clientFault = e.getStatusCode().is4xxClientError();
+            boolean serverFault = !clientFault;
 
-            Chassis.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
-                    .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
-                    .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
-                    .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
-                    .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, String.valueOf(e.getStatusCode().value()))
-                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(timedOperation.getExecutionTimeInMillis());
+            Chassis.getInstance().getApplicationHealthEngine().httpCallEnded(this.group, this.service, this.operation,
+                    String.valueOf(e.getStatusCode().value()), false, clientFault, serverFault, timedOperation.getExecutionTimeInMillis());
 
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 Context.forRequest().createLogger()
@@ -196,7 +199,7 @@ public class RestOperation {
                     .error("Unknown error in http call: statusCode -> {}", statusCode)
                     .log();
 
-            if (e.getStatusCode().is4xxClientError()) {
+            if (clientFault) {
                 throw new ClientErrorOperationException(e.getStatusCode().value()).withBody(errorResponse);
             } else {
                 throw new ServerErrorOperationException(e.getStatusCode().value()).withBody(errorResponse);
@@ -224,17 +227,8 @@ public class RestOperation {
                     .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                     .log();
 
-            //ApplicationHealthEngine.addRestBasedRequestDataWithConnectionError(this.group, this.service,
-                    //this.operation, duration);
-
-            Chassis.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                    .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
-                    .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
-                    .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
-                    .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
-                    .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, "connection_error")
-                    .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                    .observe(timedOperation.getExecutionTimeInMillis());
+            Chassis.getInstance().getApplicationHealthEngine().httpCallEnded(this.group, this.service, this.operation,
+                    "connection_error", false, false, true, timedOperation.getExecutionTimeInMillis());
 
             throw new IOErrorOperationException("Unknown error on http call", e);
 
@@ -262,17 +256,8 @@ public class RestOperation {
                 .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                 .log();
 
-        //ApplicationHealthEngine.addRestBasedRequestData(this.group, this.service, this.operation,
-                //duration, re.getStatusCode().value());
-
-        Chassis.getInstance().getMetricRegistry().createBuilder(REQUEST_DURATION_METRIC_NAME)
-                .withTag(REQUEST_DURATION_METRIC_TYPE_TAG, REQUEST_DURATION_METRIC_TYPE_TAG_VALUE)
-                .withTag(REQUEST_DURATION_METRIC_GROUP_TAG, this.group)
-                .withTag(REQUEST_DURATION_METRIC_SERVICE_TAG, this.service)
-                .withTag(REQUEST_DURATION_METRIC_OPERATION_TAG, this.operation)
-                .withTag(REQUEST_DURATION_METRIC_OUTCOME_TAG, String.valueOf(re.getStatusCode().value()))
-                .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
-                .observe(timedOperation.getExecutionTimeInMillis());
+        Chassis.getInstance().getApplicationHealthEngine().httpCallEnded(this.group, this.service, this.operation,
+                String.valueOf(re.getStatusCode().value()), true, false, false, timedOperation.getExecutionTimeInMillis());
 
         return re;
 

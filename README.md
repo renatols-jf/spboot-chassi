@@ -4,6 +4,7 @@
 
 ## Unreleased
 - Added support for labels
+- Added health metric support for integrations
 
 ## 0.0.3
 - Enabled `FieldRenderable` to render nested `Renderable` objects and collections.
@@ -555,7 +556,16 @@ are available: one that accepts a return type and one that accepts a return type
 and an error type. If no return type is expected, a null value can be passed. If
 an spefic error type is not expected, using the `RestOperation#call` without
 the error type will result in errors being initialized in a simple `Map`. 
-In the event of an error, either a 
+
+You can change connect and read timeouts for the call through `RestOperation#withConnectTimeout`, 
+which defaults to 10 seconds, and `RestOperation#withReadTimeOut`, which defaults to 40 seconds. You can
+also configure if a redirect should be followed with `RestOperation#withFollowRedirect`, which
+defaults to true.
+
+In case a connection issue happens, a
+[IOErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/IOErrorOperationException.java)
+will be thrown.
+In the event of a non 2xx/3xx http status return, either a 
 [ClientErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ClientErrorOperationException.java) or a
 [ServerErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ServerErrorOperationException.java)
 will be thrown. Both are implementations of `StatusRestOperationException`,
@@ -776,7 +786,11 @@ If the request does not have that annotation, the following metrics will be gene
   It stores the time taken for each HTTP call, in milliseconds, in buckets. 
   It uses as a `tag`: the `group` for the `RestOperation`, the `service` for the `RestOperation`
   the `operation` for the `RestOperation`, `outcome` which is either an `Http Status Code` or
-  `connection_error`, and `type`, which is always `rest`.
+  `connection_error`, and `type`, which defaults to `http`.
+  
+- A `Gauge` called `integration_health`. It stores the current health of a given integration.
+  It uses as a `tag`: the `group` for the `RestOperation`, the `service` for the `RestOperation`
+  the `operation` for the `RestOperation`, and `type`, which is always `http`.
 
 
 Here is how those metrics are exported to Prometheus:
@@ -803,6 +817,7 @@ integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",
 integration_request_time_count{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 1.0
 integration_request_time_sum{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
 integration_request_time_max{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
+integration_health{group="GOOGLE",operation="SEARCH",service="SEARCH",} 100.0
 ```
 
 ## Built-in health information
@@ -1013,11 +1028,15 @@ The following fields are supported:
 - `metrics.name.operation-health`: The name of the metric created to display the operation health.
 - `metrics.name.active-operations`: The name of the metric created to count active requests for an operation.
 - `metrics.name.operation-time`: The name of the metric created to display the time taken by an operation.
+- `metrics.name.integration-health`: The name of the metric created to display the integration health. 
+- `metrics.name.integration-time`: The name of the metric created to display the time taken by an integration call.  
 - `metrics.tag.operation`: The name of the metric tag used to identify operations.
 - `metrics.tag.outcome`: The name of the metric tag used to identify the outcome.
 - `metrics.tag.timer-type`: The name of the metric tag used to identify the timer type.
-
-
+- `metrics.tag.group`: The name of the metric tag used to identify the integration group.
+- `metrics.tag.service`: The name of the metric tag used to identify the integration service.
+- `metrics.tag.type`: The name of the metric tag used to identify the integration type.
+- `metrics.tag.value.http.type`: The name of the metric tag value used to identify the http integrations.
 
 # Next Steps
 A few future updates have been thought of. Having said that, this does not neither represent

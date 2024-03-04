@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.integration;
 
-public class ForbiddenOperationException extends StatusRestOperationException {
+public class ForbiddenOperationException extends ClientErrorOperationException {
 
     public ForbiddenOperationException() { super(403); }
     public ForbiddenOperationException(String message) { super(403, message); }

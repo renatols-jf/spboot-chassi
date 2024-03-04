@@ -49,13 +49,29 @@ public class ApplicationHealthEngine {
                 .buildGauge()
                 .dec();
 
-        if (applicationHealth == null) {
-            this.applicationHealth = new ApplicationHealth(
-                    Chassis.getInstance().getConfig().healthTimeWindowDuration(), Chassis.getInstance().getMetricRegistry());
-        }
+        this.ensureApplicationHealth();
 
-        this.applicationHealth.create(context.getOperation(), outcome.isSuccessful(),
-                outcome.isClientFault(), outcome.isServerFault(), context.getElapsedMillis(), context.getOperationTimeByType());
+        this.applicationHealth.operation(context.getOperation(), outcome.isSuccessful(),
+                outcome.isClientFault(), outcome.isServerFault(), context.getOperationTimeByType());
+
+    }
+
+    public void httpCallEnded(String group, String service, String operation, String result, boolean success,
+                              boolean clientFault, boolean serverFault, Long duration) {
+
+        Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_INTEGRATION_TIME))
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_GROUP), group)
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_SERVICE), service)
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), operation)
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_TYPE),
+                        Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_VALUE_HTTP_TYPE))
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), result)
+                .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
+                .observe(duration);
+
+        this.ensureApplicationHealth();
+
+        this.applicationHealth.http(group, service, operation, success, clientFault, serverFault, result, duration);
 
     }
 
@@ -65,6 +81,17 @@ public class ApplicationHealthEngine {
                     Chassis.getInstance().getConfig().healthTimeWindowDuration(), Chassis.getInstance().getMetricRegistry());
         }
         return this.applicationHealth;
+    }
+
+    private void ensureApplicationHealth() {
+        if (applicationHealth == null) {
+            synchronized (this) {
+                if (applicationHealth == null) {
+                    this.applicationHealth = new ApplicationHealth(
+                            Chassis.getInstance().getConfig().healthTimeWindowDuration(), Chassis.getInstance().getMetricRegistry());
+                }
+            }
+        }
     }
 
 }

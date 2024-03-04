@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis;
 
+import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.util.Arrays;
@@ -12,7 +13,8 @@ public class Labels {
     public enum FieldType {
         LOGGING("logging"),
         METRICS_NAME("metrics.name"),
-        METRICS_TAG("metrics.tag");
+        METRICS_TAG("metrics.tag"),
+        METRICS_TAG_VALUE("metrics.tag.value");
 
         private String description;
 
@@ -42,12 +44,18 @@ public class Labels {
         LOGGING_CONTEXT(FieldType.LOGGING + ".context:context"),
 
         METRICS_NAME_OPERATION_HEALTH(FieldType.METRICS_NAME + ".operation-health:operation_health"),
+        METRICS_NAME_INTEGRATION_HEALTH(FieldType.METRICS_NAME + ".integration-health:integration_health"),
         METRICS_NAME_ACTIVE_OPERATIONS(FieldType.METRICS_NAME + ".active-operations:operation_active_requests"),
         METRICS_NAME_OPERATION_TIME(FieldType.METRICS_NAME + ".operation-time:operation_request_time"),
+        METRICS_NAME_INTEGRATION_TIME(FieldType.METRICS_NAME + ".integration-time:integration_request_time"),
 
         METRICS_TAG_OPERATION(FieldType.METRICS_TAG + ".operation:operation"),
         METRICS_TAG_OUTCOME(FieldType.METRICS_TAG + ".outcome:outcome"),
-        METRICS_TAG_TIMER_TYPE(FieldType.METRICS_TAG + ".timer-type:timer_type");
+        METRICS_TAG_TIMER_TYPE(FieldType.METRICS_TAG + ".timer-type:timer_type"),
+        METRICS_TAG_SERVICE(FieldType.METRICS_TAG + ".service:service"),
+        METRICS_TAG_GROUP(FieldType.METRICS_TAG + ".group:group"),
+        METRICS_TAG_TYPE(FieldType.METRICS_TAG + ".type:type"),
+        METRICS_TAG_VALUE_HTTP_TYPE(FieldType.METRICS_TAG_VALUE + ".http.type:" + TimedOperation.HTTP_OPERATION);
 
         private String key;
         private String label;
