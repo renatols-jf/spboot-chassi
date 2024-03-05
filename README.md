@@ -516,7 +516,7 @@ the following parameters:
   indicates that a `String` must match a provided Regex -
   `@Validation(pattern = @Pattern("^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$"))`
 - `custom`: array of [Validator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/validation/validators/Validator.java).
-  Enables custom validators to be applied. Each `CustomValidator` implementation **MUST** have a 
+  Enables custom validators to be applied. Each `Validator` implementation **MUST** have a 
   public constructor that accepts a single `Validatable` parameter.
   
 Every validation type, except custom, also accepts a message parameter, which will override the 
