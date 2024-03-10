@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.0.5
+- Added i18n support for labels
+
 ## 0.0.4
 - Added support for labels
 - Added health metric support for integrations
@@ -1204,6 +1207,11 @@ The following fields are supported:
 - `metrics.tag.service`: The name of the metric tag used to identify the integration service.
 - `metrics.tag.type`: The name of the metric tag used to identify the integration type.
 - `metrics.tag.value.http-type`: The name of the metric tag value used to identify the http integrations.
+
+i18n is also supported by adding an underscore plus the language code after the name. That means files 
+named like `chassis-labels_en_US.yaml`, `chassis-labels_pt_BR.yaml`, and `chassis-labels_en.yaml` can be used.
+If the locale was set to `en_US`, the framework would search for files in the following order:
+`chassis-labels_en_US.yaml`, `chassis-labels_en.yaml`, and `chassis-labels.yaml`.
 
 # Next Steps
 A few future updates have been thought of. Having said that, this does not neither represent
