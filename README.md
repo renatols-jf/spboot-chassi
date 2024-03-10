@@ -61,13 +61,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.4'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.5'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
