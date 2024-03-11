@@ -1,12 +1,15 @@
 package io.github.renatolsjf.chassis.filtering;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Token {
 
     protected Token prior;
     protected TokenType tokenType;
     protected String identifier;
 
-    protected enum TokenType {
+    public enum TokenType {
         NOT_OPERATOR("NOT", false),
         AND_OPERATOR("AND", false),
         OR_OPERATOR("OR", false),
@@ -81,6 +84,27 @@ public class Token {
                     ? "ID: " + this.identifier + " ENDID"
                     : this.tokenType.toString());
 
+    }
+
+    public Statement createStatement() {
+        Statement statement = new Statement();
+        List<Token> tokenList = this.dismember();
+        for(Token t: tokenList) {
+
+        }
+    }
+
+    public List<Token> dismember() {
+        List<Token> tokenList = new ArrayList<>();
+        this.dismember(tokenList);
+        return tokenList;
+    }
+
+    private void dismember(List<Token> tokenList) {
+        if (this.prior != null) {
+            this.prior.dismember(tokenList);
+        }
+        tokenList.add(this);
     }
 
 }

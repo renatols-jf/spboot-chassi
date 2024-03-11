@@ -55,6 +55,10 @@ public class Tokenizer {
 
     }
 
+    /*public Statement createStatement(Token token) {
+
+    }*/
+
     private void update (StringBuffer buffer) {
         for (int i = buffer.length() - 1; i >= 0; i--) {
             Token.TokenType tt = Token.TokenType.keywordFromString(tokenBuffer.substring(i, tokenBuffer.length()));
