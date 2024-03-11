@@ -4,15 +4,15 @@ import io.github.renatolsjf.chassis.filtering.InvalidSyntaxException;
 import io.github.renatolsjf.chassis.filtering.Statement;
 import io.github.renatolsjf.chassis.filtering.Token;
 
-public class NotOperatorStrategy implements TokenTypeStrategy {
-
+public class OrStrategy implements TokenTypeStrategy {
     @Override
     public Statement crateStatement(Token token, Statement statement) throws InvalidSyntaxException {
-        if (statement.getField() != null) {
-            throw new InvalidSyntaxException("NOT operator must be at the beginning of a statement: " + token);
+        if (statement.isValid()) {
+            Statement newStatement = new Statement();
+            statement.setOr(newStatement);
+            return newStatement;
+        } else {
+            throw new InvalidSyntaxException("Invalid syntax near: " + token.toString());
         }
-        statement.setNegative(true);
-        return statement;
     }
-
 }

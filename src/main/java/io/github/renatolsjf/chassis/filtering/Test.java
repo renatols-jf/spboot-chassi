@@ -4,8 +4,12 @@ import java.util.List;
 
 public class Test {
 
-    public static void main(String... args) {
-        System.out.println(token("(not endereco.logradouro = 'peste) AND ((endereco.numero isnull)' OR (endereco.numero er 50 and 100))"));
+    public static void main(String... args) throws InvalidSyntaxException {
+        Token t = token("(not endereco.logradouro = 'peste) AND ((endereco.numero isnull) OR (endereco.numero = 50)'))");
+        System.out.println(t);
+        Statement s = t.createStatement();
+        System.out.println(s);
+        System.out.println(s.validate());
     }
 
     public static Token token(String s) {

@@ -1,5 +1,7 @@
 package io.github.renatolsjf.chassis.filtering;
 
+import io.github.renatolsjf.chassis.filtering.strategy.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,30 +11,36 @@ public class Token {
     protected TokenType tokenType;
     protected String identifier;
 
+    private static TokenTypeStrategy standardOperatorStrategy = new StandardOperatorStrategy();
+
     public enum TokenType {
-        NOT_OPERATOR("NOT", false),
-        AND_OPERATOR("AND", false),
-        OR_OPERATOR("OR", false),
-        EQUALS_OPERATOR("=", true),
-        BETWEEN_OPERATOR("BETWEEN", false),
-        ISNULL_OPERATOR("ISNULL", false),
-        GREATERTHAN_OPERATOR(">", true),
-        LESSTHAN_OPERATOR("<", true),
-        NOOP_OPERATOR("", false),
+        NOT_OPERATOR("NOT", false, new NotStrategy()),
+        AND_OPERATOR("AND", false, new AndStrategy()),
+        OR_OPERATOR("OR", false, new OrStrategy()),
+        EQUALS_OPERATOR("=", true, standardOperatorStrategy),
+        //BETWEEN_OPERATOR("BETWEEN", false),
+        ISNULL_OPERATOR("ISNULL", false, standardOperatorStrategy),
+        GREATERTHAN_OPERATOR(">", true, standardOperatorStrategy),
+        LESSTHAN_OPERATOR("<", true, standardOperatorStrategy),
+        //NOOP_OPERATOR("", false),
         //REGEX_CONSTANT,
-        //PROPERTY_IDENTIFIER(""),
-        //VALUE_IDENTIFIER(""),
-        IDENTIFIER("", false),
-        OPEN_PARENTHESIS_SEPARATOR("(", true),
-        CLOSE_PARENTHESIS_SEPARATOR(")", true),
-        QUOTE_SEPARATOR("'", true);
+        IDENTIFIER("", false, new IdentifierStrategy()),
+        OPEN_PARENTHESIS_SEPARATOR("(", true, new OpenStrategy()),
+        CLOSE_PARENTHESIS_SEPARATOR(")", true, new CloseStrategy()),
+        QUOTE_SEPARATOR("'", true, new QuoteStrategy());
 
         private String stringToken;
         private boolean keyword;
+        private TokenTypeStrategy strategy;
 
-        TokenType(String stringToken, boolean keyword) {
+        TokenType(String stringToken, boolean keyword, TokenTypeStrategy strategy) {
             this.stringToken = stringToken;
             this.keyword = keyword;
+            this.strategy = strategy;
+        }
+
+        public TokenTypeStrategy getStrategy() {
+            return this.strategy;
         }
 
         public static TokenType fromString(String s) {
@@ -73,6 +81,14 @@ public class Token {
         return anotherToken;
     }
 
+    public TokenType getTokenType() {
+        return this.tokenType;
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
+    }
+
     @Override
     public String toString() {
         String s = "";
@@ -86,12 +102,13 @@ public class Token {
 
     }
 
-    public Statement createStatement() {
+    public Statement createStatement() throws InvalidSyntaxException {
         Statement statement = new Statement();
         List<Token> tokenList = this.dismember();
         for(Token t: tokenList) {
-
+            statement = t.getTokenType().getStrategy().crateStatement(t, statement);
         }
+        return statement;
     }
 
     public List<Token> dismember() {
