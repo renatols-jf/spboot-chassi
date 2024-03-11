@@ -4,6 +4,7 @@ public class Tokenizer {
 
     private StringBuffer tokenBuffer = new StringBuffer();
     private Token token;
+    private boolean quoteMode = false;
 
     public Token tokenize(String content) {
 
@@ -13,18 +14,31 @@ public class Tokenizer {
 
             char c = content.charAt(i);
 
-            if (!Character.isWhitespace(c)) {
-                tokenBuffer.append(c);
-                this.update(tokenBuffer);
-            }  else if (!tokenBuffer.isEmpty()) {
-                Token.TokenType tt = Token.TokenType.fromString(tokenBuffer.toString());
-                if (tt != null) {
-                    this.createToken(tt);
-                } else {
-                    this.createIdentifier(tokenBuffer.toString());
+            if (!quoteMode) {
+                if (!Character.isWhitespace(c)) {
+                    tokenBuffer.append(c);
+                    this.update(tokenBuffer);
+                }  else if (!tokenBuffer.isEmpty()) {
+                    Token.TokenType tt = Token.TokenType.fromString(tokenBuffer.toString());
+                    if (tt != null) {
+                        this.createToken(tt);
+                    } else {
+                        this.createIdentifier(tokenBuffer.toString());
+                    }
+                    tokenBuffer.setLength(0);
                 }
-                tokenBuffer.setLength(0);
+            } else {
+                Token.TokenType tt = Token.TokenType.fromString(String.valueOf(c));
+                if (tt != null && tt == Token.TokenType.QUOTE_SEPARATOR) {
+                    this.createIdentifier(tokenBuffer.substring(0, tokenBuffer.length() - 1));
+                    this.createToken(tt);
+                    this.quoteMode = false;
+                    tokenBuffer.setLength(0);
+                } else {
+                    tokenBuffer.append(c);
+                }
             }
+
 
         }
 
@@ -46,10 +60,20 @@ public class Tokenizer {
             Token.TokenType tt = Token.TokenType.keywordFromString(tokenBuffer.substring(i, tokenBuffer.length()));
             if (tt != null) {
                 if (i != 0) {
-                    this.createIdentifier(buffer.substring(0, i));
+                    Token.TokenType another = Token.TokenType.fromString(tokenBuffer.substring(0, i));
+                    if (another != null) {
+                        this.createToken(another);
+                    } else {
+                        this.createIdentifier(buffer.substring(0, i));
+                    }
                 }
                 this.createToken(tt);
                 this.tokenBuffer.setLength(0);
+
+                if (tt == Token.TokenType.QUOTE_SEPARATOR) {
+                    this.quoteMode = true;
+                }
+
                 break;
             }
         }

@@ -7,7 +7,7 @@ public class Token {
     protected String identifier;
 
     protected enum TokenType {
-        NOT_OPERATOR("!", true),
+        NOT_OPERATOR("NOT", false),
         AND_OPERATOR("AND", false),
         OR_OPERATOR("OR", false),
         EQUALS_OPERATOR("=", true),
@@ -21,7 +21,8 @@ public class Token {
         //VALUE_IDENTIFIER(""),
         IDENTIFIER("", false),
         OPEN_PARENTHESIS_SEPARATOR("(", true),
-        CLOSE_PARENTHESIS_SEPARATOR(")", true);
+        CLOSE_PARENTHESIS_SEPARATOR(")", true),
+        QUOTE_SEPARATOR("'", true);
 
         private String stringToken;
         private boolean keyword;
@@ -77,7 +78,7 @@ public class Token {
         }
 
         return s + (this.identifier != null
-                    ? "ID: " + this.identifier
+                    ? "ID: " + this.identifier + " ENDID"
                     : this.tokenType.toString());
 
     }
