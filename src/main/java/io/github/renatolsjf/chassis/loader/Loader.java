@@ -1,10 +1,8 @@
 package io.github.renatolsjf.chassis.loader;
 
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -32,12 +30,10 @@ public class Loader {
         for (String suffix: suffixes) {
             for (String ext: SUPPORTED_EXTENSIONS) {
                 try {
-                    File f = ResourceUtils.getFile("classpath:" + LABELS_FILE + suffix + ext);
-                    if (f != null) {
-                        try (InputStream is = new FileInputStream(f)) {
-                            this.labelsData = yaml.load(is);
-                            return this;
-                        }
+                    ClassPathResource c = new ClassPathResource(LABELS_FILE + suffix + ext);
+                    try (InputStream is = c.getInputStream()) {
+                        this.labelsData = yaml.load(is);
+                        return this;
                     }
                 } catch (IOException ex) {
                     //TODO log issue
