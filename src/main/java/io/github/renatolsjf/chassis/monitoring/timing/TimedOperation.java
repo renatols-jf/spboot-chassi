@@ -29,8 +29,6 @@ public class TimedOperation<T> {
         long l = System.currentTimeMillis();
         try {
             r.run();
-        } catch (Exception ex) {
-            throw new TimedOperationException(ex);
         } finally {
             this.executionTime = System.currentTimeMillis() - l;
             Context.forRequest().recordOperationTime(this.tag, this.executionTime);
@@ -41,6 +39,8 @@ public class TimedOperation<T> {
         long l = System.currentTimeMillis();
         try {
             return e.call();
+        } catch (RuntimeException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new TimedOperationException(ex);
         } finally {
