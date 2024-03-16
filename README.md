@@ -265,10 +265,10 @@ information, as is: `logger.info(message, param1, param2).log()`. A few observat
 are in order:
 
 - There are a few fields that are always logged automatically:
-  - transactionId: [see above](###transactionId)
-  - correlationId: [see above](###correlationId)
-  - operationTimes: [see below](##Timing operations and timer classification)
-  - operation: [see above](###operation)
+  - transactionId: [see above](#transactionid)
+  - correlationId: [see above](#correlationid)
+  - operationTimes: [see below](#timing-operations-and-timer-classification)
+  - operation: [see above](#operation)
   - elapsedTime: the time passed between the start of the request and the give log message
 
 - Any log level provides two arguments: a message and an object varargs. Any varargs
