@@ -7,6 +7,8 @@ import java.util.*;
 
 public class Labels {
 
+    private static final String UNKNOWN_APP_NAME = "unknown_app" ;
+
     public enum FieldType {
         APPLICATION("application"),
         LOGGING("logging"),
@@ -34,10 +36,10 @@ public class Labels {
 
     public enum Field {
 
-        APPLICATION_NAME(FieldType.APPLICATION + ".name:unknown_app"),
+        APPLICATION_NAME(FieldType.APPLICATION + ".name:" + UNKNOWN_APP_NAME),
         APPLICATION_INSTANCE_ID(FieldType.APPLICATION + ".instance-id:" + UUID.randomUUID().toString()),
 
-        LOGGING_APPLICATION_NAME(FieldType.LOGGING + ".application-name:applicationName"),
+        LOGGING_APPLICATION_NAME(FieldType.LOGGING + ".application-name:application"),
         LOGGING_TRANSACTION_ID(FieldType.LOGGING + ".transaction-id:transactionId"),
         LOGGING_CORRELATION_ID(FieldType.LOGGING + ".correlation-id:correlationId"),
         LOGGING_OPERATION(FieldType.LOGGING + ".operation:operation"),
@@ -51,7 +53,7 @@ public class Labels {
         METRICS_NAME_OPERATION_TIME(FieldType.METRICS_NAME + ".operation-time:operation_request_time"),
         METRICS_NAME_INTEGRATION_TIME(FieldType.METRICS_NAME + ".integration-time:integration_request_time"),
 
-        METRICS_TAG_APPLICATION_NAME(FieldType.METRICS_TAG + ".application-name:application_name"),
+        METRICS_TAG_APPLICATION_NAME(FieldType.METRICS_TAG + ".application-name:application"),
         METRICS_TAG_INSTANCE_ID(FieldType.METRICS_TAG + ".instance-id:instance_id"),
         METRICS_TAG_OPERATION(FieldType.METRICS_TAG + ".operation:operation"),
         METRICS_TAG_OUTCOME(FieldType.METRICS_TAG + ".outcome:outcome"),
@@ -93,6 +95,10 @@ public class Labels {
 
     Labels(Map<String, Object> labelData) {
         this.labelData = labelData;
+    }
+
+    public boolean isAppNameAvailable() {
+        return !(UNKNOWN_APP_NAME.equalsIgnoreCase(this.getLabel(Field.APPLICATION_NAME)));
     }
 
     public String getLabel(Field field) {

@@ -4,7 +4,8 @@
 
 ## UNRELEASED
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
-  and instance id to the metrics.
+  and instance id to the metrics. Application name will only be exported if a value is found 
+  in `chassis-labels.yaml`.
 
 ## 0.0.7
 - Fixed labels loading which were not working from inside jar
@@ -262,6 +263,13 @@ from the context: `ApplicationLogger logger = Context.forRequest().createLogger(
 With an ApplicationLogger instance, you can use the default logging levels to log
 information, as is: `logger.info(message, param1, param2).log()`. A few observations
 are in order:
+
+- There are a few fields that are always logged automatically:
+  - transactionId: [see above](###transactionId)
+  - correlationId: [see above](###correlationId)
+  - operationTimes: [see below](##Timing operations and timer classification)
+  - operation: [see above](###operation)
+  - elapsedTime: the time passed between the start of the request and the give log message
 
 - Any log level provides two arguments: a message and an object varargs. Any varargs
   present will replace `{}` inside the message. 
