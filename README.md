@@ -2,6 +2,10 @@
 
 # Changelist
 
+## UNRELEASED
+- Added labels for application name and instance id. Application name is exported to the logs and metrics,
+  and instance id to the metrics.
+
 ## 0.0.7
 - Fixed labels loading which were not working from inside jar
 
@@ -1196,6 +1200,9 @@ configurations are in use:
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
 a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
 The following fields are supported:
+- `application.name`: The name of the application.
+- `application.instance-id`: The ID for this instance of the give application. Defaults to a UUID v4.
+- `logging.application-name`: The name of the field under which the application name will be logged.  
 - `logging.transaction-id`: The name of the field under which the transactionId will be logged.
 - `logging.correlation-id`: The name of the field under which the correlationId will be logged.
 - `logging.operation`: The name of the field under which the operation will be logged.
@@ -1206,7 +1213,9 @@ The following fields are supported:
 - `metrics.name.active-operations`: The name of the metric created to count active requests for an operation.
 - `metrics.name.operation-time`: The name of the metric created to display the time taken by an operation.
 - `metrics.name.integration-health`: The name of the metric created to display the integration health. 
-- `metrics.name.integration-time`: The name of the metric created to display the time taken by an integration call.  
+- `metrics.name.integration-time`: The name of the metric created to display the time taken by an integration call.
+- `metrics.tag.application-name`: The name of the metric tag used to identify the application.
+- `metrics.tag.instance-id`: Then name of the metric tag used to identify the instance id. 
 - `metrics.tag.operation`: The name of the metric tag used to identify operations.
 - `metrics.tag.outcome`: The name of the metric tag used to identify the outcome.
 - `metrics.tag.timer-type`: The name of the metric tag used to identify the timer type.

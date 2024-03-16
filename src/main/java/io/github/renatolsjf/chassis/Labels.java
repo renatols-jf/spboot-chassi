@@ -3,14 +3,12 @@ package io.github.renatolsjf.chassis;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.util.CaseString;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Labels {
 
     public enum FieldType {
+        APPLICATION("application"),
         LOGGING("logging"),
         METRICS_NAME("metrics.name"),
         METRICS_TAG("metrics.tag"),
@@ -36,6 +34,10 @@ public class Labels {
 
     public enum Field {
 
+        APPLICATION_NAME(FieldType.APPLICATION + ".name:unknown_app"),
+        APPLICATION_INSTANCE_ID(FieldType.APPLICATION + ".instance-id:" + UUID.randomUUID().toString()),
+
+        LOGGING_APPLICATION_NAME(FieldType.LOGGING + ".application-name:applicationName"),
         LOGGING_TRANSACTION_ID(FieldType.LOGGING + ".transaction-id:transactionId"),
         LOGGING_CORRELATION_ID(FieldType.LOGGING + ".correlation-id:correlationId"),
         LOGGING_OPERATION(FieldType.LOGGING + ".operation:operation"),
@@ -49,6 +51,8 @@ public class Labels {
         METRICS_NAME_OPERATION_TIME(FieldType.METRICS_NAME + ".operation-time:operation_request_time"),
         METRICS_NAME_INTEGRATION_TIME(FieldType.METRICS_NAME + ".integration-time:integration_request_time"),
 
+        METRICS_TAG_APPLICATION_NAME(FieldType.METRICS_TAG + ".application-name:application_name"),
+        METRICS_TAG_INSTANCE_ID(FieldType.METRICS_TAG + ".instance-id:instance_id"),
         METRICS_TAG_OPERATION(FieldType.METRICS_TAG + ".operation:operation"),
         METRICS_TAG_OUTCOME(FieldType.METRICS_TAG + ".outcome:outcome"),
         METRICS_TAG_TIMER_TYPE(FieldType.METRICS_TAG + ".timer-type:timer_type"),

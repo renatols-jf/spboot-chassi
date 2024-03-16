@@ -91,7 +91,10 @@ public class MetricRegistry implements MetricListener {
     Map<String, Metric> registeredMetrics = new HashMap<>();
 
     public MetricBuilder createBuilder(String name) {
-        return new MetricBuilder(name);
+        Labels l = Chassis.getInstance().labels();
+        return new MetricBuilder(name)
+                .withTag(l.getLabel(Labels.Field.METRICS_TAG_APPLICATION_NAME), l.getLabel(Labels.Field.APPLICATION_NAME))
+                .withTag(l.getLabel(Labels.Field.METRICS_TAG_INSTANCE_ID), l.getLabel(Labels.Field.APPLICATION_INSTANCE_ID));
     }
 
     @Override

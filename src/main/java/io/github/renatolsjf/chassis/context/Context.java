@@ -181,6 +181,7 @@ public class Context {
             this.requestContext.entrySet().forEach(e -> loggingAttributes.put(e.getKey(), () -> e.getValue()));
         }
 
+        loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_APPLICATION_NAME), () -> c.labels().getLabel(Labels.Field.APPLICATION_NAME));
         loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRANSACTION_ID), () -> this.transactionId);
         loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_CORRELATION_ID), () -> this.correlationId);
         loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_OPERATION), () -> this.operation);
