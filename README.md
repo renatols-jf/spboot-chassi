@@ -844,10 +844,23 @@ integration_health{group="GOOGLE",operation="SEARCH",service="SEARCH",} 100.0
 ```
 
 ## Built-in health information
-The application has a default `HealthRequest` that exports health information in `json`.
+The application has a default 
+[HealthRequest](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/request/HealthRequest.java) 
+that exports health information in `json`.
 It exports health percentage, request count, quantiles for the time taken for each type, and
 result count by type. It does so by each operation, and also aggregates as application information.
 The application health is not an average. Instead, it reflects the health of the worst operation.
+To use, create a `HealthRequest`, process it and render the result, such as 
+`new HealthRequest().process().render()`. To tie this to a Spring rest entrypoint, just use something like:
+
+```
+@GetMapping("healthcheck")
+public ResponseEntity healthCheck() {
+    return ResponseEntity.ok(new HealthRequest().process().render());
+}
+```
+
+A sample result:
 
 ```
 {
