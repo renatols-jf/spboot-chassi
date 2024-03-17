@@ -1,5 +1,7 @@
 package io.github.renatolsjf.chassis;
 
+import io.github.renatolsjf.chassis.loader.Loadable;
+
 import java.time.Duration;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -7,17 +9,35 @@ import java.util.Map;
 
 public class Configuration {
 
-    public enum Properties {
-        LOGGER_USE_CALLING_CLASS,
-        LOGGER_PRINT_CONTEXT_AS_JSON,
-        LOGGER_EXPLODE_ATTACHED_OBJECTS,
-        LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE,
-        VALIDATOR_FAIL_ON_EXECUTION_ERROR,
+    public enum Property implements Loadable<Object> {
+        LOGGER_USE_CALLING_CLASS("logging.use-calling-class", Boolean.TRUE),
+        LOGGER_PRINT_CONTEXT_AS_JSON("logging.print-context-as-json", Boolean.TRUE),
+        //LOGGER_EXPLODE_ATTACHED_OBJECTS("logging.explode-attached-objects", Boolean.FALSE),
+        LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE("logging.enable-default-attributes-overwrite", Boolean.FALSE),
+        VALIDATOR_FAIL_ON_EXECUTION_ERROR("validation.fail-on-execution-error", Boolean.TRUE),
         CONTEXT_FORBID_UNAUTHORIZED_CREATION,
         CONTEXT_ALLOW_CORRELATION_ID_UPDATE,
         METRIC_REQUEST_DURATION_HISTOGRAM_RANGES,
         METRIC_EXPORT_REQUEST_DURATION_BY_TYPE,
-        HEALTH_TIME_WINDOW_DURATION
+        HEALTH_TIME_WINDOW_DURATION;
+
+        private String keyValue;
+        private Object defaultValue;
+
+        Property(String keyValue, Object defaultValue) {
+            this.keyValue = keyValue;
+            this.defaultValue = defaultValue;
+        }
+
+        @Override
+        public String key() {
+            return this.keyValue;
+        }
+
+        @Override
+        public Object defaultValue() {
+            return this.defaultValue;
+        }
     }
 
     Map<String, Object> configData;
