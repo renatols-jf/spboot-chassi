@@ -43,6 +43,9 @@ the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
 This is not related to the standard NIO Thread pool.
 
+This was built and tested using Java 21 and Spring Boot 3.2.2. A Java 11 version with Sprint 2.x.x
+is planned.
+
 # What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
 applications. It deals with a few common concerns for distributed 
@@ -850,7 +853,7 @@ that exports health information in `json`.
 It exports health percentage, request count, quantiles for the time taken for each type, and
 result count by type. It does so by each operation, and also aggregates as application information.
 The application health is not an average. Instead, it reflects the health of the worst operation.
-To use, create a `HealthRequest`, process it and render the result, such as 
+To use it, create a `HealthRequest`, process it and render the result, such as 
 `new HealthRequest().process().render()`. To tie this to a Spring rest entrypoint, just use something like:
 
 ```
