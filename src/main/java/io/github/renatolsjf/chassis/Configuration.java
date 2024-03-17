@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis;
 
 import java.time.Duration;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Configuration {
@@ -19,7 +20,11 @@ public class Configuration {
         HEALTH_TIME_WINDOW_DURATION
     }
 
-    Map<Properties, Object> configData = new EnumMap<>(Properties.class);
+    Map<String, Object> configData;
+
+    Configuration(Map<String, Object> configData) {
+        this.configData = configData;
+    }
 
     public Boolean useCallingClassNameForLogging() {
         return (Boolean) this.configData
