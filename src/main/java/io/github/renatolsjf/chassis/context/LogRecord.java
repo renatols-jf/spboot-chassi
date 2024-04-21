@@ -68,7 +68,7 @@ public class LogRecord {
 
     public LogRecord attachObject(final Object value, String... fieldToPrint) {
         return this.attachObject(value, this.recordData,
-                Chassis.getInstance().getConfig().explodeLoggingAttachedObjects(), fieldToPrint);
+                /*Chassis.getInstance().getConfig().explodeLoggingAttachedObjects()*/ false, fieldToPrint);
     }
 
     private LogRecord attachObject(final Object value, Map<String, Object> container,
