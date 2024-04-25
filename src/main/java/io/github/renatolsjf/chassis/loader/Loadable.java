@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis.loader;
 
 import io.github.renatolsjf.chassis.util.CaseString;
+import io.github.renatolsjf.chassis.util.conversion.ConversionFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,20 +19,20 @@ public interface Loadable<T> {
         return Arrays.asList(this.key().split("\\."));
     }
 
-    default T initializeAndGet(Map<String, Object> m) {
-        T v = this.getValueOrDefault(m);
+    default T initializeAndGet(Map<String, Object> m, Class<? extends T> expectedClass) {
+        T v = this.getValueOrDefault(m, expectedClass);
         this.setValue(v);
         return v;
     }
 
-    default T initializeIfNeededAndGet(Map<String, Object> m) {
+    default T initializeIfNeededAndGet(Map<String, Object> m, Class<? extends T> expectedClass) {
 
         T v = value();
         if (v != null) {
             return v;
         }
 
-        return this.initializeAndGet(m);
+        return this.initializeAndGet(m, expectedClass);
 
     }
 
@@ -42,10 +43,12 @@ public interface Loadable<T> {
                 : this.defaultValue();
     }
 
-    default T getValueOrDefault(Map<String, Object> m) {
+    default T getValueOrDefault(Map<String, Object> m, Class<? extends T> expectedClass) {
+
+        T dValue = this.defaultValue();
 
         if (m == null || m.isEmpty()) {
-            return this.defaultValue();
+            return dValue;
         }
 
         Object toReturn = this.defaultValue();
@@ -61,9 +64,17 @@ public interface Loadable<T> {
         }
 
         if (toReturn != null) {
+
+            if (dValue != null) {
+                T convertedValue = (T) ConversionFactory.converter(toReturn.getClass(), expectedClass).convert(toReturn);
+                return convertedValue != null
+                        ? convertedValue
+                        : dValue;
+            }
+
             return (T) toReturn;
         } else {
-            return this.defaultValue();
+            return dValue;
         }
     }
 

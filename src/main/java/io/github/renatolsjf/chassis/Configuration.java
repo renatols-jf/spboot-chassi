@@ -59,39 +59,39 @@ public class Configuration {
     }
 
     public Boolean useCallingClassNameForLogging() {
-        return (Boolean) Properties.LOGGER_USE_CALLING_CLASS.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.LOGGER_USE_CALLING_CLASS.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean printLoggingContextAsJson() {
-        return (Boolean) Properties.LOGGER_PRINT_CONTEXT_AS_JSON.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.LOGGER_PRINT_CONTEXT_AS_JSON.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean allowDefaultLoggingAttributesOverride() {
-        return (Boolean) Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean validatorFailOnExecutionError() {
-        return (Boolean) Properties.VALIDATOR_FAIL_ON_EXECUTION_ERROR.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.VALIDATOR_FAIL_ON_EXECUTION_ERROR.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean forbidUnauthorizedContextCreation() {
-        return (Boolean) Properties.CONTEXT_FORBID_UNAUTHORIZED_CREATION.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.CONTEXT_FORBID_UNAUTHORIZED_CREATION.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean allowContextCorrelationIdUpdate() {
-        return (Boolean) Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public double[] monitoringRequestDurationRanges() {
-        return (double[]) Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES.initializeIfNeededAndGet(this.configData);
+        return (double[]) Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES.initializeIfNeededAndGet(this.configData, double[].class);
     }
 
     public Boolean exportRequestDurationMetricByType() {
-        return (Boolean) Properties.METRIC_REQUEST_DURATION_EXPORT_BY_TYPE.initializeIfNeededAndGet(this.configData);
+        return (Boolean) Properties.METRIC_REQUEST_DURATION_EXPORT_BY_TYPE.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Duration healthTimeWindowDuration() {
-        return Duration.ofMinutes((Long) Properties.HEALTH_TIME_WINDOW_DURATION.initializeIfNeededAndGet(this.configData));
+        return Duration.ofMinutes((Integer) Properties.HEALTH_TIME_WINDOW_DURATION.initializeIfNeededAndGet(this.configData, Integer.class));
     }
 
 }

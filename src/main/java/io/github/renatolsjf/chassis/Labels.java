@@ -113,7 +113,7 @@ public class Labels {
     }
 
     public String getLabel(Field field) {
-        return field.initializeIfNeededAndGet(this.labelData);
+        return field.initializeIfNeededAndGet(this.labelData, String.class);
     }
 
     public String getLabel(FieldType fieldType, String suffix) {
