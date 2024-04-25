@@ -6,13 +6,15 @@ public class Chassis {
 
     private static Chassis instance = new Chassis();
 
-    private Configuration config = new Configuration();
+    private Configuration config;
     private Labels labelsInstance;
     private MetricRegistry metricRegistry = new MetricRegistry();
     private ApplicationHealthEngine applicationHealthEngine = new ApplicationHealthEngine();
 
     private Chassis() {
-        this.labelsInstance = new Labels(Loader.defaultLoader().getLabelsData());
+        Loader loader = Loader.defaultLoader();
+        this.config = new Configuration(loader.getConfigData());
+        this.labelsInstance = new Labels(loader.getLabelsData());
     }
 
     public Configuration getConfig() {
