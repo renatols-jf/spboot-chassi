@@ -13,17 +13,35 @@ import java.util.Map;
 public class Loader {
 
     private final static String LABELS_FILE = "chassis-labels";
+    private final static String CONFIG_FILE = "chassis-config";
     private final static String[] SUPPORTED_EXTENSIONS = new String[]{".yaml", ".yml"};
 
     private Map<String, Object> labelsData;
+    private Map<String, Object> configData;
 
     private Loader() {}
 
     public static Loader defaultLoader() {
-        return new Loader().load();
+        return new Loader().loadConfig().loadLabels();
     }
 
-    private Loader load() {
+    private Loader loadConfig() {
+        Yaml yaml = new Yaml();
+        for (String ext: SUPPORTED_EXTENSIONS) {
+            try {
+                ClassPathResource c = new ClassPathResource(CONFIG_FILE + ext);
+                try (InputStream is = c.getInputStream()) {
+                    this.configData = yaml.load(is);
+                    return this;
+                }
+            } catch (IOException ex) {
+                //TODO log issue
+            }
+        }
+        return this;
+    }
+
+    private Loader loadLabels() {
         Yaml yaml = new Yaml();
         Locale l = Locale.getDefault();
         List<String> suffixes = Arrays.asList("_" + l.toString(), "_" + l.getLanguage() + "_" + l.getCountry(), "_" + l.getLanguage(), "");
@@ -41,6 +59,10 @@ public class Loader {
             }
         }
         return this;
+    }
+
+    public Map<String, Object> getConfigData() {
+        return this.configData;
     }
 
     public Map<String, Object> getLabelsData() {

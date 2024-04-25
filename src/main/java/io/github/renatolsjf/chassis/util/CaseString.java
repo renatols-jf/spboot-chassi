@@ -7,10 +7,11 @@ import java.util.stream.Collectors;
 
 public class CaseString {
 
-    enum CaseType {
+    public enum CaseType {
         KEBAB,
         SNAKE,
-        CAMEL
+        CAMEL,
+        PASCAL
     }
 
     private List<CaseBuffer> buffers = new ArrayList<>();
@@ -19,6 +20,7 @@ public class CaseString {
         this.buffers.add(new KebabCaseBuffer());
         this.buffers.add(new SnakeCaseBuffer());
         this.buffers.add(new CamelCaseBuffer());
+        this.buffers.add(new PascalCaseBuffer());
     }
 
     //TODO add support for objects in general other than map
@@ -182,6 +184,19 @@ class CamelCaseBuffer extends CaseBuffer {
         } else {
             this.valueBuffer.append(c);
         }
+    }
+
+}
+
+class PascalCaseBuffer extends CamelCaseBuffer {
+
+    PascalCaseBuffer() {
+        this.type = CaseString.CaseType.PASCAL;
+    }
+
+    @Override
+    void appendUpperCase(char c) {
+        this.valueBuffer.append(c);
     }
 
 }

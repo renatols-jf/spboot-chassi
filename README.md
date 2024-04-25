@@ -2,10 +2,12 @@
 
 # Changelist
 
-## UNRELEASED
+## 0.0.8
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
   and instance id to the metrics. Application name will only be exported if a value is found 
   in `chassis-labels.yaml`.
+- Enabled configuration changes through `chassis-config.yaml` file.  
+- Added `@Inject` annotation to inject / automatically initialize spring beans inside a `Request`
 
 ## 0.0.7
 - Fixed labels loading which were not working from inside jar
@@ -81,13 +83,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.7'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.8'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -128,9 +130,12 @@ controls domain behavior.
 The domain logic is to be implemented in the method `doProcess()` - 
 it should **NEVER** be called directly, instead, `process()` should. At this point,
 you might want to access Spring-managed objects, such as services. 
-There are two ways of doing so:
+There are three ways of doing so (Note that an exception will be thrown if no beans qualify in all cases):
+- Annotate the desired field with
+  [Inject](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Inject.java).
+  `@Inject` will only work inside requests.
 - `this.requestResource(MyService.class)` in which you provide the class you are expecting. 
-  This is a syntatic sugar available only inside requests.
+  This is a syntactic sugar available only inside requests.
 - `AppRegistry.getResource(MyService.class)` in which you provide the class you are expecting.
   This can be called anywhere.
 
@@ -1179,26 +1184,26 @@ is over for this wrap-up to use a stopped timer, but this is part of the request
 Be it as it may, a future release will include a configuration to stop the timer.
 
 ## Configuration
-Although a configuration module exists and is accessible via `Chassis.getInstance().getConfig()`,
-currently no changes to the configurations can be made. Be it as it may, the following 
-configurations are in use:
+Configurations allow for changes to default application behavior. To change a behavior, insert
+the desired value in a file called `chassis-config.yaml` or `chassis-config.yml` under the 
+default resources folder. The following configurations can be changed:
 
-- `useCallingClassNameForLogging`: Defaults to `true`. Governs whether the stack trace will be 
+- `logging.use-calling-class`: Boolean, defaults to `true`. Governs whether the stack trace will be 
   used or not to initialize the logging class. When creating an `ApplicationLogger`, 
   you can provide a class or not to be exported as the logger name. In case where no class is provided,
   as in `Context.forRequest().createLogger()`, this configuration will be used to initialize
   the class. If it's true, the class will be the calling class. If it's false, it will
   always be `ApplicatonLogger`.
   
-- `printLoggingContextAsJson`: Defaults to `true`. Governs whether the `context` field present
+- `logging.print-context-as-json`: Boolean, defaults to `true`. Governs whether the `context` field present
   in log messages will be exported as `json`.
   
-- `allowDefaultLoggingAttributesOverride`: Defaults fo `false`. Governs whether automatic logging
+- `logging.enable-default-attributes-overwrite`: Boolean, defaults fo `false`. Governs whether automatic logging
   attributes, such as `transactionId`, can have their value replaced with a call for 
   `Context#withRequestContextEntry` as in
   `Context.forRequest.withRequestContextEntry("transactionId", aNewValue)`.
   
-- `validatorFailOnExecutionError`: Defaults to `true`. Governs whether an unexpected error
+- `validation.fail-on-execution-error`: Boolean, defaults to `true`. Governs whether an unexpected error
   in a validation attempt results in an exception. Every validation that fails for not matching
   the annotations for the current operation will result in an exception. For whatever
   reason, an exception can happen in the middle of the validation attempt. Let's say a method
@@ -1207,22 +1212,22 @@ configurations are in use:
   will not happen, but it will be ignored, and if no other validation fails, the `Validatable`
   would be deemed valid.
   
-- `forbidUnauthorizedContextCreation`: Defatuls to `true`. `Context.initialize` can't be called
+- `context.forbid-unauthorized-creation`: Boolean, defatuls to `true`. `Context.initialize` can't be called
   anywhere to create a `Context`. Allowing the `Context` creation is error-prone and, in almost
   all cases, not needed. If this configuration is true, unless the class in which 
   `Context.initialize` is being called is annotated with `@ContextCreator`, an exception will
   be thrown.
 
-- `allowContextCorrelationIdUpdate`: Defaults to `true`. Governs whether a `correlationId` can be
+- `context.allow-correlation-id-update`: Boolean, defaults to `true`. Governs whether a `correlationId` can be
   updated after the context has been initialized.
   
-- `monitoringRequestDurationRanges`: Defaults to `new double[]{200, 500, 1000, 2000, 5000, 10000}`.
+- `metrics.request.duration.histogram-range`: Integer list, defaults to `[200, 500, 1000, 2000, 5000, 10000]`.
   Govern the default `Histogram` buckets for request duration in milliseconds.
   
-- `exportRequestDurationMetricByType`: Defaults to `true`. Governs whether `Histogram` metrics
+- `metrics.request.duration.export-by-type`: Boolean, defaults to `true`. Governs whether `Histogram` metrics
   for request duration will be tagged with timer types.
   
-- `healthTimeWindowDuration`: Defaults to 5 minutes. Governs the maximum age of requests
+- `metrics.health-window-duration-minutes`: Integer, defaults to 5. Governs the maximum age of requests
   to be used in health calculations.
   
 ## Labels
