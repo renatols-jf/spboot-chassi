@@ -23,6 +23,7 @@ public class Configuration {
 
         private String keyValue;
         private Object defaultValue;
+        private Object value;
 
         Properties(String keyValue, Object defaultValue) {
             this.keyValue = keyValue;
@@ -38,6 +39,17 @@ public class Configuration {
         public Object defaultValue() {
             return this.defaultValue;
         }
+
+        @Override
+        public Object value() {
+            return this.value;
+        }
+
+        @Override
+        public void setValue(Object value) {
+            this.value = value;
+        }
+
     }
 
     Map<String, Object> configData;
@@ -47,48 +59,39 @@ public class Configuration {
     }
 
     public Boolean useCallingClassNameForLogging() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.LOGGER_USE_CALLING_CLASS, Boolean.TRUE);
+        return (Boolean) Properties.LOGGER_USE_CALLING_CLASS.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean printLoggingContextAsJson() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.LOGGER_PRINT_CONTEXT_AS_JSON, Boolean.TRUE);
+        return (Boolean) Properties.LOGGER_PRINT_CONTEXT_AS_JSON.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean allowDefaultLoggingAttributesOverride() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE, Boolean.FALSE);
+        return (Boolean) Properties.LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean validatorFailOnExecutionError() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.VALIDATOR_FAIL_ON_EXECUTION_ERROR, Boolean.TRUE);
+        return (Boolean) Properties.VALIDATOR_FAIL_ON_EXECUTION_ERROR.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean forbidUnauthorizedContextCreation() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.CONTEXT_FORBID_UNAUTHORIZED_CREATION, Boolean.TRUE);
+        return (Boolean) Properties.CONTEXT_FORBID_UNAUTHORIZED_CREATION.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean allowContextCorrelationIdUpdate() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE, Boolean.TRUE);
+        return (Boolean) Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE.initializeIfNeededAndGet(this.configData);
     }
 
     public double[] monitoringRequestDurationRanges() {
-        return (double[]) this.configData
-                .getOrDefault(Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES, new double[]{200, 500, 1000, 2000, 5000, 10000});
+        return (double[]) Properties.METRIC_REQUEST_DURATION_HISTOGRAM_RANGES.initializeIfNeededAndGet(this.configData);
     }
 
     public Boolean exportRequestDurationMetricByType() {
-        return (Boolean) this.configData
-                .getOrDefault(Properties.METRIC_REQUEST_DURATION_EXPORT_BY_TYPE, Boolean.TRUE);
+        return (Boolean) Properties.METRIC_REQUEST_DURATION_EXPORT_BY_TYPE.initializeIfNeededAndGet(this.configData);
     }
 
     public Duration healthTimeWindowDuration() {
-        return (Duration) this.configData
-                .getOrDefault(Properties.HEALTH_TIME_WINDOW_DURATION, Duration.ofMinutes(5));
+        return Duration.ofMinutes((Long) Properties.HEALTH_TIME_WINDOW_DURATION.initializeIfNeededAndGet(this.configData));
     }
 
 }

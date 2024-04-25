@@ -73,14 +73,6 @@ public class Labels {
             this.defaultLabel = defaultLabel;
         }
 
-        void setLabel(String label) {
-            this.label = label;
-        }
-
-        String getLabel() {
-            return this.label;
-        }
-
         @Override
         public String key() {
             return this.keyValue;
@@ -89,6 +81,16 @@ public class Labels {
         @Override
         public String defaultValue() {
             return this.defaultLabel;
+        }
+
+        @Override
+        public String value() {
+            return this.label;
+        }
+
+        @Override
+        public void setValue(String value) {
+            this.label = value;
         }
 
         public static Field fromFieldType(FieldType fieldType, String suffix) {
@@ -111,10 +113,7 @@ public class Labels {
     }
 
     public String getLabel(Field field) {
-        if (field.getLabel() == null) {
-            field.setLabel(this.getLabelOrDefault(field));
-        }
-        return field.getLabel();
+        return field.initializeIfNeededAndGet(this.labelData);
     }
 
     public String getLabel(FieldType fieldType, String suffix) {
@@ -129,10 +128,6 @@ public class Labels {
         return f != null
                 ? this.getLabel(f)
                 : defaultValue;
-    }
-
-    private String getLabelOrDefault(Field field) {
-        return field.getValueOrDefault(this.labelData);
     }
 
 }
