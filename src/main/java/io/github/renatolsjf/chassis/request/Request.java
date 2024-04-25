@@ -11,6 +11,7 @@ import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,18 @@ public abstract class Request {
         }
         this.context = Context.initialize(transactionId, correlationId).withOperation(operation).withProjection(projection);
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
+
+        for(Field f: this.getClass().getDeclaredFields()) {
+            if (f.getAnnotation(Inject.class) != null) {
+                try {
+                    f.trySetAccessible();
+                    f.set(this, this.requestResource(f.getType()));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
     }
 
     protected abstract Media doProcess();

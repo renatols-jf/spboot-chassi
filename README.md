@@ -7,6 +7,7 @@
   and instance id to the metrics. Application name will only be exported if a value is found 
   in `chassis-labels.yaml`.
 - Enabled configuration changes through `chassis-config.yaml` file.  
+- Added `@Inject` annotation to inject / automatically initialize spring beans inside a `Request`
 
 ## 0.0.7
 - Fixed labels loading which were not working from inside jar
@@ -129,9 +130,12 @@ controls domain behavior.
 The domain logic is to be implemented in the method `doProcess()` - 
 it should **NEVER** be called directly, instead, `process()` should. At this point,
 you might want to access Spring-managed objects, such as services. 
-There are two ways of doing so:
+There are three ways of doing so (Note that an exception will be thrown if no beans qualify in all cases):
+- Annotate the desired field with
+  [Inject](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Inject.java).
+  `@Inject` will only work inside requests.
 - `this.requestResource(MyService.class)` in which you provide the class you are expecting. 
-  This is a syntatic sugar available only inside requests.
+  This is a syntactic sugar available only inside requests.
 - `AppRegistry.getResource(MyService.class)` in which you provide the class you are expecting.
   This can be called anywhere.
 
