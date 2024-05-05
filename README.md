@@ -2,6 +2,10 @@
 
 # Changelist
 
+## UNRELEASED
+- Added config for displaying application health as an average of the operations
+  or as the current lowest operation health.
+
 ## 0.0.8
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
   and instance id to the metrics. Application name will only be exported if a value is found 
@@ -1229,6 +1233,10 @@ default resources folder. The following configurations can be changed:
   
 - `metrics.health-window-duration-minutes`: Integer, defaults to 5. Governs the maximum age of requests
   to be used in health calculations.
+
+- `metrics.health-value-type`: String, defaults to `lowest`. The type of health calculation used to export
+  the overral application health. Either `lowest`, to use the lowest operation health as the application heatlh,
+  or `average`, to calculate the average of the health of the operations.
   
 ## Labels
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create

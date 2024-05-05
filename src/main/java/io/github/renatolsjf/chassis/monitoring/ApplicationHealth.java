@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis.monitoring;
 
 
 import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.Configuration;
 import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.MetricRegistry;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
@@ -11,6 +12,7 @@ import io.github.renatolsjf.chassis.util.RollingTimedWindowList;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 public class ApplicationHealth implements Renderable {
 
@@ -146,11 +148,20 @@ class OperationSummary implements Renderable {
     }
 
     public double getHealth() {
-        return this.childSummaries.values().stream()
+
+        DoubleStream ds = this.childSummaries.values().stream()
                 .flatMap(List::stream)
-                .mapToDouble(cs -> cs.getHealth())
-                .min()
-                .orElse(requestCount == 0 ? 100 : (((double) (successCount + clientErrorCount)) / requestCount) * 100);
+                .mapToDouble(cs -> cs.getHealth());
+
+        OptionalDouble opt;
+        if (Chassis.getInstance().getConfig().healthValueType() == Configuration.HealthValueType.LOWEST) {
+            opt = ds.min();
+        } else {
+            opt = ds.average();
+        }
+
+        return opt.orElse(requestCount == 0 ? 100 : (((double) (successCount + clientErrorCount)) / requestCount) * 100);
+
     }
 
     public void add(OperationData operationData) {
