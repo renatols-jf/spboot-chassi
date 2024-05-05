@@ -3,8 +3,6 @@ package io.github.renatolsjf.chassis;
 import io.github.renatolsjf.chassis.loader.Loadable;
 
 import java.time.Duration;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Configuration {
@@ -27,8 +25,8 @@ public class Configuration {
         HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
         HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST);
 
-        private String keyValue;
-        private Object defaultValue;
+        private final String keyValue;
+        private final Object defaultValue;
         private Object value;
 
         Properties(String keyValue, Object defaultValue) {
