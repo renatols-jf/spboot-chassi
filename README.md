@@ -1280,11 +1280,9 @@ in the future.
 - Create a configuration to log attached fields in their own fields.
 - Allow for `@OneOf` to accept values other than `String`.
 - Create further validations, such as the minimum and the maximum size.
-- Create a configuration to have some level of control in automatic logs and metrics.  
-- Display integration health on health check.  
+- Create a configuration to have some level of control in automatic logs and metrics.   
 - Remove the need to call `.log()` for messages that have no attachment.  
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
-- Create a configuration to calculate application health as an average instead of worst.
 - Allow extra tags in automatic metrics.
 - Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)
 - Create a summary type metric;
