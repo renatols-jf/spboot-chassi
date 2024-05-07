@@ -82,21 +82,21 @@ public abstract class ApiCall {
 
     public abstract ApiCall withHeader(String key, String value);
 
-    public ApiResponse get() throws OperationException {
+    public ApiResponse get() throws ApiException {
         return this.execute(ApiMethod.GET, null);
     }
 
 
 
-    public ApiResponse post() throws OperationException {
+    public ApiResponse post() throws ApiException {
         return this.post((Object) null);
     }
 
-    public ApiResponse post(Renderable body) throws OperationException {
+    public ApiResponse post(Renderable body) throws ApiException {
         return this.post(Media.ofRenderable(body).render());
     }
 
-    public ApiResponse post(Renderable... body) throws OperationException {
+    public ApiResponse post(Renderable... body) throws ApiException {
         return this.post(Media.ofCollection(body).render());
     }
 
@@ -106,15 +106,15 @@ public abstract class ApiCall {
 
 
 
-    public ApiResponse put() throws OperationException {
+    public ApiResponse put() throws ApiException {
         return this.put((Object) null);
     }
 
-    public ApiResponse put(Renderable body) throws OperationException {
+    public ApiResponse put(Renderable body) throws ApiException {
         return this.put(Media.ofRenderable(body).render());
     }
 
-    public ApiResponse put(Renderable... body) throws OperationException {
+    public ApiResponse put(Renderable... body) throws ApiException {
         return this.put(Media.ofCollection(body).render());
     }
 
@@ -124,15 +124,15 @@ public abstract class ApiCall {
 
 
 
-    public ApiResponse patch() throws OperationException {
+    public ApiResponse patch() throws ApiException {
         return this.patch((Object) null);
     }
 
-    public ApiResponse patch(Renderable body) throws OperationException {
+    public ApiResponse patch(Renderable body) throws ApiException {
         return this.patch(Media.ofRenderable(body).render());
     }
 
-    public ApiResponse patch(Renderable... body) throws OperationException {
+    public ApiResponse patch(Renderable... body) throws ApiException {
         return this.patch(Media.ofCollection(body).render());
     }
 
@@ -143,15 +143,15 @@ public abstract class ApiCall {
 
 
 
-    public ApiResponse delete() throws OperationException {
+    public ApiResponse delete() throws ApiException {
         return this.delete((Object) null);
     }
 
-    public ApiResponse delete(Renderable body) throws OperationException {
+    public ApiResponse delete(Renderable body) throws ApiException {
         return this.delete(Media.ofRenderable(body).render());
     }
 
-    public ApiResponse delete(Renderable... body) throws OperationException {
+    public ApiResponse delete(Renderable... body) throws ApiException {
         return this.delete(Media.ofCollection(body).render());
     }
 
@@ -190,23 +190,17 @@ public abstract class ApiCall {
                 statusCode, apiResponse.isSuccess(), apiResponse.isClientError(), apiResponse.isServerError(), duration);
 
         if (apiResponse.isConnectionError() && this.failOnError) {
-            throw new IOErrorOperationException("Unknown error on http call", apiResponse.getCause());
+            throw new IOApiException("Unknown error on http call", apiResponse.getCause());
         } else if (apiResponse.isRequestError()) {
 
             if (apiResponse.isUnauthorized()) {
                 Context.forRequest().createLogger()
                         .error("Unauthorized http request")
                         .log();
-                if (this.failOnError) {
-                    throw new UnauthorizedOperationException();
-                }
             } else if (apiResponse.isForbidden()) {
                 Context.forRequest().createLogger()
                         .error("Forbidden http request")
                         .log();
-                if (this.failOnError) {
-                    throw new ForbiddenOperationException();
-                }
             }
 
         }
@@ -216,9 +210,7 @@ public abstract class ApiCall {
                 .log();
 
         if (failOnError) {
-            throw apiResponse.isClientError()
-                    ? new ClientErrorOperationException(apiResponse.getHttpStatusAsInt())
-                    : new ServerErrorOperationException(apiResponse.getHttpStatusAsInt());
+            throw RequestErrorApiException.create(apiResponse);
         }
 
         return apiResponse;
