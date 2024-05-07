@@ -181,7 +181,7 @@ public abstract class ApiCall {
                 .attach(LOGGING_FIELD_HTTP_STATUS, statusCode)
                 .attach(LOGGING_FIELD_REQUEST_HEADERS, this.headers)
                 .attach(LOGGING_FIELD_REQUEST_BODY, this.body)
-                .attach(LOGGING_FIELD_RESPONSE_HEADERS, apiResponse.getResponseHeaders())
+                .attach(LOGGING_FIELD_RESPONSE_HEADERS, apiResponse.getHeaders())
                 .attach(LOGGING_FIELD_RESPONSE_BODY, apiResponse.getRawBody())
                 .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
                 .log();

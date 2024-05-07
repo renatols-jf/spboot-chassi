@@ -62,9 +62,9 @@ public class RestTemplateApiCall extends ApiCall {
 
         try {
             re = timedOperation.execute(() -> r.exchange(this.uri, httpMethod, he, String.class));
-            apiResponse = new ApiResponse(re.getStatusCode().value(), re.getBody());
+            apiResponse = new ApiResponse(re.getStatusCode().value(), re.getBody(), re.getHeaders().toSingleValueMap());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString());
+            apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseHeaders().toSingleValueMap());
         } catch (Exception e) {
             apiResponse = new ApiResponse(e);
         }

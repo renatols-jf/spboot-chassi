@@ -1,11 +1,18 @@
 package io.github.renatolsjf.chassis.integration.dsl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.renatolsjf.chassis.integration.ResponseParsingException;
+import io.vavr.control.Try;
+
 import java.util.Map;
 
 public class ApiResponse {
 
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
     private int statusCode = 0;
     private String body;
+    private Map<String, String> headers;
 
     private Throwable cause;
 
@@ -13,9 +20,10 @@ public class ApiResponse {
         this.cause = cause;
     }
 
-    public ApiResponse(int statusCode, String body) {
+    public ApiResponse(int statusCode, String body, Map<String, String> headers) {
         this.statusCode = statusCode;
         this.body = body;
+        this.headers = headers;
     }
 
     public boolean isRequestError() {
@@ -62,8 +70,8 @@ public class ApiResponse {
         return 0;
     }
 
-    public Map<String, Object> getResponseHeaders() {
-        return null;
+    public Map<String, String> getHeaders() {
+        return this.headers;
     }
 
     public Throwable getCause() {
@@ -71,7 +79,9 @@ public class ApiResponse {
     }
 
     public <T> T getBody(Class<T> type) {
-        return null;
+        return Try.of(() -> objectMapper.readValue(this.body, type))
+                .getOrElseThrow(t -> new ResponseParsingException("Error while parsing response : " +
+                        t.getMessage(), t));
     }
 
 
