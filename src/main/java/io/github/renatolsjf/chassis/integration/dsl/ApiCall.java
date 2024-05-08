@@ -50,7 +50,7 @@ public abstract class ApiCall {
     private String endpoint;
     private Map<String, String> queryParams = new HashMap<>();
     private Map<String, String> urlReplacements = new HashMap<>();
-    private ApiMethod apiMethod;
+    private ApiMethod method;
 
 
     public ApiCall withOperation(String operation) {
@@ -99,7 +99,7 @@ public abstract class ApiCall {
     }
 
     public ApiCall withApiMethod(ApiMethod apiMethod) {
-        this.apiMethod = apiMethod;
+        this.method = apiMethod;
         return this;
     }
 
@@ -211,10 +211,10 @@ public abstract class ApiCall {
 
 
     public <T> ApiResponse execute(T body) throws ApiException {
-        if (this.apiMethod == null) {
+        if (this.method == null) {
             throw new NullPointerException("Api method not set");
         }
-        return this.execute(this.apiMethod, body);
+        return this.execute(this.method, body);
     }
 
     public <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {

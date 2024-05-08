@@ -13,8 +13,8 @@ public class ApiFactory {
         return new RestTemplateApiCall();
     }
 
-    public static void initializeApis() {
-
+    private static void initializeApis() {
+        //TODO load from yaml
     }
 
 
