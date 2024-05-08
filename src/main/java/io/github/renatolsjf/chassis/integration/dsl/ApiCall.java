@@ -259,12 +259,14 @@ public abstract class ApiCall {
                     .log();
         }
 
-        Context.forRequest().createLogger()
-                .error("Unknown error in http call: statusCode -> {}", statusCode)
-                .log();
+        if (!apiResponse.isSuccess()) {
+            Context.forRequest().createLogger()
+                    .error("Unknown error in http call: statusCode -> {}", statusCode)
+                    .log();
 
-        if (failOnError) {
-            throw RequestErrorApiException.create(apiResponse);
+            if (failOnError) {
+                throw RequestErrorApiException.create(apiResponse);
+            }
         }
 
         return apiResponse;
