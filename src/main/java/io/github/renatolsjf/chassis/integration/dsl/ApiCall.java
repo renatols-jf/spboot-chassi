@@ -48,8 +48,8 @@ public abstract class ApiCall {
     protected boolean failOnError = true;
 
     private String endpoint;
-    private Map<String, String> queryParams = new HashMap<>();
-    private Map<String, String> urlReplacements = new HashMap<>();
+    private final Map<String, String> queryParams = new HashMap<>();
+    private final Map<String, String> urlReplacements = new HashMap<>();
     private ApiMethod method;
 
 
@@ -111,7 +111,7 @@ public abstract class ApiCall {
 
         String url = this.endpoint;
         String queryString;
-        if (this.endpoint.indexOf("?") != -1) {
+        if (this.endpoint.contains("?")) {
             queryString = "&";
         } else {
             queryString = "?";
@@ -122,7 +122,7 @@ public abstract class ApiCall {
         url += queryString.substring(0, queryString.length() - 1);
 
         for (Map.Entry<String, String> entry : this.urlReplacements.entrySet()) {
-            url = url.replaceAll("\\{" + entry.getKey() + "\\}", entry.getValue());
+            url = url.replaceAll("{" + entry.getKey() + "}", entry.getValue());
         }
 
         return url;

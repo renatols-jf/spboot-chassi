@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class RestTemplateApiCall extends ApiCall {
 
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     @Override
     public ApiCall withHeader(String key, String value) {
@@ -35,7 +35,7 @@ public class RestTemplateApiCall extends ApiCall {
         HttpHeaders h = new HttpHeaders();
         this.headers.keySet().forEach(k -> h.set(k, this.headers.get(k)));
 
-        HttpEntity he = new HttpEntity(this.body, h);
+        HttpEntity<T> he = new HttpEntity(this.body, h);
         RestTemplate r = new RestTemplateBuilder()
                 .requestFactory(() -> new SimpleClientHttpRequestFactory(){
                     @Override
@@ -66,7 +66,8 @@ public class RestTemplateApiCall extends ApiCall {
             re = timedOperation.execute(() -> r.exchange(this.getEndpoint(), httpMethod, he, String.class));
             apiResponse = new ApiResponse(re.getStatusCode().value(), re.getBody(), re.getHeaders().toSingleValueMap());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
-            apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseHeaders().toSingleValueMap());
+            apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString(),
+                    e.getResponseHeaders() != null ? e.getResponseHeaders().toSingleValueMap() : null);
         } catch (Exception e) {
             apiResponse = new ApiResponse(e);
         }
