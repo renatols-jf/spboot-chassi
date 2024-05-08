@@ -21,14 +21,6 @@ import java.util.Map;
 
 public class RestTemplateApiCall extends ApiCall {
 
-    private final Map<String, String> headers = new HashMap<>();
-
-    @Override
-    public ApiCall withHeader(String key, String value) {
-        this.headers.put(key, value);
-        return this;
-    }
-
     @Override
     protected <T> ApiResponse doExecute(ApiMethod method, T body) throws OperationException {
 

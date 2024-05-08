@@ -130,7 +130,10 @@ public abstract class ApiCall {
         return url;
     }
 
-    public abstract ApiCall withHeader(String key, String value);
+    public ApiCall withHeader(String key, String value) {
+        this.headers.put(key, value);
+        return this;
+    }
 
     public ApiResponse get() throws ApiException {
         return this.execute(ApiMethod.GET, null);
