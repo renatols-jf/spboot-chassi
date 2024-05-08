@@ -1,6 +1,8 @@
-package io.github.renatolsjf.chassis.integration.dsl;
+package io.github.renatolsjf.chassis.integration.dsl.resttemplate;
 
 import io.github.renatolsjf.chassis.integration.OperationException;
+import io.github.renatolsjf.chassis.integration.dsl.ApiCall;
+import io.github.renatolsjf.chassis.integration.dsl.ApiResponse;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -61,7 +63,7 @@ public class RestTemplateApiCall extends ApiCall {
         };
 
         try {
-            re = timedOperation.execute(() -> r.exchange(this.uri, httpMethod, he, String.class));
+            re = timedOperation.execute(() -> r.exchange(this.getEndpoint(), httpMethod, he, String.class));
             apiResponse = new ApiResponse(re.getStatusCode().value(), re.getBody(), re.getHeaders().toSingleValueMap());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString(), e.getResponseHeaders().toSingleValueMap());

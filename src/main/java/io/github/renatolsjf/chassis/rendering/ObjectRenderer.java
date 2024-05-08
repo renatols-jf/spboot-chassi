@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class ObjectRenderer {
 
-    public static Media properties(Media media, Object obj) {
+    public static Media renderProperties(Media media, Object obj) {
         Class clazz = obj.getClass();
         while (clazz != null && clazz != Object.class) {
             Arrays.stream(clazz.getDeclaredFields())

@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis.loader;
 
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.env.EnvScalarConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,8 @@ public class Loader {
     }
 
     private Loader loadConfig() {
-        Yaml yaml = new Yaml();
+        Yaml yaml = new Yaml(new EnvScalarConstructor());
+        yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$");
         for (String ext: SUPPORTED_EXTENSIONS) {
             try {
                 ClassPathResource c = new ClassPathResource(CONFIG_FILE + ext);

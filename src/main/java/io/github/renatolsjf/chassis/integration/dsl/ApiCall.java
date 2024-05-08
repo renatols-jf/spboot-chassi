@@ -2,13 +2,12 @@ package io.github.renatolsjf.chassis.integration.dsl;
 
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
-import io.github.renatolsjf.chassis.integration.*;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
 
-import java.net.URI;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class ApiCall {
@@ -41,13 +40,17 @@ public abstract class ApiCall {
 
     protected Map<String, String> headers;
     protected Renderable body;
-    protected URI uri;
 
     protected boolean followRedirect = true;
     protected Duration connectTimeOut = Duration.ofSeconds(10);
     protected Duration readTimeOut = Duration.ofSeconds(40);
 
     protected boolean failOnError = true;
+
+    private String endpoint;
+    private Map<String, String> queryParams = new HashMap<>();
+    private Map<String, String> urlReplacements = new HashMap<>();
+    private ApiMethod apiMethod;
 
 
     public ApiCall withOperation(String operation) {
@@ -78,6 +81,51 @@ public abstract class ApiCall {
     public ApiCall withReadTimeOut(Duration readTimeOut) {
         this.readTimeOut = readTimeOut;
         return this;
+    }
+
+    public ApiCall withEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+        return this;
+    }
+
+    public ApiCall withQueryParam(String key, String value) {
+        this.queryParams.put(key, value);
+        return this;
+    }
+
+    public ApiCall withUrlReplacement(String key, String value) {
+        this.urlReplacements.put(key, value);
+        return this;
+    }
+
+    public ApiCall withApiMethod(ApiMethod apiMethod) {
+        this.apiMethod = apiMethod;
+        return this;
+    }
+
+    protected String getEndpoint() {
+
+        if (this.endpoint == null) {
+            throw new NullPointerException("Endpoint not set");
+        }
+
+        String url = this.endpoint;
+        String queryString;
+        if (this.endpoint.indexOf("?") != -1) {
+            queryString = "&";
+        } else {
+            queryString = "?";
+        }
+
+
+        queryString += queryParams.entrySet().stream().map(e -> e.getKey() + e.getValue() + "&");
+        url += queryString.substring(0, queryString.length() - 1);
+
+        for (Map.Entry<String, String> entry : this.urlReplacements.entrySet()) {
+            url = url.replaceAll("\\{" + entry.getKey() + "\\}", entry.getValue());
+        }
+
+        return url;
     }
 
     public abstract ApiCall withHeader(String key, String value);
@@ -155,11 +203,21 @@ public abstract class ApiCall {
         return this.delete(Media.ofCollection(body).render());
     }
 
-    protected <T> ApiResponse delete(T body) {
+    protected <T> ApiResponse delete(T body) throws ApiException {
         return this.execute(ApiMethod.DELETE, body);
     }
 
-    protected <T> ApiResponse execute(ApiMethod method, T body) {
+
+
+
+    public <T> ApiResponse execute(T body) throws ApiException {
+        if (this.apiMethod == null) {
+            throw new NullPointerException("Api method not set");
+        }
+        return this.execute(this.apiMethod, body);
+    }
+
+    public <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
         TimedOperation<ApiResponse> timedOperation =
                 TimedOperation.http();
@@ -169,12 +227,12 @@ public abstract class ApiCall {
         String statusCode = apiResponse.getHttpStatus();
 
         Context.forRequest().createLogger()
-                .info("API CALL: " + method.toString() + " " + this.uri +
+                .info("API CALL: " + method.toString() + " " + this.getEndpoint() +
                         " " + statusCode + " " + duration)
                 .attach(LOGGING_FIELD_PROVIDER, this.provider)
                 .attach(LOGGING_FIELD_SERVICE, this.service)
                 .attach(LOGGING_FIELD_OPERATION, this.operation)
-                .attach(LOGGING_FIELD_ENDPOINT, this.uri)
+                .attach(LOGGING_FIELD_ENDPOINT, this.getEndpoint())
                 .attach(LOGGING_FIELD_METHOD, method.toString())
                 .attach(LOGGING_FIELD_CONNECTION_ERROR, apiResponse.isConnectionError())
                 .attach(LOGGING_FIELD_REQUEST_ERROR, apiResponse.isRequestError())
@@ -191,18 +249,14 @@ public abstract class ApiCall {
 
         if (apiResponse.isConnectionError() && this.failOnError) {
             throw new IOApiException("Unknown error on http call", apiResponse.getCause());
-        } else if (apiResponse.isRequestError()) {
-
-            if (apiResponse.isUnauthorized()) {
-                Context.forRequest().createLogger()
-                        .error("Unauthorized http request")
-                        .log();
-            } else if (apiResponse.isForbidden()) {
-                Context.forRequest().createLogger()
-                        .error("Forbidden http request")
-                        .log();
-            }
-
+        } else if (apiResponse.isUnauthorized()) {
+            Context.forRequest().createLogger()
+                    .error("Unauthorized http request")
+                    .log();
+        } else if (apiResponse.isForbidden()) {
+            Context.forRequest().createLogger()
+                    .error("Forbidden http request")
+                    .log();
         }
 
         Context.forRequest().createLogger()
