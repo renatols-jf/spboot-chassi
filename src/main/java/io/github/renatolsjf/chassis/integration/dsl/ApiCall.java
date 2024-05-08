@@ -9,6 +9,7 @@ import io.github.renatolsjf.chassis.rendering.Renderable;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class ApiCall {
 
@@ -118,7 +119,9 @@ public abstract class ApiCall {
         }
 
 
-        queryString += queryParams.entrySet().stream().map(e -> e.getKey() + e.getValue() + "&");
+        queryString += queryParams.entrySet().stream()
+                .map(e -> e.getKey() + e.getValue())
+                .collect(Collectors.joining("&"));
         url += queryString.substring(0, queryString.length() - 1);
 
         for (Map.Entry<String, String> entry : this.urlReplacements.entrySet()) {
