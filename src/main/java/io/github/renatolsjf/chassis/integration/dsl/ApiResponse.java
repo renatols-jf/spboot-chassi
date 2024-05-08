@@ -63,11 +63,13 @@ public class ApiResponse {
     }
 
     public String getHttpStatus() {
-        return "";
+        return this.isConnectionError()
+                ? "CONNECTION_ERROR"
+                : String.valueOf(this.statusCode);
     }
 
     public int getHttpStatusAsInt() {
-        return 0;
+        return this.statusCode;
     }
 
     public Map<String, String> getHeaders() {
