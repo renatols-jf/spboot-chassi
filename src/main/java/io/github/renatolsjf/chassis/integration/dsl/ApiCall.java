@@ -118,9 +118,8 @@ public abstract class ApiCall {
             queryString = "?";
         }
 
-
         queryString += queryParams.entrySet().stream()
-                .map(e -> e.getKey() + e.getValue())
+                .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("&"));
         url += queryString.substring(0, queryString.length() - 1);
 
