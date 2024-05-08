@@ -39,7 +39,7 @@ public abstract class ApiCall {
     protected String service;
     protected String provider;
 
-    protected Map<String, String> headers;
+    protected Map<String, String> headers = new HashMap<>();
     protected Renderable body;
 
     protected boolean followRedirect = true;
