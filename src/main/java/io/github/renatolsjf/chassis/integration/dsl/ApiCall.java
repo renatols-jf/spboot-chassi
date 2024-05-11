@@ -7,6 +7,7 @@ import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
 
 import java.time.Duration;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -84,6 +85,11 @@ public abstract class ApiCall {
         return this;
     }
 
+    public ApiCall withFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+        return this;
+    }
+
     public ApiCall withEndpoint(String endpoint) {
         this.endpoint = endpoint;
         return this;
@@ -135,12 +141,24 @@ public abstract class ApiCall {
         return this;
     }
 
+    public ApiCall withBasicAuth(String username, String password) {
+        String authHeader = username + ":" + password;
+        this.headers.put("Authorization", "Basic " + new String(Base64.getEncoder().encode(authHeader.getBytes())));
+        return this;
+    }
+
+    public ApiCall withBearerToken(String token) {
+        this.headers.put("Authorization", "Bearer " + token);
+        return this;
+    }
+
+
+    //---------- GET
     public ApiResponse get() throws ApiException {
         return this.execute(ApiMethod.GET, null);
     }
 
-
-
+    //---------- POST
     public ApiResponse post() throws ApiException {
         return this.post((Object) null);
     }
@@ -157,8 +175,7 @@ public abstract class ApiCall {
         return this.execute(ApiMethod.POST, body);
     }
 
-
-
+    //---------- PUT
     public ApiResponse put() throws ApiException {
         return this.put((Object) null);
     }
@@ -175,8 +192,7 @@ public abstract class ApiCall {
         return this.execute(ApiMethod.PUT, body);
     }
 
-
-
+    //---------- PATCH
     public ApiResponse patch() throws ApiException {
         return this.patch((Object) null);
     }
@@ -193,9 +209,7 @@ public abstract class ApiCall {
         return this.execute(ApiMethod.PATCH, body);
     }
 
-
-
-
+    //---------- DELETE
     public ApiResponse delete() throws ApiException {
         return this.delete((Object) null);
     }
@@ -211,8 +225,6 @@ public abstract class ApiCall {
     protected <T> ApiResponse delete(T body) throws ApiException {
         return this.execute(ApiMethod.DELETE, body);
     }
-
-
 
 
     public <T> ApiResponse execute(T body) throws ApiException {
