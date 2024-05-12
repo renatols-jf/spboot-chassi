@@ -9,12 +9,13 @@ import java.util.stream.Collectors;
 
 public abstract class MemberExtractor<T extends Member, I extends MemberExtractor> {
 
+    protected Object object;
     protected List<T> members;
-
     protected String nameFilter;
     protected List<ExtractorFilter<T>> extractorFilters = new ArrayList<>();
 
-    public MemberExtractor(List<T> members) {
+    public MemberExtractor(Object object, List<T> members) {
+        this.object = object;
         this.members = members;
         this.extractorFilters.add((t) -> this.nameFilter == null || t.getName().equals(CaseString.getValue(CaseString.CaseType.CAMEL, this.nameFilter)));
     }
@@ -39,7 +40,22 @@ public abstract class MemberExtractor<T extends Member, I extends MemberExtracto
         }
     }
 
-    public abstract ExtractedMember<T>  mostAdequate(Object... parameters) throws NoAdequateMemberException;
+    public ExtractedMember<T>  mostAdequate(Object... parameters) throws NoAdequateMemberException {
+
+        List<ExtractedMember<T>> extractedMembers = this.get();
+        if (extractedMembers.isEmpty()) {
+            throw new NoAdequateMemberException();
+        }
+
+        return extractedMembers.stream()
+                .map(em -> em.withParams(parameters))
+                .filter(ExtractedMember::hasAffinity)
+                .sorted()
+                .findFirst()
+                .orElseThrow(NoAdequateMemberException::new);
+
+    }
+
     protected abstract ExtractedMember<T> createExtractedMember(T member);
 
 }

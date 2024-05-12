@@ -33,4 +33,19 @@ public class ConversionFactory {
 
     }
 
+    public static boolean isConverterAvailable(Class<?> before, Class<?> after) {
+
+        String converterClassName = "io.github.renatolsjf.chassis.util.conversion."
+                + CaseString.getValue(CaseString.CaseType.PASCAL, ClassName.parse(before).getParsedName()
+                + "To" + ClassName.parse(after).getParsedName()) + "Converter";
+
+        try {
+            Class.forName(converterClassName);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+
+    }
+
 }

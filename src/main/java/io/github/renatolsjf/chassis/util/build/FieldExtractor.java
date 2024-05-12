@@ -5,8 +5,13 @@ import java.util.List;
 
 public class FieldExtractor extends MemberExtractor<Field, FieldExtractor> {
 
-    public FieldExtractor(List<Field> members) {
-        super(members);
+
+    public FieldExtractor(Object object, List<Field> members) {
+        super(object, members);
     }
 
+    @Override
+    protected ExtractedMember<Field> createExtractedMember(Field member) {
+        return new ExtractedField(this.object, this.nameFilter, member);
+    }
 }

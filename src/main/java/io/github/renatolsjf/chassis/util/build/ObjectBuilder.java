@@ -1,9 +1,7 @@
 package io.github.renatolsjf.chassis.util.build;
 
-import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.lang.reflect.*;
-import java.util.List;
 import java.util.Map;
 
 public class ObjectBuilder {
@@ -39,23 +37,32 @@ public class ObjectBuilder {
             if (this.initializationType == InitializationType.METHOD_FIRST || this.initializationType == InitializationType.METHOD_ONLY) {
                 ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
                 if (ex != null) {
-                    ex.set(v);
-                    return;
+                    try {
+                        ex.set();
+                        return;
+                    } catch (UnableToSetMemberException e) {
+                    }
                 }
             }
 
             if (this.initializationType != InitializationType.METHOD_ONLY) {
                 ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(v);
                 if (ex != null) {
-                    ex.set(v);
-                    return;
+                    try {
+                        ex.set();
+                        return;
+                    } catch (UnableToSetMemberException e) {
+                    }
                 }
             }
 
             if (this.initializationType == InitializationType.FIELD_FIRST) {
                 ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
                 if (ex != null) {
-                    ex.set(v);
+                    try {
+                        ex.set();
+                    } catch (UnableToSetMemberException e) {
+                    }
                 }
             }
 

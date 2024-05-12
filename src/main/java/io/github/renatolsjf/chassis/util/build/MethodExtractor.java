@@ -12,8 +12,8 @@ public final class MethodExtractor extends MemberExtractor<Method, MethodExtract
     private List<String> acceptablePrefixes = new ArrayList<>();
     private List<Class<?>> acceptableParameters = new ArrayList<>();
 
-    public MethodExtractor(List<Method> members) {
-        super(members);
+    public MethodExtractor(Object object, List<Method> members) {
+        super(object, members);
         this.extractorFilters.add((m) -> {
 
             if (this.nameFilter == null || this.acceptablePrefixes.isEmpty()) {
@@ -56,22 +56,8 @@ public final class MethodExtractor extends MemberExtractor<Method, MethodExtract
     }
 
     @Override
-    public ExtractedMember<Method> mostAdequate(Object... parameters) throws NoAdequateMemberException {
-
-        List<ExtractedMember<Method>> extractedMembers = this.get();
-        int affinity = 0x00;
-        for (ExtractedMember<Method> extractedMethod : extractedMembers) {
-            int currentAffinity = 0x00;
-
-        }
-
-        throw new NoAdequateMemberException();
-
-    }
-
-    @Override
     protected ExtractedMember<Method> createExtractedMember(Method member) {
-        return null;
+        return new ExtractedMethod(this.object, this.nameFilter, member);
     }
 
 
