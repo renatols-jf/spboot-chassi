@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ApiFactory {
 
-    private static Map<String, ApiCall> apiCalls = new HashMap<>();
+    private static Map<String, Map> apiCalls = new HashMap<>();
 
     public static ApiCall createApiCall() {
         return new RestTemplateApiCall();
@@ -20,17 +20,21 @@ public class ApiFactory {
         ObjectBuilder objectBuilder = new ObjectBuilder();
         apiData.entrySet().stream()
                 .filter(e -> e.getValue() instanceof Map)
-                .forEach(e -> {
-                    try {
-                        apiCalls.put(CaseString.getValue(CaseString.CaseType.CAMEL, e.getKey()),
-                                objectBuilder.build(RestTemplateApiCall.class, (Map) e.getValue()));
-                    } catch (UnableToBuildObjectException ex) {}
-                });
+                .forEach(e -> apiCalls.put(CaseString.getValue(CaseString.CaseType.CAMEL,
+                        e.getKey()), (Map) e.getValue()));
     }
 
     public static ApiCall apiFromLabel(String label) {
         String s = CaseString.getValue(CaseString.CaseType.CAMEL, label);
-        return apiCalls.get(s);
+        Map m = apiCalls.get(s);
+        if (m != null) {
+            ObjectBuilder objectBuilder = new ObjectBuilder();
+            try {
+                return objectBuilder.build(RestTemplateApiCall.class, m);
+            } catch (UnableToBuildObjectException e) {
+                return null;
+            }
+        }
     }
 
 
