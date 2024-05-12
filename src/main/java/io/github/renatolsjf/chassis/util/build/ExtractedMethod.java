@@ -35,7 +35,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
                 && paramTypes.containsAll(Arrays.asList(params).stream().map(p -> p.getClass()).collect(Collectors.toList()))) {
             this.params = params;
             this.affinity = 0xF0 | affinity;
-        } else if (paramTypes.size() > 1 && params.length == 1 && params[0] instanceof Collection<?>) {
+        } else if (params.length == 1 && params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (paramTypes.size() == params.length) {
             if (IntStream.range(0, paramTypes.size())
