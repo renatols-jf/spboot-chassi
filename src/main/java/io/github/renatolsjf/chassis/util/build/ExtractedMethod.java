@@ -34,7 +34,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
         if (paramTypes.size() == params.length
                 && paramTypes.containsAll(Arrays.asList(params).stream().map(p -> p.getClass()).collect(Collectors.toList()))) {
             this.params = params;
-            this.affinity = 0xF0 & affinity;
+            this.affinity = 0xF0 | affinity;
         } else if (paramTypes.size() > 1 && params.length == 1 && params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (paramTypes.size() == params.length) {
@@ -43,7 +43,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
                 this.params = IntStream.range(0, paramTypes.size())
                         .mapToObj(i -> ConversionFactory.converter(params[i].getClass(), paramTypes.get(i)).convert(params[i]))
                         .collect(Collectors.toList()).toArray();
-                this.affinity = 0x90 & affinity;
+                this.affinity = 0x90 | affinity;
             }
         }
 

@@ -34,7 +34,7 @@ public class ExtractedField extends ExtractedMember<Field> {
         Class<?> paramType = this.member.getType();
         if (params.length == 1 && paramType == params[0].getClass()) {
             this.params = params;
-            this.affinity = 0xF0 & affinity;
+            this.affinity = 0xF0 | affinity;
         } else if (params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (ConversionFactory.isConverterAvailable(params[0].getClass(), paramType)) {
@@ -42,7 +42,7 @@ public class ExtractedField extends ExtractedMember<Field> {
                     .map(p -> ConversionFactory.converter(p.getClass(), paramType).convert(p))
                     .collect(Collectors.toList())
                     .toArray();
-            this.affinity = 0x90 & affinity;
+            this.affinity = 0x90 | affinity;
         }
     }
 
