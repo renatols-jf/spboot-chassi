@@ -27,7 +27,7 @@ public class RestTemplateApiCall extends ApiCall {
         HttpHeaders h = new HttpHeaders();
         this.headers.keySet().forEach(k -> h.set(k, this.headers.get(k)));
 
-        HttpEntity<T> he = new HttpEntity(this.body, h);
+        HttpEntity<T> he = new HttpEntity(body, h);
         RestTemplate r = new RestTemplateBuilder()
                 .requestFactory(() -> new SimpleClientHttpRequestFactory(){
                     @Override

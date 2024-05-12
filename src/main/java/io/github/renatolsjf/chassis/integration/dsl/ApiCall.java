@@ -41,7 +41,6 @@ public abstract class ApiCall {
     protected String provider;
 
     protected Map<String, String> headers = new HashMap<>();
-    protected Renderable body;
 
     protected boolean followRedirect = true;
     protected Duration connectTimeOut = Duration.ofSeconds(10);
@@ -226,6 +225,17 @@ public abstract class ApiCall {
         return this.execute(ApiMethod.DELETE, body);
     }
 
+    public ApiResponse execute() throws ApiException {
+        return this.execute((Object) null);
+    }
+
+    public ApiResponse execute(Renderable body) throws ApiException {
+        return this.execute(Media.ofRenderable(body).render());
+    }
+
+    public ApiResponse execute(Renderable... body) throws ApiException {
+        return this.execute(Media.ofCollection(body).render());
+    }
 
     public <T> ApiResponse execute(T body) throws ApiException {
         if (this.method == null) {
@@ -255,7 +265,7 @@ public abstract class ApiCall {
                 .attach(LOGGING_FIELD_REQUEST_ERROR, apiResponse.isRequestError())
                 .attach(LOGGING_FIELD_HTTP_STATUS, statusCode)
                 .attach(LOGGING_FIELD_REQUEST_HEADERS, this.headers)
-                .attach(LOGGING_FIELD_REQUEST_BODY, this.body)
+                .attach(LOGGING_FIELD_REQUEST_BODY, body)
                 .attach(LOGGING_FIELD_RESPONSE_HEADERS, apiResponse.getHeaders())
                 .attach(LOGGING_FIELD_RESPONSE_BODY, apiResponse.getRawBody())
                 .attach(LOGGING_FIELD_REQUEST_DURATION, duration)

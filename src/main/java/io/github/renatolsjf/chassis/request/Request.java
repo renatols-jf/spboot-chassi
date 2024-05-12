@@ -124,7 +124,7 @@ public abstract class Request {
 
             return m;
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
             this.outcome = this.resolveError(e);
 
