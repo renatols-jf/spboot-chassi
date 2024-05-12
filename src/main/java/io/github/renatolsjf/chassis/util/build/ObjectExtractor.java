@@ -36,7 +36,7 @@ public class ObjectExtractor<T> {
             Class<?> type = object.getClass();
             while (type != null && type != Object.class) {
                 this.methods.addAll(Arrays.stream(type.getDeclaredMethods())
-                        .filter(m -> Modifier.isStatic(m.getModifiers()))
+                        .filter(m -> !Modifier.isStatic(m.getModifiers()))
                         .collect(Collectors.toList()));
                 type = type.getSuperclass();
             }
@@ -49,7 +49,7 @@ public class ObjectExtractor<T> {
             Class<?> type = object.getClass();
             while (type != null && type != Object.class) {
                 this.fields.addAll(Arrays.stream(type.getDeclaredFields())
-                        .filter(f -> Modifier.isStatic(f.getModifiers()))
+                        .filter(f -> !Modifier.isStatic(f.getModifiers()))
                         .collect(Collectors.toList()));
                 type = type.getSuperclass();
             }
