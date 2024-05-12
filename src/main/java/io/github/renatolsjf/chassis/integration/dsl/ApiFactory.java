@@ -34,6 +34,8 @@ public class ApiFactory {
             } catch (UnableToBuildObjectException e) {
                 return null;
             }
+        } else {
+            return null;
         }
     }
 
