@@ -15,6 +15,11 @@ public class ObjectBuilder {
 
     private InitializationType initializationType = InitializationType.METHOD_FIRST;
 
+    public ObjectBuilder withInitializationType(InitializationType initializationType) {
+        this.initializationType = initializationType;
+        return this;
+    }
+
     public <T> T build(Class<T> type, Map<String, Object> map) throws UnableToBuildObjectException {
 
         T t;

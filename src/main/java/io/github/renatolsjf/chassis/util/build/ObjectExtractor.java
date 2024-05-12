@@ -22,12 +22,12 @@ public class ObjectExtractor<T> {
 
     public MethodExtractor methodExtractor() {
         this.ensureMethods();
-        return new MethodExtractor(this.methods);
+        return new MethodExtractor(this.object, this.methods);
     }
 
     public FieldExtractor fieldExtractor() {
         this.ensureFields();
-        return new FieldExtractor(this.fields);
+        return new FieldExtractor(this.object, this.fields);
     }
 
     private void ensureMethods() {
