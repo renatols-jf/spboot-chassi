@@ -15,15 +15,17 @@ public class Loader {
 
     private final static String LABELS_FILE = "chassis-labels";
     private final static String CONFIG_FILE = "chassis-config";
+    private final static String API_FILE = "chassis-api";
     private final static String[] SUPPORTED_EXTENSIONS = new String[]{".yaml", ".yml"};
 
     private Map<String, Object> labelsData;
     private Map<String, Object> configData;
+    private Map<String, Object> apiData;
 
     private Loader() {}
 
     public static Loader defaultLoader() {
-        return new Loader().loadConfig().loadLabels();
+        return new Loader().loadConfig().loadLabels().loadApi();
     }
 
     private Loader loadConfig() {
@@ -63,12 +65,33 @@ public class Loader {
         return this;
     }
 
+    private Loader loadApi() {
+        Yaml yaml = new Yaml(new EnvScalarConstructor());
+        yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$");
+        for (String ext: SUPPORTED_EXTENSIONS) {
+            try {
+                ClassPathResource c = new ClassPathResource(API_FILE + ext);
+                try (InputStream is = c.getInputStream()) {
+                    this.apiData = yaml.load(is);
+                    return this;
+                }
+            } catch (IOException ex) {
+                //TODO log issue
+            }
+        }
+        return this;
+    }
+
     public Map<String, Object> getConfigData() {
         return this.configData;
     }
 
     public Map<String, Object> getLabelsData() {
         return this.labelsData;
+    }
+
+    public Map<String, Object> getApiData() {
+        return this.apiData;
     }
 
 }

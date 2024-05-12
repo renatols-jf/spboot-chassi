@@ -11,7 +11,6 @@ public class StringToHealthValueTypeConverter implements Converter<String, Confi
         } catch (Exception e) {
             return null;
         }
-
     }
 
 }
