@@ -16,7 +16,12 @@ public class ExtractedField extends ExtractedMember<Field> {
 
     @Override
     protected void doSet() throws UnableToSetMemberException {
-
+        this.member.trySetAccessible();
+        try {
+            this.member.set(this.object, this.params[0]);
+        } catch (IllegalAccessException e) {
+            throw new UnableToSetMemberException(e);
+        }
     }
 
     @Override
