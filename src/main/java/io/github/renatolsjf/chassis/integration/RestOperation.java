@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.util.Map;
 
+@Deprecated
 public class RestOperation {
 
     private static final String REQUEST_DURATION_METRIC_NAME = "integration_request_time";
