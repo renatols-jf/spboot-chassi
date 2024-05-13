@@ -41,9 +41,6 @@ public class RestTemplateApiCall extends ApiCall {
                 .build();
 
         ResponseEntity<String> re;
-        TimedOperation<ResponseEntity<String>> timedOperation =
-                TimedOperation.http();
-
         ApiResponse apiResponse;
 
         HttpMethod httpMethod = switch (method) {
@@ -55,7 +52,7 @@ public class RestTemplateApiCall extends ApiCall {
         };
 
         try {
-            re = timedOperation.execute(() -> r.exchange(this.getEndpoint(), httpMethod, he, String.class));
+            re = r.exchange(this.getEndpoint(), httpMethod, he, String.class);
             apiResponse = new ApiResponse(re.getStatusCode().value(), re.getBody(), re.getHeaders().toSingleValueMap());
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             apiResponse = new ApiResponse(e.getStatusCode().value(), e.getResponseBodyAsString(),
