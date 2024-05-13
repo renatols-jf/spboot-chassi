@@ -652,7 +652,35 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getCause(): Throwable`: Returns an exception in case a connection error happened.
 - `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
 
+If `failOnError` is true, an exception will be thrown in case the request is not successful :
+- [IOApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/IOApiException.java)
+  in case of a connection issue
+- [ClientErrorApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ClientErrorApiException.java)
+  in case of a 4xx status other than 401 and 403.
+- [UnauthorizedApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/UnauthorizedApiException.java)
+  in case of a 401 status.
+- [ForbiddenApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ForbiddenApiException.java)
+  in case of a 403 status.
+- [ServerErrorApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ServerErrorApiException.java)
+  in case of a 5xx status.
 
+#### Automatic API Configuration
+It's possible to automatically configure Apis through a file called `chassis-api.yaml`, that should be placed
+under the default resources folder. The following attributes can be configured (see ApiCall above for their meaning).
+- `provider`: String.
+- `service`: String.
+- `operation`: String.
+- `follow-redirect`: Boolean.
+- `connection-timeout-seconds`: Integer.
+- `read-timeout-seconds`: Integer.
+- `fail-on-error`: Boolean.
+- `endpoint`: String.
+- `api-method`: String - GET, POST, PUT, PATCH, or DELETE.
+- `basic-auth`: List with 2 elements - user and password
+- `bearer-token`: String.
+- `header`: List with 2 elements - key and value
+- `query-param`: List with 2 elements - key and value
+- `url-replacement`: List with 2 elements - key and value
 
 ### RestOperation
 DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
