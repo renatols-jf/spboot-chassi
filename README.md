@@ -676,11 +676,73 @@ under the default resources folder. The following attributes can be configured (
 - `fail-on-error`: Boolean.
 - `endpoint`: String.
 - `api-method`: String - GET, POST, PUT, PATCH, or DELETE.
-- `basic-auth`: List with 2 elements - user and password
+- `basic-auth`: List with 2 elements - user and password.
 - `bearer-token`: String.
-- `header`: List with 2 elements - key and value
-- `query-param`: List with 2 elements - key and value
-- `url-replacement`: List with 2 elements - key and value
+- `header`: List with 2 elements - key and value. Supports multiple.
+- `query-param`: List with 2 elements - key and value. Supports multiple.
+- `url-replacement`: List with 2 elements - key and value. Supports multiple.
+
+If an attribute supports multiple initializations, to initialize it multiple times an array with
+a multiple of its total parameter count should be provided, e.g, to add 2 query parameters, a
+list with 4 elements needs to be provided.
+
+Also, the first element of the hierarchy will be the label by which that ApiCall is retrieved.
+Here is an example of two different ApiCalls initialized by code and yaml.
+
+YAML file
+```
+#label used to retrieve the operation
+google-search: 
+  operation: SEARCH
+  service: GOOGLE_SEARCH
+  provider: GOOGLE
+  follow-redirect: false
+  endpoint: https://www.google.com.br
+  method: GET
+  failOnError: false
+  basicAuth: ["user", "pass"]
+  queryParam: [test1, test2, test3, test4]
+  
+a-random-api
+  operation: RANDOM_OPERATION
+  service: RANDOM_SERVICE
+  provider: RANDOM_PROVIDER
+  endpoint: https://www.randomservice.com
+  method: POST
+  fail-on-error: true
+  bearerToken: 043e8ea2-950c-466a-a7d2-78d693e60a62
+```
+
+Code creation and execution if not configured in YAML
+```
+ApiResponse apiResponse = ApiFactory.createApiCall()
+  .withOperation("SEARCH")
+  .withService("GOOGLE_SEARCH")
+  .withProvider("GOOGLE")
+  .withFollorRedirect(false)
+  .withEndpoint("https://www.google.com.br")
+  .withFailOnError(false)
+  .withBasicAuth("user", "pass")
+  .withQueryParam("test1", "test2")
+  .withQueryParam("test3", "test4")
+  .get();
+  
+ApiResponse apiResponse = ApiFactory.createApiCall()
+  .withOperation("RANDOM_OPERATION")
+  .withService("RANDOM_SERVICE")
+  .withProvider("RANDOM_PROVIDER")
+  .withEndpoint("https://www.randomservice.com")
+  .withBearerToken("043e8ea2-950c-466a-a7d2-78d693e60a62")
+  .post(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.  
+```
+
+Code creation and execution using YAML configuration
+```
+ApiResponse apiResponse = ApiFactory.apiFromLabel("googleSearch").execute();
+ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.
+```
+
+Here is an example of the same ApiCall created and exe
 
 ### RestOperation
 DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
