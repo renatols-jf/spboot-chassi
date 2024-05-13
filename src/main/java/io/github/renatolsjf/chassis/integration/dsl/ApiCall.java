@@ -9,6 +9,7 @@ import io.github.renatolsjf.chassis.util.build.BuildIgnore;
 import io.github.renatolsjf.chassis.util.build.Buildable;
 import io.github.renatolsjf.chassis.util.build.Multi;
 
+import java.net.*;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
@@ -119,12 +120,11 @@ public abstract class ApiCall {
 
     protected String getEndpoint() {
 
-        //TODO encoding?
         if (this.endpoint == null) {
             throw new NullPointerException("Endpoint not set");
         }
 
-        String url = this.endpoint;
+        String urlString = this.endpoint;
 
         if (!this.queryParams.isEmpty()) {
             String queryString;
@@ -136,14 +136,22 @@ public abstract class ApiCall {
             queryString += queryParams.entrySet().stream()
                     .map(e -> e.getKey() + "=" + e.getValue())
                     .collect(Collectors.joining("&"));
-            url += queryString;
+            urlString += queryString;
         }
 
         for (Map.Entry<String, String> entry : this.urlReplacements.entrySet()) {
-            url = url.replaceAll("{" + entry.getKey() + "}", entry.getValue());
+            urlString = urlString.replaceAll("{" + entry.getKey() + "}", entry.getValue());
         }
 
-        return url;
+        try {
+            URL url = new URL(urlString);
+            URI uri = new URI(url.getProtocol(), url.getUserInfo(), IDN.toASCII(url.getHost()), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            return uri.toASCIIString();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new ApiException(e);
+        }
+
+
     }
 
     @Multi
