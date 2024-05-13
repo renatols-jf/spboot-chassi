@@ -21,16 +21,6 @@ import java.util.Map;
 @Deprecated
 public class RestOperation {
 
-    private static final String REQUEST_DURATION_METRIC_NAME = "integration_request_time";
-
-    private static final String REQUEST_DURATION_METRIC_TYPE_TAG = "type";
-    private static final String REQUEST_DURATION_METRIC_GROUP_TAG = "group";
-    private static final String REQUEST_DURATION_METRIC_SERVICE_TAG = "service";
-    private static final String REQUEST_DURATION_METRIC_OPERATION_TAG = "operation";
-    private static final String REQUEST_DURATION_METRIC_OUTCOME_TAG = "outcome";
-
-    private static final String REQUEST_DURATION_METRIC_TYPE_TAG_VALUE = "rest";
-
     private static final String LOGGING_FIELD_GROUP = "group";
     private static final String LOGGING_FIELD_SERVICE = "service";
     private static final String LOGGING_FIELD_OPERATION = "operation";

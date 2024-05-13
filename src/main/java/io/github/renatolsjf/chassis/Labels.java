@@ -60,7 +60,7 @@ public class Labels {
         METRICS_TAG_OUTCOME(FieldType.METRICS_TAG + ".outcome", "outcome"),
         METRICS_TAG_TIMER_TYPE(FieldType.METRICS_TAG + ".timer-type", "timer_type"),
         METRICS_TAG_SERVICE(FieldType.METRICS_TAG + ".service", "service"),
-        METRICS_TAG_GROUP(FieldType.METRICS_TAG + ".group", "group"),
+        METRICS_TAG_PROVIDER(FieldType.METRICS_TAG + ".provider", "provider"),
         METRICS_TAG_TYPE(FieldType.METRICS_TAG + ".type", "type"),
         METRICS_TAG_VALUE_HTTP_TYPE(FieldType.METRICS_TAG_VALUE + ".http-type", TimedOperation.HTTP_OPERATION);
 

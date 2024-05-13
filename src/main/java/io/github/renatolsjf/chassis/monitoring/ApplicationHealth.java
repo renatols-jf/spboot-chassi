@@ -44,15 +44,15 @@ public class ApplicationHealth implements Renderable {
                 });
     }
 
-    public void http(String group, String service, String operation, boolean success, boolean clientFault, boolean serverFault,
+    public void http(String provider, String service, String operation, boolean success, boolean clientFault, boolean serverFault,
                      String result, long duration) {
         this.updateNeeded = true;
-        OperationData od = new OperationData(new DataKey().withEmptyKey("integration").withKey("groups", group)
+        OperationData od = new OperationData(new DataKey().withEmptyKey("integration").withKey("providers", provider)
                 .withKey("services", service).withKey("operations", operation),  success, clientFault,
                 serverFault, result, Map.of(TimedOperation.HTTP_OPERATION, duration));
         operationDataList.add(od);
         this.metricRegistry.createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_INTEGRATION_HEALTH))
-                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_GROUP), group)
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_PROVIDER), provider)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_SERVICE), service)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), operation)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_TYPE),
@@ -74,7 +74,7 @@ public class ApplicationHealth implements Renderable {
             for (OperationData operationData: operationDataList) {
                 operationData.dataKey.ensureSummary(this.summaryList).add(operationData);
             }
-            this.summaryList.sort(Comparator.comparing(os -> os.group));
+            this.summaryList.sort(Comparator.comparing(os -> os.provider));
             this.updateNeeded = false;
         }
         lastUpdateRecordsCount = this.operationDataList.size();
@@ -90,7 +90,7 @@ public class ApplicationHealth implements Renderable {
             media.forkRenderable("application", os);
         } else {
             for (OperationSummary os: summaryList) {
-                media = media.forkRenderable(os.group, os);
+                media = media.forkRenderable(os.provider, os);
             }
         }
 
@@ -123,7 +123,7 @@ class OperationData {
 class OperationSummary implements Renderable {
 
     OperationSummary parent;
-    String group;
+    String provider;
     String name;
     int requestCount = 0;
     int successCount = 0;
@@ -250,11 +250,11 @@ class DataKey {
         for(Map.Entry<String, String> entry: this.keys.entrySet()) {
             if (summary == null) {
                 summary = summaryList.stream()
-                        .filter(s -> s.group.equals(entry.getKey()) && (s.name != null ? s.name.equals(entry.getValue()) : entry.getValue() == null))
+                        .filter(s -> s.provider.equals(entry.getKey()) && (s.name != null ? s.name.equals(entry.getValue()) : entry.getValue() == null))
                         .findFirst()
                         .orElseGet(() -> {
                             OperationSummary os = new OperationSummary();
-                            os.group = entry.getKey();
+                            os.provider = entry.getKey();
                             os.name = entry.getValue();
                             summaryList.add(os);
                             return os;
@@ -270,7 +270,7 @@ class DataKey {
                         .orElseGet(() -> {
 
                             OperationSummary os = new OperationSummary();
-                            os.group = entry.getKey();
+                            os.provider = entry.getKey();
                             os.name = entry.getValue();
                             os.parent = parentSummary;
 

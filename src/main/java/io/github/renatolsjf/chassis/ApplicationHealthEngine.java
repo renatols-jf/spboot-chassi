@@ -56,11 +56,11 @@ public class ApplicationHealthEngine {
 
     }
 
-    public void httpCallEnded(String group, String service, String operation, String result, boolean success,
+    public void httpCallEnded(String provider, String service, String operation, String result, boolean success,
                               boolean clientFault, boolean serverFault, Long duration) {
 
         Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_INTEGRATION_TIME))
-                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_GROUP), group)
+                .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_PROVIDER), provider)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_SERVICE), service)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), operation)
                 .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_TYPE),
@@ -71,7 +71,7 @@ public class ApplicationHealthEngine {
 
         this.ensureApplicationHealth();
 
-        this.applicationHealth.http(group, service, operation, success, clientFault, serverFault, result, duration);
+        this.applicationHealth.http(provider, service, operation, success, clientFault, serverFault, result, duration);
 
     }
 

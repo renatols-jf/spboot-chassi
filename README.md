@@ -5,6 +5,10 @@
 ## UNRELEASED
 - Added config for displaying application health as an average of the operations
   or as the current lowest operation health.
+- Enabled the usage of environment variables in the various chassis.yaml files. (DESCRIBE)
+- Replaced `group` label integration identification with `provider`. (DESCRIBE)
+- Deprecated RestOperation (DESCRIBE)
+- Created ApiCall as an alternative to RestOperation. (DESCRIBE)
 
 ## 0.0.8
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
