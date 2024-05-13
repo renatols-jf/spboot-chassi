@@ -17,7 +17,7 @@ import java.util.stream.DoubleStream;
 public class ApplicationHealth implements Renderable {
 
     List<OperationSummary> summaryList = new ArrayList<>();
-    private RollingTimedWindowList<OperationData> operationDataList;
+    private final RollingTimedWindowList<OperationData> operationDataList;
     private MetricRegistry metricRegistry;
     private volatile boolean updateNeeded = false;
     private volatile int lastUpdateRecordsCount = 0;
@@ -70,7 +70,7 @@ public class ApplicationHealth implements Renderable {
     // is so small, it's neglected for the moment.
     private void update() {
         if (this.updateNeeded || lastUpdateRecordsCount != this.operationDataList.size()) {
-            this.summaryList.forEach(os -> os.clear());
+            this.summaryList.forEach(OperationSummary::clear);
             for (OperationData operationData: operationDataList) {
                 operationData.dataKey.ensureSummary(this.summaryList).add(operationData);
             }
@@ -140,7 +140,7 @@ class OperationSummary implements Renderable {
         }
 
         if (values == null || values.isEmpty()) {
-            return 0l;
+            return 0L;
         }
 
         return values.get(Math.toIntExact(Math.round(values.size() * qtl)) - 1);
@@ -151,7 +151,7 @@ class OperationSummary implements Renderable {
 
         DoubleStream ds = this.childSummaries.values().stream()
                 .flatMap(List::stream)
-                .mapToDouble(cs -> cs.getHealth());
+                .mapToDouble(OperationSummary::getHealth);
 
         OptionalDouble opt;
         if (Chassis.getInstance().getConfig().healthValueType() == Configuration.HealthValueType.LOWEST) {
@@ -191,7 +191,7 @@ class OperationSummary implements Renderable {
         this.childSummaries.entrySet().stream()
                 .map(Map.Entry::getValue)
                 .flatMap(List::stream)
-                .forEach(os -> os.clear());
+                .forEach(OperationSummary::clear);
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class ExtractedMember<T extends Member> implements Comparable<ExtractedMember<T>> {
 
@@ -82,7 +83,7 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
     }
 
     public ExtractedMember<T> withParams(Object... params) {
-        params = Arrays.stream(params).filter(p -> p != null).toArray();
+        params = Arrays.stream(params).filter(Objects::nonNull).toArray();
         this.setParams(params);
         return this;
     }

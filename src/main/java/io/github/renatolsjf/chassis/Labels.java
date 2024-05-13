@@ -2,7 +2,6 @@ package io.github.renatolsjf.chassis;
 
 import io.github.renatolsjf.chassis.loader.Loadable;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
-import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ public class Labels {
         METRICS_TAG("metrics.tag"),
         METRICS_TAG_VALUE("metrics.tag.value");
 
-        private String description;
+        private final String description;
 
         FieldType(String description) {
             this.description = description;
@@ -64,8 +63,8 @@ public class Labels {
         METRICS_TAG_TYPE(FieldType.METRICS_TAG + ".type", "type"),
         METRICS_TAG_VALUE_HTTP_TYPE(FieldType.METRICS_TAG_VALUE + ".http-type", TimedOperation.HTTP_OPERATION);
 
-        private String keyValue;
-        private String defaultLabel;
+        private final String keyValue;
+        private final String defaultLabel;
         private String label;
 
         Field(String keyValue, String defaultLabel) {
@@ -102,7 +101,7 @@ public class Labels {
 
     }
 
-    private Map<String, Object> labelData;
+    private final Map<String, Object> labelData;
 
     Labels(Map<String, Object> labelData) {
         this.labelData = labelData;

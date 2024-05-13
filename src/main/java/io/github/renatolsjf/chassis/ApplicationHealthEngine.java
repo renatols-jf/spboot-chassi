@@ -7,7 +7,7 @@ import io.github.renatolsjf.chassis.request.RequestOutcome;
 
 public class ApplicationHealthEngine {
 
-    private ApplicationHealth applicationHealth;
+    private volatile ApplicationHealth applicationHealth;
 
 
     ApplicationHealthEngine() {}
@@ -24,7 +24,7 @@ public class ApplicationHealthEngine {
         Context context = Context.forRequest();
         if (Chassis.getInstance().getConfig().exportRequestDurationMetricByType()) {
 
-            context.getOperationTimeByType().entrySet().stream().forEach(entry ->
+            context.getOperationTimeByType().entrySet().forEach(entry ->
                     Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
                             .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
                             .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), outcome.toString().toLowerCase())
