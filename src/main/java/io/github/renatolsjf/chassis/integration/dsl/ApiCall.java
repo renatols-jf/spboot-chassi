@@ -7,6 +7,7 @@ import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
 import io.github.renatolsjf.chassis.util.build.BuildIgnore;
 import io.github.renatolsjf.chassis.util.build.Buildable;
+import io.github.renatolsjf.chassis.util.build.Multi;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -99,11 +100,13 @@ public abstract class ApiCall {
         return this;
     }
 
+    @Multi
     public ApiCall withQueryParam(String key, String value) {
         this.queryParams.put(key, value);
         return this;
     }
 
+    @Multi
     public ApiCall withUrlReplacement(String key, String value) {
         this.urlReplacements.put(key, value);
         return this;
@@ -116,6 +119,7 @@ public abstract class ApiCall {
 
     protected String getEndpoint() {
 
+        //TODO encoding?
         if (this.endpoint == null) {
             throw new NullPointerException("Endpoint not set");
         }
@@ -142,6 +146,7 @@ public abstract class ApiCall {
         return url;
     }
 
+    @Multi
     public ApiCall withHeader(String key, String value) {
         this.headers.put(key, value);
         return this;
