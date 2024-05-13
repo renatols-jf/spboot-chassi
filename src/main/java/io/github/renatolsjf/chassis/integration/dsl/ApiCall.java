@@ -282,7 +282,6 @@ public abstract class ApiCall {
                 statusCode, apiResponse.isSuccess(), apiResponse.isClientError(), apiResponse.isServerError(), duration);
 
         if (apiResponse.isConnectionError() && this.failOnError) {
-
             throw new IOApiException("Unknown error on http call", apiResponse.getCause());
         } else if (apiResponse.isUnauthorized()) {
             Context.forRequest().createLogger()

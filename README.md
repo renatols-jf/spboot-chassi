@@ -649,7 +649,7 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getHttpStatus(): String`: Returns the HTTP status or `CONNECTION_ERROR`, if `isConnectionError()` is true.
 - `getHttpStatusAsInt(): int`: Returns the HTTP status or 0, if `isConnectionError()` is true.
 - `getHeaders(): Map<String, String>`: Returns the headers present in the response.
-- `getCause(): Throwable`: Returns an exception in chase the request was not successful.
+- `getCause(): Throwable`: Returns an exception in case a connection error happened.
 - `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
 
 
