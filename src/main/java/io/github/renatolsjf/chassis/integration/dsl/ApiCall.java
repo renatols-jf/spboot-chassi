@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Buildable
+@Buildable(ignoreContaining = {"get", "post", "put", "patch", "delete", "execute"})
 public abstract class ApiCall {
 
     public enum ApiMethod {
@@ -118,17 +118,19 @@ public abstract class ApiCall {
         }
 
         String url = this.endpoint;
-        String queryString;
-        if (this.endpoint.contains("?")) {
-            queryString = "&";
-        } else {
-            queryString = "?";
-        }
 
-        queryString += queryParams.entrySet().stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(Collectors.joining("&"));
-        url += queryString.substring(0, queryString.length() - 1);
+        if (!this.queryParams.isEmpty()) {
+            String queryString;
+            if (this.endpoint.contains("?")) {
+                queryString = "&";
+            } else {
+                queryString = "?";
+            }
+            queryString += queryParams.entrySet().stream()
+                    .map(e -> e.getKey() + "=" + e.getValue())
+                    .collect(Collectors.joining("&"));
+            url += queryString;
+        }
 
         for (Map.Entry<String, String> entry : this.urlReplacements.entrySet()) {
             url = url.replaceAll("{" + entry.getKey() + "}", entry.getValue());
@@ -277,6 +279,7 @@ public abstract class ApiCall {
                 statusCode, apiResponse.isSuccess(), apiResponse.isClientError(), apiResponse.isServerError(), duration);
 
         if (apiResponse.isConnectionError() && this.failOnError) {
+
             throw new IOApiException("Unknown error on http call", apiResponse.getCause());
         } else if (apiResponse.isUnauthorized()) {
             Context.forRequest().createLogger()

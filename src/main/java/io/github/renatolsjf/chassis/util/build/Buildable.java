@@ -6,4 +6,5 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface Buildable {
+    String[] ignoreContaining() default {};
 }
