@@ -14,7 +14,6 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
             short.class, Short.class, double.class, Double.class);
 
     protected Object object;
-    private String memberName;
     protected T member;
     protected Object[] params;
     protected int affinity = 0x00;
@@ -38,6 +37,15 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
             this.affinity = 0x00;
         }
 
+    }
+
+    public boolean setAndIgnore() {
+        try {
+            this.set();
+            return true;
+        } catch (UnableToSetMemberException ex) {
+            return false;
+        }
     }
 
     public void set() throws UnableToSetMemberException {

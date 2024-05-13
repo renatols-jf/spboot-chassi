@@ -5,8 +5,6 @@ import io.github.renatolsjf.chassis.util.conversion.ConversionFactory;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ExtractedField extends ExtractedMember<Field> {
 
@@ -40,9 +38,8 @@ public class ExtractedField extends ExtractedMember<Field> {
         } else if (params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (ConversionFactory.isConverterAvailable(params[0].getClass(), paramType)) {
-            this.params = Arrays.asList(params).stream()
+            this.params = Arrays.stream(params)
                     .map(p -> ConversionFactory.converter(p.getClass(), paramType).convert(p))
-                    .collect(Collectors.toList())
                     .toArray();
             this.affinity = 0x90 | affinity;
         }

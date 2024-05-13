@@ -30,10 +30,10 @@ public class ExtractedMethod extends ExtractedMember<Method> {
     @Override
     protected void setParams(Object... params) {
 
-        List<Class<?>> paramTypes = Arrays.asList(this.member.getParameterTypes()).stream()
-                .map(c -> wrapperTypes.containsKey(c) ? wrapperTypes.get(c) : c).collect(Collectors.toList());
+        List<Class<?>> paramTypes = Arrays.stream(this.member.getParameterTypes())
+                .map(c -> wrapperTypes.getOrDefault(c, c)).collect(Collectors.toList());
         if (paramTypes.size() == params.length
-                && paramTypes.containsAll(Arrays.asList(params).stream().map(p -> p.getClass()).collect(Collectors.toList()))) {
+                && paramTypes.containsAll(Arrays.stream(params).map(Object::getClass).collect(Collectors.toList()))) {
             this.params = params;
             this.affinity = 0xF0 | affinity;
         } else if (params.length == 1 && params[0] instanceof Collection<?>) {
@@ -43,7 +43,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
                     .allMatch(i -> ConversionFactory.isConverterAvailable(params[i].getClass(), paramTypes.get(i)))) {
                 this.params = IntStream.range(0, paramTypes.size())
                         .mapToObj(i -> ConversionFactory.converter(params[i].getClass(), paramTypes.get(i)).convert(params[i]))
-                        .collect(Collectors.toList()).toArray();
+                        .toArray();
                 this.affinity = 0x90 | affinity;
             }
         }
