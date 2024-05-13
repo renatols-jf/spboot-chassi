@@ -3,10 +3,15 @@ package io.github.renatolsjf.chassis.util.build;
 import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.lang.reflect.Member;
+import java.util.Map;
 
 public abstract class ExtractedMember<T extends Member> implements Comparable<ExtractedMember<T>> {
 
     private static final int AFFINITY_THRESHOLD = 0x11;
+
+    protected static final Map<Class<?>, Class<?>> wrapperTypes = Map.of(boolean.class, Boolean.class,
+            byte.class, Byte.class, char.class, Character.class, float.class, Float.class, int.class, Integer.class, long.class, Long.class,
+            short.class, Short.class, double.class, Double.class);
 
     protected Object object;
     private String memberName;

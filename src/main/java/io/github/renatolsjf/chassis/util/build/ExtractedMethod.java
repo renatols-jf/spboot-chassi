@@ -30,7 +30,8 @@ public class ExtractedMethod extends ExtractedMember<Method> {
     @Override
     protected void setParams(Object... params) {
 
-        List<Class<?>> paramTypes = Arrays.asList(this.member.getParameterTypes());
+        List<Class<?>> paramTypes = Arrays.asList(this.member.getParameterTypes()).stream()
+                .map(c -> wrapperTypes.containsKey(c) ? wrapperTypes.get(c) : c).collect(Collectors.toList());
         if (paramTypes.size() == params.length
                 && paramTypes.containsAll(Arrays.asList(params).stream().map(p -> p.getClass()).collect(Collectors.toList()))) {
             this.params = params;

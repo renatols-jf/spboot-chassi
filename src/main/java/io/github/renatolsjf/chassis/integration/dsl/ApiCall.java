@@ -5,6 +5,7 @@ import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
+import io.github.renatolsjf.chassis.util.build.Buildable;
 
 import java.time.Duration;
 import java.util.Base64;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Buildable
 public abstract class ApiCall {
 
     public enum ApiMethod {

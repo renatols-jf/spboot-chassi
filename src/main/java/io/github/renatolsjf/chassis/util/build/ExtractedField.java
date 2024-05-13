@@ -31,7 +31,9 @@ public class ExtractedField extends ExtractedMember<Field> {
             return;
         }
 
-        Class<?> paramType = this.member.getType();
+        Class<?> paramType = wrapperTypes.containsKey(this.member.getType())
+                ? wrapperTypes.get(this.member.getType())
+                :this.member.getType();
         if (params.length == 1 && paramType == params[0].getClass()) {
             this.params = params;
             this.affinity = 0xF0 | affinity;

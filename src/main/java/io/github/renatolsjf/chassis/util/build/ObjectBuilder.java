@@ -22,6 +22,10 @@ public class ObjectBuilder {
 
     public <T> T build(Class<T> type, Map<String, Object> map) throws UnableToBuildObjectException {
 
+        if (!type.isAnnotationPresent(Buildable.class)) {
+            throw new UnableToBuildObjectException("Type " + type + " is not annotated with @Buildable");
+        }
+
         T t;
         try {
             Constructor<T> c = type.getConstructor();
