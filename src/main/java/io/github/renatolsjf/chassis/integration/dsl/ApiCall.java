@@ -5,6 +5,7 @@ import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
+import io.github.renatolsjf.chassis.util.build.BuildIgnore;
 import io.github.renatolsjf.chassis.util.build.Buildable;
 
 import java.time.Duration;
@@ -45,7 +46,9 @@ public abstract class ApiCall {
     protected Map<String, String> headers = new HashMap<>();
 
     protected boolean followRedirect = true;
+    @BuildIgnore
     protected Duration connectTimeOut = Duration.ofSeconds(10);
+    @BuildIgnore
     protected Duration readTimeOut = Duration.ofSeconds(40);
 
     protected boolean failOnError = true;
@@ -76,13 +79,13 @@ public abstract class ApiCall {
         return this;
     }
 
-    public ApiCall withConnectTimeout(Duration connectTimeOut) {
-        this.connectTimeOut = connectTimeOut;
+    public ApiCall withConnectTimeoutSeconds(long seconds) {
+        this.connectTimeOut = Duration.ofSeconds(seconds);
         return this;
     }
 
-    public ApiCall withReadTimeOut(Duration readTimeOut) {
-        this.readTimeOut = readTimeOut;
+    public ApiCall withReadTimeOutSeconds(long seconds) {
+        this.readTimeOut = Duration.ofSeconds(seconds);;
         return this;
     }
 
@@ -248,7 +251,7 @@ public abstract class ApiCall {
         return this.execute(this.method, body);
     }
 
-    public <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
+    private <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
         TimedOperation<ApiResponse> timedOperation =
                 TimedOperation.http();

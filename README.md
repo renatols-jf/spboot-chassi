@@ -5,10 +5,10 @@
 ## UNRELEASED
 - Added config for displaying application health as an average of the operations
   or as the current lowest operation health.
-- Enabled the usage of environment variables in the various chassis.yaml files. (DESCRIBE)
-- Replaced `group` label integration identification with `provider`. (DESCRIBE)
-- Deprecated RestOperation (DESCRIBE)
-- Created ApiCall as an alternative to RestOperation. (DESCRIBE)
+- Enabled the usage of environment variables in the various chassis.yaml files.
+- Replaced `group` label integration identification with `provider`.
+- Deprecated RestOperation
+- Created ApiCall as an alternative to RestOperation. (DESCRIBE - Initialization too)
 
 ## 0.0.8
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
@@ -566,12 +566,104 @@ Every validation type, except custom, also accepts a message parameter, which wi
 default error message in case of a validation error.
 
 ## API integrations - HTTP(s) calls
+### ApiCall
+[ApiCall](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiCall.java)
+is the preferred way to make HTTP requests. It's an attempt to create a more fluid API to configure and
+make HTTP calls. To create an ApiCall, um request an instancen from
+[ApiFactory](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiFactory.java),
+as in `ApiFactory.createApiCall()`. The following methors are available to configure the ApiCall 
+(each returns the ApiCall object to enable chaining).
+
+- `withProvider(String provider)`: It's used to identify to whom the service being called belongs.
+  It's the first of a three-layered identification. I generally use the company
+  or team responsible for the service.
+
+- `withService(String service)`: It's used to identify to whom the service being called belongs to.
+  It's the second of a three-layered identification. I generally use the actual
+  service name being called.
+
+- `withOperation(String operation)`: It's used to identify to whom the service being called belongs to.
+  It's the third of a three-layered identification. I generally use a name for the
+  operation being requested, e.g., Authorization.
+
+- `withFollowRedirect(boolean followRedirect)`: It's used to indicate whether an ApiCall should redirect
+  a request when prompted or return the result even when receiving a 3xx redirect.
+
+- `withConnectTimeoutSeconds(long seconds)`: It's used to specify how long an ApiCall will wait before
+  a connection is established. Defaults to 10.
+
+- `withReadTimeOutSeconds(long seconds)`: It's used to specify how long an ApiCall will wait for a socket
+  answer before throwing an error. Defaults to 40.
+
+- `withFailOnError(boolean failOnError)`: It's used to indicate if an error will be thrown if an HTTP error
+  code or connection issue will result in an exception thrown or not. Defaults to true.
+
+- `withEndpoint(String endpoint)`: It's used to initialize the base endpoint to be called.
+
+- `withQueryParam(String key, String value)`: It's used to add a param to the query string.
+
+- `withUrlReplacement(String key, String value)`: Sometimes, part of the URL may need to be replaced,
+  such as a URL that has some sort of identification and is provided via an environment variable.
+  In order to be replaced, that part of URL need to be between `{}`. So, the following call
+  `ApiFactory.createApiCall().withEndpoint("https://www.testsite.com/{productId}/price").withUrlReplacement("productId, "512")` 
+  would ultimately send the request to `https://www.testsite.com/512/price`.
+
+- `withApiMethod(ApiMethod apiMethod)`: The method to be executed. One of GET, POST, PUT, PATCH, or DELETE.
+
+- `withHeader(String key, String value)`: Adds the desired header to the request. There are a few syntactic
+  sugar header methods available. More will be added in future releases.
+
+- `withBasicAuth(String username, String password)`: Adds an authorization header using Basic Auth.
+
+- `withBearerToken(String token)`: Adds an authorization header using a Bearer Token.
+
+To make the request, we have a few behavior methods available. We have a method for each HTTP
+method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
+Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such
+initialization is needed will be treated bellow. Except for `ApiCall::get()`, which expects no body,
+all other methods described above have 3 different implementations:
+
+- One that expects a Renderable, which will render the single object as the body of the request.
+- One that expects multiple Renderable, which will render them as a list as the body of the request.
+- One that accepts any object. The API will make the best effort to export the object as the body. This is
+  fine for Collections, Maps, etc. For a POJO, it will export the public getters.
+
+Besides the methods described above, there is also a method called `ApiCall::execute()`, which
+has the same 3 variations. The method will use the ApiMethod configured vai `withApiMethod()`. Being able
+to initialize the ApiMethod prior to the request execution will enable us to automatically configure
+ApiCall objects as we will see bellow.
+
+Upon executing a request, an
+[ApiResponse](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiResponse.java)
+will be returned. It has the necessary data/behavior related to the request made. The following methods are available:
+
+- `isConnectionError(): boolean`: Indicates whether the operation failed due to a connection / socket issue.
+- `isRequestError(): boolean`: Indicates whether the operation completed with an HTTP status code error (4xx or 5xx)
+- `isSuccess(): boolean`: Indicates whether the operation completed with an HTTP status code of success (2xx - or 3xx, in case redirections are not allowed)
+- `isClientError(): boolean`: Indicates whether the HTTP status code is 4xx
+- `isServerError(): boolean`: Indicates whether the HTTP status code is 5xx
+- `isUnauthorized(): boolean`: Indicates whether the HTTP status code is 401
+- `isForbidden(): boolean`: Indicates whether the HTTP status code is 403
+- `getRawBody(): String`: Returns the HTTP response body as a String, if available.
+- `getDuration(): long`: Returns the duration of the operation in milliseconds.
+- `getHttpStatus(): String`: Returns the HTTP status or `CONNECTION_ERROR`, if `isConnectionError()` is true.
+- `getHttpStatusAsInt(): int`: Returns the HTTP status or 0, if `isConnectionError()` is true.
+- `getHeaders(): Map<String, String>`: Returns the headers present in the response.
+- `getCause(): Throwable`: Returns an exception in chase the request was not successful.
+- `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
+
+
+
+### RestOperation
+DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
+later release.
+
 Each HTTP request should be made using the 
 [RestOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/RestOperation.java) 
 class. To create a `RestOperation` you should call `RestOperation#create` 
 providing the following parameters:
 
-- `group`: It's used to identify to whom the service being called belongs.
+- `provider`: It's used to identify to whom the service being called belongs.
   It's the first of a three-layered identification. I generally use the company
   or team responsible for the service.
   
@@ -828,12 +920,12 @@ If the request does not have that annotation, the following metrics will be gene
   
 - If a `RestOperation` is executed, a `Histogram` named `integration_request_time`.
   It stores the time taken for each HTTP call, in milliseconds, in buckets. 
-  It uses as a `tag`: the `group` for the `RestOperation`, the `service` for the `RestOperation`
+  It uses as a `tag`: the `provider` for the `RestOperation`, the `service` for the `RestOperation`
   the `operation` for the `RestOperation`, `outcome` which is either an `Http Status Code` or
   `connection_error`, and `type`, which defaults to `http`.
   
 - A `Gauge` called `integration_health`. It stores the current health of a given integration.
-  It uses as a `tag`: the `group` for the `RestOperation`, the `service` for the `RestOperation`
+  It uses as a `tag`: the `provider` for the `RestOperation`, the `service` for the `RestOperation`
   the `operation` for the `RestOperation`, and `type`, which is always `http`.
 
 
@@ -851,17 +943,17 @@ operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer
 operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 1.0
 operation_request_time_bucket{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
 operation_request_time_max{operation="DEMO_OPERATION",outcome="success",timer_type="internal",} 10.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="200.0",} 0.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="500.0",} 0.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="1000.0",} 1.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="2000.0",} 1.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="5000.0",} 1.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="10000.0",} 1.0
-integration_request_time_bucket{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="+Inf",} 1.0
-integration_request_time_count{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 1.0
-integration_request_time_sum{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
-integration_request_time_max{group="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
-integration_health{group="GOOGLE",operation="SEARCH",service="SEARCH",} 100.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="200.0",} 0.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="500.0",} 0.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="1000.0",} 1.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="2000.0",} 1.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="5000.0",} 1.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="10000.0",} 1.0
+integration_request_time_bucket{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",le="+Inf",} 1.0
+integration_request_time_count{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 1.0
+integration_request_time_sum{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
+integration_request_time_max{provider="GOOGLE",operation="SEARCH",outcome="200",service="SEARCH",type="rest",} 760.0
+integration_health{provider="GOOGLE",operation="SEARCH",service="SEARCH",} 100.0
 ```
 
 ## Built-in health information
@@ -1009,7 +1101,7 @@ A sample result:
             "200": 1,
             "403": 1
         },
-        "groups": [
+        "providers": [
             {
                 "name": "GOOGLE",
                 "health": 100.0,
@@ -1107,7 +1199,7 @@ You can tag the `TimedOperation` however you like, using `new TimedOperation(myT
 pre-defined tags: http `TimedOperation.http()`, used for HTTP calls, and db `TimedOperation.db()`,
 used for database calls. 
 
-`TimedOperation.http()` is used internally in `RestOperation`, and
+`TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`, and
 `TimedOperation.db()` has to manually wrap a database call. It's not uncommon for database calls
 to be automatic, having only the interface for the `Repository` created. To avoid wrapping every call
 to the repository in `TimedOperation`, you can create a delegate for such cases:
@@ -1191,6 +1283,23 @@ of the request, but the timer is still ticking. We could stop the timer as soon 
 is over for this wrap-up to use a stopped timer, but this is part of the request after all. 
 Be it as it may, a future release will include a configuration to stop the timer.
 
+## A note about YAML loading and environment variables
+It's possible to load values from environment variables. To do so, the YAML value should be put inside
+${}. It's also possible to use a default value in case the environment variable is not set by using 
+a colon followed by a dash as in ${:-}.
+
+The following uses MY_ENV to initialize the day
+```
+work:
+  day: ${MY_ENV}
+```
+
+The following uses MY_ENV to initialize the or set it with the default `Monday`
+```
+work:
+  day: ${MY_ENV:-Monday}
+```
+
 ## Configuration
 Configurations allow for changes to default application behavior. To change a behavior, insert
 the desired value in a file called `chassis-config.yaml` or `chassis-config.yml` under the 
@@ -1265,7 +1374,7 @@ The following fields are supported:
 - `metrics.tag.operation`: The name of the metric tag used to identify operations.
 - `metrics.tag.outcome`: The name of the metric tag used to identify the outcome.
 - `metrics.tag.timer-type`: The name of the metric tag used to identify the timer type.
-- `metrics.tag.group`: The name of the metric tag used to identify the integration group.
+- `metrics.tag.provider`: The name of the metric tag used to identify the integration provider.
 - `metrics.tag.service`: The name of the metric tag used to identify the integration service.
 - `metrics.tag.type`: The name of the metric tag used to identify the integration type.
 - `metrics.tag.value.http-type`: The name of the metric tag value used to identify the http integrations.
@@ -1274,6 +1383,8 @@ i18n is also supported by adding an underscore plus the language code after the 
 named like `chassis-labels_en_US.yaml`, `chassis-labels_pt_BR.yaml`, and `chassis-labels_en.yaml` can be used.
 If the locale was set to `en_US`, the framework would search for files in the following order:
 `chassis-labels_en_US.yaml`, `chassis-labels_en.yaml`, and `chassis-labels.yaml`.
+
+
 
 # Next Steps
 A few future updates have been thought of. Having said that, this does not neither represent

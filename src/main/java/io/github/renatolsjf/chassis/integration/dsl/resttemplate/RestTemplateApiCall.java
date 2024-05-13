@@ -3,7 +3,6 @@ package io.github.renatolsjf.chassis.integration.dsl.resttemplate;
 import io.github.renatolsjf.chassis.integration.OperationException;
 import io.github.renatolsjf.chassis.integration.dsl.ApiCall;
 import io.github.renatolsjf.chassis.integration.dsl.ApiResponse;
-import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RestTemplateApiCall extends ApiCall {
 

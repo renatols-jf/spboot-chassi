@@ -2,17 +2,19 @@ package io.github.renatolsjf.chassis.integration.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.renatolsjf.chassis.integration.ResponseParsingException;
+import io.github.renatolsjf.chassis.monitoring.timing.TimeSensitive;
 import io.vavr.control.Try;
 
 import java.util.Map;
 
-public class ApiResponse {
+public class ApiResponse implements TimeSensitive {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private int statusCode = 0;
     private String body;
     private Map<String, String> headers;
+    private long durationInMillis;
 
     private Throwable cause;
 
@@ -59,7 +61,7 @@ public class ApiResponse {
     }
 
     public long getDuration() {
-        return 0l;
+        return this.durationInMillis;
     }
 
     public String getHttpStatus() {
@@ -86,7 +88,8 @@ public class ApiResponse {
                         t.getMessage(), t));
     }
 
-
-
-
+    @Override
+    public void setDurationInMilliseconds(long milliseconds) {
+        this.durationInMillis = milliseconds;
+    }
 }
