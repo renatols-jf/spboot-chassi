@@ -630,6 +630,9 @@ all other methods described above have 3 different implementations:
 - One that accepts any object. The API will make the best effort to export the object as the body. This is
   fine for Collections, Maps, etc. For a POJO, it will export the public getters.
 
+DISCLAIMER: Currently, very limited support is  given for any content-type other than application/json and
+application/x-www-form-urlencoded.
+
 Besides the methods described above, there is also a method called `ApiCall::execute()`, which
 has the same 3 variations. The method will use the ApiMethod configured vai `withApiMethod()`. Being able
 to initialize the ApiMethod prior to the request execution will enable us to automatically configure
