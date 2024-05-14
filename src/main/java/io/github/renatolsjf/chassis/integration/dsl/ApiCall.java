@@ -171,6 +171,11 @@ public abstract class ApiCall {
         return this;
     }
 
+    public ApiCall withContentType(String contentType) {
+        this.headers.put("Content-Type", contentType);
+        return this;
+    }
+
 
     //---------- GET
     public ApiResponse get() throws ApiException {
@@ -294,25 +299,29 @@ public abstract class ApiCall {
         Chassis.getInstance().getApplicationHealthEngine().httpCallEnded(this.provider, this.service, this.operation,
                 statusCode, apiResponse.isSuccess(), apiResponse.isClientError(), apiResponse.isServerError(), duration);
 
-        if (apiResponse.isConnectionError() && this.failOnError) {
-            throw new IOApiException("Unknown error on http call", apiResponse.getCause());
-        } else if (apiResponse.isUnauthorized()) {
-            Context.forRequest().createLogger()
-                    .error("Unauthorized http request")
-                    .log();
-        } else if (apiResponse.isForbidden()) {
-            Context.forRequest().createLogger()
-                    .error("Forbidden http request")
-                    .log();
-        }
+
 
         if (!apiResponse.isSuccess()) {
-            Context.forRequest().createLogger()
-                    .error("Unknown error in http call: statusCode -> {}", statusCode)
-                    .log();
+            if (apiResponse.isUnauthorized()) {
+                Context.forRequest().createLogger()
+                        .error("Unauthorized http request")
+                        .log();
+            } else if (apiResponse.isForbidden()) {
+                Context.forRequest().createLogger()
+                        .error("Forbidden http request")
+                        .log();
+            } else if (!apiResponse.isConnectionError()) {
+                Context.forRequest().createLogger()
+                        .error("Unknown error in http call: statusCode -> {}", statusCode)
+                        .log();
+            }
 
             if (failOnError) {
-                throw RequestErrorApiException.create(apiResponse);
+                if (apiResponse.isConnectionError()) {
+                    throw new IOApiException("Unknown error on http call", apiResponse.getCause());
+                } else {
+                    throw RequestErrorApiException.create(apiResponse);
+                }
             }
         }
 

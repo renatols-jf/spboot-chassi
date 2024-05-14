@@ -617,6 +617,8 @@ as in `ApiFactory.createApiCall()`. The following methors are available to confi
 
 - `withBearerToken(String token)`: Adds an authorization header using a Bearer Token.
 
+- `withContenType(String contentType)`: Adds the `Content-Type` header.
+
 To make the request, we have a few behavior methods available. We have a method for each HTTP
 method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
 Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such

@@ -4,17 +4,16 @@ import io.github.renatolsjf.chassis.integration.OperationException;
 import io.github.renatolsjf.chassis.integration.dsl.ApiCall;
 import io.github.renatolsjf.chassis.integration.dsl.ApiResponse;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.Map;
 
 public class RestTemplateApiCall extends ApiCall {
 
@@ -23,6 +22,13 @@ public class RestTemplateApiCall extends ApiCall {
 
         HttpHeaders h = new HttpHeaders();
         this.headers.keySet().forEach(k -> h.set(k, this.headers.get(k)));
+
+        if (this.headers.getOrDefault("Content-Type", "")
+                .equals(MediaType.APPLICATION_FORM_URLENCODED_VALUE) && body instanceof Map m) {
+            LinkedMultiValueMap mvm = new LinkedMultiValueMap<>();
+            m.forEach((k, v) -> mvm.add(k, v));
+            body = (T) mvm;
+        }
 
         HttpEntity<T> he = new HttpEntity(body, h);
         RestTemplate r = new RestTemplateBuilder()
