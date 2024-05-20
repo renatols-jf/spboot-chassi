@@ -2,13 +2,13 @@
 
 # Changelist
 
-## UNRELEASED
+## 0.0.9
 - Added config for displaying application health as an average of the operations
   or as the current lowest operation health.
 - Enabled the usage of environment variables in the various chassis.yaml files.
 - Replaced `group` label integration identification with `provider`.
 - Deprecated RestOperation
-- Created ApiCall as an alternative to RestOperation. (DESCRIBE - Initialization too)
+- Created ApiCall as an alternative to RestOperation.
 
 ## 0.0.8
 - Added labels for application name and instance id. Application name is exported to the logs and metrics,
@@ -91,13 +91,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.9</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.8'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.9'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
