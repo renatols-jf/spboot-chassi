@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis;
 
+import io.github.renatolsjf.chassis.integration.dsl.ApiFactory;
 import io.github.renatolsjf.chassis.loader.Loader;
 
 public class Chassis {
@@ -15,6 +16,7 @@ public class Chassis {
         Loader loader = Loader.defaultLoader();
         this.config = new Configuration(loader.getConfigData());
         this.labelsInstance = new Labels(loader.getLabelsData());
+        ApiFactory.initializeApis(loader.getApiData());
     }
 
     public Configuration getConfig() {

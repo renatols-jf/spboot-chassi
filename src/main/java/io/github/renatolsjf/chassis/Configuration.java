@@ -3,11 +3,14 @@ package io.github.renatolsjf.chassis;
 import io.github.renatolsjf.chassis.loader.Loadable;
 
 import java.time.Duration;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Configuration {
+
+    public enum HealthValueType {
+        LOWEST,
+        AVERAGE
+    }
 
     public enum Properties implements Loadable<Object> {
         LOGGER_USE_CALLING_CLASS("logging.use-calling-class", Boolean.TRUE),
@@ -19,10 +22,11 @@ public class Configuration {
         CONTEXT_ALLOW_CORRELATION_ID_UPDATE("context.allow-correlation-id-update", Boolean.TRUE),
         METRIC_REQUEST_DURATION_HISTOGRAM_RANGES("metrics.request.duration.histogram-range", new double[]{200, 500, 1000, 2000, 5000, 10000}),
         METRIC_REQUEST_DURATION_EXPORT_BY_TYPE("metrics.request.duration.export-by-type", Boolean.TRUE),
-        HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5);
+        HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
+        HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST);
 
-        private String keyValue;
-        private Object defaultValue;
+        private final String keyValue;
+        private final Object defaultValue;
         private Object value;
 
         Properties(String keyValue, Object defaultValue) {
@@ -92,6 +96,10 @@ public class Configuration {
 
     public Duration healthTimeWindowDuration() {
         return Duration.ofMinutes((Integer) Properties.HEALTH_TIME_WINDOW_DURATION.initializeIfNeededAndGet(this.configData, Integer.class));
+    }
+
+    public HealthValueType healthValueType() {
+        return (HealthValueType) Properties.HEALTH_VALUE_TYPE.initializeAndGet(this.configData, HealthValueType.class);
     }
 
 }

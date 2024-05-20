@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.integration;
 
-abstract class OperationException extends RuntimeException {
+public class OperationException extends RuntimeException {
 
     protected OperationException() { super(); }
     protected OperationException(String message) { super(message); }

@@ -37,8 +37,10 @@ public class TimedOperation<T> {
 
     public T execute(Callable<T> e) {
         long l = System.currentTimeMillis();
+        T t = null;
         try {
-            return e.call();
+            t = e.call();
+            return t;
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -46,6 +48,9 @@ public class TimedOperation<T> {
         } finally {
             this.executionTime = System.currentTimeMillis() - l;
             Context.forRequest().recordOperationTime(this.tag, this.executionTime);
+            if (t instanceof TimeSensitive ts) {
+                ts.setDurationInMilliseconds(this.executionTime);
+            }
         }
     }
 

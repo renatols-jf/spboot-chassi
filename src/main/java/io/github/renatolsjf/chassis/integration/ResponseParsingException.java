@@ -2,9 +2,9 @@ package io.github.renatolsjf.chassis.integration;
 
 public class ResponseParsingException extends OperationException {
 
-    protected ResponseParsingException() { super(); }
-    protected ResponseParsingException(String message) { super(message); }
-    protected ResponseParsingException(Throwable cause) { super(cause); }
-    protected ResponseParsingException(String message, Throwable cause) { super(message, cause); }
+    public ResponseParsingException() { super(); }
+    public ResponseParsingException(String message) { super(message); }
+    public ResponseParsingException(Throwable cause) { super(cause); }
+    public ResponseParsingException(String message, Throwable cause) { super(message, cause); }
 
 }

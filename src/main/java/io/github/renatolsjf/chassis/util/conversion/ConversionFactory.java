@@ -4,7 +4,6 @@ import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 
 public class ConversionFactory {
 
@@ -30,6 +29,21 @@ public class ConversionFactory {
             return (value) -> value.getClass() == after.getClass()
                     ? (T2) value
                     : null;
+        }
+
+    }
+
+    public static boolean isConverterAvailable(Class<?> before, Class<?> after) {
+
+        String converterClassName = "io.github.renatolsjf.chassis.util.conversion."
+                + CaseString.getValue(CaseString.CaseType.PASCAL, ClassName.parse(before).getParsedName()
+                + "To" + ClassName.parse(after).getParsedName()) + "Converter";
+
+        try {
+            Class.forName(converterClassName);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
 
     }

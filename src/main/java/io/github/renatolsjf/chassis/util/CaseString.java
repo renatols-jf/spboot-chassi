@@ -188,15 +188,24 @@ class CamelCaseBuffer extends CaseBuffer {
 
 }
 
-class PascalCaseBuffer extends CamelCaseBuffer {
+class PascalCaseBuffer extends CaseBuffer {
 
     PascalCaseBuffer() {
-        this.type = CaseString.CaseType.PASCAL;
+        super(CaseString.CaseType.PASCAL);
     }
 
     @Override
     void appendUpperCase(char c) {
         this.valueBuffer.append(c);
+    }
+
+    @Override
+    void appendLowerCase(char c) {
+        if (this.lastCharWasDelimiter || this.valueBuffer.isEmpty()) {
+            this.valueBuffer.append(Character.toUpperCase(c));
+        } else {
+            this.valueBuffer.append(c);
+        }
     }
 
 }
