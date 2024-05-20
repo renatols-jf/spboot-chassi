@@ -66,6 +66,7 @@ public class Context {
     private String correlationId;
     private String operation;
     private Projection projection = new Projection(Collections.emptyList());
+    private boolean tracingEnabled = false;
     private Map<String, String> requestContext = new HashMap<>();
 
     private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
@@ -107,6 +108,10 @@ public class Context {
         return this.projection;
     }
 
+    public boolean isTracingEnabled() {
+        return this.tracingEnabled;
+    }
+
     public Context withCorrelationId(String correlationId) {
         if (Chassis.getInstance().getConfig().allowContextCorrelationIdUpdate()) {
             this.correlationId = correlationId;
@@ -130,6 +135,11 @@ public class Context {
         } else {
             this.projection = new Projection(Collections.emptyList());
         }
+        return this;
+    }
+
+    public Context enableTracing() {
+        this.tracingEnabled = true;
         return this;
     }
 

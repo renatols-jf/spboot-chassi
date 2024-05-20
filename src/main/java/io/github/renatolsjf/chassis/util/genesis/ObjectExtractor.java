@@ -1,6 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
-
-import io.github.renatolsjf.chassis.util.CaseString;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

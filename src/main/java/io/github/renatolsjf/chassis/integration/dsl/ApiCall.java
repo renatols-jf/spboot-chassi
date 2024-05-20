@@ -5,9 +5,9 @@ import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
-import io.github.renatolsjf.chassis.util.build.BuildIgnore;
-import io.github.renatolsjf.chassis.util.build.Buildable;
-import io.github.renatolsjf.chassis.util.build.Multi;
+import io.github.renatolsjf.chassis.util.genesis.BuildIgnore;
+import io.github.renatolsjf.chassis.util.genesis.Buildable;
+import io.github.renatolsjf.chassis.util.genesis.Multi;
 
 import java.net.*;
 import java.time.Duration;
