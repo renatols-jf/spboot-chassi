@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.0.10
+- Fixed a bug related to API loading
+
 ## 0.0.9
 - Added config for displaying application health as an average of the operations
   or as the current lowest operation health.
@@ -91,13 +94,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.9'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.10'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
