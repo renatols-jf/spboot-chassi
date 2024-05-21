@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.0.11
+- Added `isBodyAvailable` to `ApiResponse`
+
 ## 0.0.10
 - Fixed a bug related to API loading
 
@@ -659,6 +662,7 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getHeaders(): Map<String, String>`: Returns the headers present in the response.
 - `getCause(): Throwable`: Returns an exception in case a connection error happened.
 - `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
+- `isBodyAvailable(): boolean`: Indicates wheter a Response Body is available or not.
 
 If `failOnError` is true, an exception will be thrown in case the request is not successful :
 - [IOApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/IOApiException.java)
