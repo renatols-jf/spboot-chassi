@@ -15,14 +15,29 @@ public class TracingEnhancer implements TypeEnhancer{
 
     public MethodInterceptor createInterceptor(Object delegate) {
         return (Object o, Method method, Object[] args, MethodProxy methodProxy) -> {
+
+            if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)) {
+                if (delegate != null) {
+                    return method.invoke(delegate, args);
+                } else {
+                    return methodProxy.invokeSuper(o, args);
+                }
+
+            }
+
             System.out.println("ENHANCED: " + o.getClass().getSimpleName() + " - " + method.getName());
             Tracer tracer = new Telemetry().tracer(); // TODO this needs to be in the context so the tracer is already initialized
             Span span = tracer.spanBuilder(method.getName()).startSpan(); //TODO span annotation to configure
             try (Scope scope = span.makeCurrent()) {
-                return method.invoke(delegate != null ? delegate : o, args);
+                if (delegate != null) {
+                    return method.invoke(delegate, args);
+                } else {
+                    return methodProxy.invokeSuper(o, args);
+                }
             } finally {
                 span.end();
             }
+
         };
     }
 

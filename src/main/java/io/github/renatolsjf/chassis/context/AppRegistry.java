@@ -76,8 +76,8 @@ public class AppRegistry {
                     child = createObject(field.getType(), child);
                     field.set(object, child);
                 }
-
             }
+            currentType = currentType.getSuperclass();
         }
 
         if (delegate != null) {
