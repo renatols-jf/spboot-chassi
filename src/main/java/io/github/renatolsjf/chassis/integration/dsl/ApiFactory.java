@@ -17,11 +17,16 @@ public class ApiFactory {
     }
 
     public static void initializeApis(Map<String, Object> apiData) {
+
         ObjectBuilder objectBuilder = new ObjectBuilder();
+        if (apiData == null) {
+            return;
+        }
         apiData.entrySet().stream()
                 .filter(e -> e.getValue() instanceof Map)
                 .forEach(e -> apiCalls.put(CaseString.getValue(CaseString.CaseType.CAMEL,
                         e.getKey()), (Map) e.getValue()));
+
     }
 
     public static ApiCall apiFromLabel(String label) {

@@ -21,13 +21,20 @@ public class ApplicationHealthEngine {
 
     public void operationEnded(RequestOutcome outcome) {
 
+        RequestOutcome o;
+        if (outcome == null) {
+            o = RequestOutcome.SERVER_ERROR;
+        } else {
+            o = outcome;
+        }
+
         Context context = Context.forRequest();
         if (Chassis.getInstance().getConfig().exportRequestDurationMetricByType()) {
 
             context.getOperationTimeByType().entrySet().forEach(entry ->
                     Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
                             .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
-                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), outcome.toString().toLowerCase())
+                            .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), o.toString().toLowerCase())
                             .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_TIMER_TYPE), entry.getKey())
                             .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                             .observe(entry.getValue())
@@ -38,7 +45,7 @@ public class ApplicationHealthEngine {
 
             Chassis.getInstance().getMetricRegistry().createBuilder(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_NAME_OPERATION_TIME))
                     .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OPERATION), context.getOperation())
-                    .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), outcome.toString().toLowerCase())
+                    .withTag(Chassis.getInstance().labels().getLabel(Labels.Field.METRICS_TAG_OUTCOME), o.toString().toLowerCase())
                     .buildHistogram(MetricRegistry.HistogramRanges.REQUEST_DURATION)
                     .observe(context.getElapsedMillis());
 
@@ -51,8 +58,8 @@ public class ApplicationHealthEngine {
 
         this.ensureApplicationHealth();
 
-        this.applicationHealth.operation(context.getOperation(), outcome.isSuccessful(),
-                outcome.isClientFault(), outcome.isServerFault(), context.getOperationTimeByType());
+        this.applicationHealth.operation(context.getOperation(), o.isSuccessful(),
+                o.isClientFault(), o.isServerFault(), context.getOperationTimeByType());
 
     }
 
