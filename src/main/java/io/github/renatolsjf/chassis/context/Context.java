@@ -3,6 +3,7 @@ package io.github.renatolsjf.chassis.context;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
+import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryAgent;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 
 import java.time.Duration;
@@ -19,12 +20,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * Be it as it may, by default, a context can not be created anywhere. It's necessary to annotate the calling as a ContextCreator
  * @see ContextCreator
  *
- * The currently implementation nas no support for NIO. A relatively easy solution is to implement a snapshot, which holds a context object
+ * The current implementation has no support for NIO. A relatively easy solution is to implement a snapshot, which holds a context object
  * and clears the context ThreadLocal. A restore method then would reinitialize it. A less manual solution would likely require code manipulation.
  */
 public class Context {
 
     private static ThreadLocal<Context> tlContext = new ThreadLocal<>();
+
+    public static boolean isAvailable() {
+        return tlContext.get() != null;
+    }
 
     public static Context forRequest() {
         Context c = tlContext.get();
@@ -66,8 +71,8 @@ public class Context {
     private String correlationId;
     private String operation;
     private Projection projection = new Projection(Collections.emptyList());
-    private boolean tracingEnabled = false;
     private Map<String, String> requestContext = new HashMap<>();
+    private TelemetryAgent telemetryAgent;
 
     private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
 
@@ -108,10 +113,6 @@ public class Context {
         return this.projection;
     }
 
-    public boolean isTracingEnabled() {
-        return this.tracingEnabled;
-    }
-
     public Context withCorrelationId(String correlationId) {
         if (Chassis.getInstance().getConfig().allowContextCorrelationIdUpdate()) {
             this.correlationId = correlationId;
@@ -138,9 +139,19 @@ public class Context {
         return this;
     }
 
-    public Context enableTracing() {
-        this.tracingEnabled = true;
+    public Context withTracing(String traceName) {
+        if (Chassis.getInstance().getConfig().distributedTracingEnabled()) {
+            this.telemetryAgent = TelemetryAgent.start(traceName);
+        }
         return this;
+    }
+
+    public TelemetryAgent getTelemetryAgent() {
+        return this.telemetryAgent;
+    }
+
+    public boolean isBeingTraced() {
+        return this.telemetryAgent != null;
     }
 
     public Map<String, String> getRequestContext() {

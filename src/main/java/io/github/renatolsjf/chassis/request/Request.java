@@ -10,6 +10,8 @@ import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
 import io.github.renatolsjf.chassis.validation.ValidationException;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -61,7 +63,10 @@ public abstract class Request {
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
-        this.context = Context.initialize(transactionId, correlationId).withOperation(operation).withProjection(projection);
+        this.context = Context.initialize(transactionId, correlationId)
+                .withOperation(operation)
+                .withProjection(projection)
+                .withTracing(this.getClass().getSimpleName());
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
 
         for(Field f: this.getClass().getDeclaredFields()) {
@@ -113,7 +118,18 @@ public abstract class Request {
                     .attachObject(this)
                     .log();
 
-            Media m =  doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+            Media m;
+            if (Chassis.getInstance().getConfig().distributedTracingEnabled()) {
+                Span span = this.context.getTelemetryAgent().getTracer()
+                        .spanBuilder("doProcess").startSpan();
+                try(Scope scope = span.makeCurrent()) {
+                    m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+                } finally {
+                    span.end();
+                }
+            } else {
+                m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+            }
 
             this.context.createLogger()
                     .info("Completed request: {}", this.getClass().getSimpleName())

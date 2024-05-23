@@ -1,8 +1,9 @@
 package io.github.renatolsjf.chassis.util.proxy;
 
 import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
-import io.github.renatolsjf.chassis.monitoring.tracing.Telemetry;
+import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryAgent;
 import io.github.renatolsjf.chassis.monitoring.tracing.Traceable;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -17,7 +18,9 @@ public class TracingEnhancer implements TypeEnhancer{
     public MethodInterceptor createInterceptor(Object delegate) {
         return (Object o, Method method, Object[] args, MethodProxy methodProxy) -> {
 
-            if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)) {
+            if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)
+                    || !Context.isAvailable()
+                    || !Context.forRequest().isBeingTraced()) {
                 if (delegate != null) {
                     return method.invoke(delegate, args);
                 } else {
@@ -27,7 +30,7 @@ public class TracingEnhancer implements TypeEnhancer{
             }
 
             System.out.println("ENHANCED: " + o.getClass().getSimpleName() + " - " + method.getName());
-            Tracer tracer = new Telemetry().tracer(); // TODO this needs to be in the context so the tracer is already initialized
+            Tracer tracer = Context.forRequest().getTelemetryAgent().getTracer(); // TODO this needs to be in the context so the tracer is already initialized
             Span span = tracer.spanBuilder(method.getName()).startSpan(); //TODO span annotation to configure
             try (Scope scope = span.makeCurrent()) {
                 if (delegate != null) {
@@ -45,6 +48,7 @@ public class TracingEnhancer implements TypeEnhancer{
     @Override
     public boolean isEnhanceable(Class<?> type) {
         return Chassis.getInstance().getConfig().distributedTracingEnabled()
+                && Context.isAvailable()
                 && type.isAnnotationPresent(Traceable.class)
                 && !type.isAnnotationPresent(NotTraceable.class);
     }

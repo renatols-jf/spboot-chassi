@@ -7,18 +7,34 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.ResourceAttributes;
 
-public class Telemetry {
+public class TelemetryAgent {
 
-    public Tracer tracer() {
+    private static SdkTracerProvider sdkTracerProvider;
+
+    private Tracer tracer;
+
+    static {
 
         Resource resource = Resource.getDefault().toBuilder()
                 .put(ResourceAttributes.SERVICE_NAME, "PLACEHOLDER").put(ResourceAttributes.SERVICE_VERSION, "0.0.1").build();
 
-        return SdkTracerProvider.builder()
+        sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
                 .setResource(resource)
-                .build()
-                .get("PLACEHOLDER");
+                .build();
+
+    }
+
+    private TelemetryAgent(String trace) {
+        this.tracer = sdkTracerProvider.get("trace");
+    }
+
+    public static TelemetryAgent start(String trace) {
+        return new TelemetryAgent(trace);
+    }
+
+    public Tracer getTracer() {
+        return this.tracer;
     }
 
 }
