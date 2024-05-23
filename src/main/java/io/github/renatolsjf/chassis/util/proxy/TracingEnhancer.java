@@ -18,6 +18,7 @@ public class TracingEnhancer implements TypeEnhancer{
     public MethodInterceptor createInterceptor(Object delegate) {
         return (Object o, Method method, Object[] args, MethodProxy methodProxy) -> {
 
+            io.github.renatolsjf.chassis.monitoring.tracing.Span spanAnnotation;
             if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)
                     || !Context.isAvailable()
                     || !Context.forRequest().isBeingTraced()) {
@@ -26,12 +27,14 @@ public class TracingEnhancer implements TypeEnhancer{
                 } else {
                     return methodProxy.invokeSuper(o, args);
                 }
-
+            } else {
+                spanAnnotation = method.getAnnotation(io.github.renatolsjf.chassis.monitoring.tracing.Span.class);
             }
 
             System.out.println("ENHANCED: " + o.getClass().getSimpleName() + " - " + method.getName());
             Tracer tracer = Context.forRequest().getTelemetryAgent().getTracer(); // TODO this needs to be in the context so the tracer is already initialized
-            Span span = tracer.spanBuilder(method.getName()).startSpan(); //TODO span annotation to configure
+            Span span = tracer.spanBuilder(spanAnnotation.value().isBlank()
+                    ? method.getName() : spanAnnotation.value()).startSpan(); //TODO span annotation to configure
             try (Scope scope = span.makeCurrent()) {
                 if (delegate != null) {
                     return method.invoke(delegate, args);
