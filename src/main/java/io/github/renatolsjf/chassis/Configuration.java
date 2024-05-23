@@ -23,7 +23,8 @@ public class Configuration {
         METRIC_REQUEST_DURATION_HISTOGRAM_RANGES("metrics.request.duration.histogram-range", new double[]{200, 500, 1000, 2000, 5000, 10000}),
         METRIC_REQUEST_DURATION_EXPORT_BY_TYPE("metrics.request.duration.export-by-type", Boolean.TRUE),
         HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
-        HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST);
+        HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST),
+        INSTRUMENTATION_DISTRIBUTED_TRACING_ENABLED("instrumentation.distributed-tracing-enabled", Boolean.FALSE);
 
         private final String keyValue;
         private final Object defaultValue;
@@ -100,6 +101,10 @@ public class Configuration {
 
     public HealthValueType healthValueType() {
         return (HealthValueType) Properties.HEALTH_VALUE_TYPE.initializeAndGet(this.configData, HealthValueType.class);
+    }
+
+    public Boolean distributedTracingEnabled() {
+        return (Boolean) Properties.INSTRUMENTATION_DISTRIBUTED_TRACING_ENABLED.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
 }

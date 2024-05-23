@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis.util.proxy;
 
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.monitoring.tracing.Telemetry;
 import io.github.renatolsjf.chassis.monitoring.tracing.Traceable;
@@ -43,7 +44,9 @@ public class TracingEnhancer implements TypeEnhancer{
 
     @Override
     public boolean isEnhanceable(Class<?> type) {
-        return type.isAnnotationPresent(Traceable.class) && !type.isAnnotationPresent(NotTraceable.class);
+        return Chassis.getInstance().getConfig().distributedTracingEnabled()
+                && type.isAnnotationPresent(Traceable.class)
+                && !type.isAnnotationPresent(NotTraceable.class);
     }
 
 
