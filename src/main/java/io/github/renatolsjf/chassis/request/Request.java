@@ -7,6 +7,7 @@ import io.github.renatolsjf.chassis.context.ContextCreator;
 import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
+import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
 import io.github.renatolsjf.chassis.validation.ValidationException;
@@ -60,13 +61,19 @@ public abstract class Request {
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
+
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
+
         this.context = Context.initialize(transactionId, correlationId)
                 .withOperation(operation)
-                .withProjection(projection)
-                .withTracing(this.getClass().getSimpleName());
+                .withProjection(projection);
+
+        if (!this.getClass().isAnnotationPresent(NotTraceable.class)) {
+            this.context.withTracing(this.getClass().getSimpleName());
+        }
+
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
 
         for(Field f: this.getClass().getDeclaredFields()) {
