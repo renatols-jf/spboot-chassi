@@ -3,7 +3,7 @@ package io.github.renatolsjf.chassis.context;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
-import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryAgent;
+import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 
 import java.time.Duration;
@@ -72,7 +72,7 @@ public class Context {
     private String operation;
     private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
-    private TelemetryAgent telemetryAgent;
+    private TelemetryContext telemetryContext;
 
     private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
 
@@ -141,17 +141,17 @@ public class Context {
 
     public Context withTracing(String traceName) {
         if (Chassis.getInstance().getConfig().distributedTracingEnabled()) {
-            this.telemetryAgent = TelemetryAgent.start(traceName);
+            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName);
         }
         return this;
     }
 
-    public TelemetryAgent getTelemetryAgent() {
-        return this.telemetryAgent;
+    public TelemetryContext getTelemetryContext() {
+        return this.telemetryContext;
     }
 
     public boolean isBeingTraced() {
-        return this.telemetryAgent != null;
+        return this.telemetryContext != null;
     }
 
     public Map<String, String> getRequestContext() {

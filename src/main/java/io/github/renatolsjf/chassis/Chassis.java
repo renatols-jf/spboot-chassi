@@ -6,16 +6,17 @@ import io.github.renatolsjf.chassis.loader.Loader;
 public class Chassis {
 
     private static Chassis instance = new Chassis();
-
     private Configuration config;
     private Labels labelsInstance;
     private MetricRegistry metricRegistry = new MetricRegistry();
     private ApplicationHealthEngine applicationHealthEngine = new ApplicationHealthEngine();
+    private TelemetryAgent telemetryAgent;
 
     private Chassis() {
         Loader loader = Loader.defaultLoader();
         this.config = new Configuration(loader.getConfigData());
         this.labelsInstance = new Labels(loader.getLabelsData());
+        this.telemetryAgent = new TelemetryAgent(this.labelsInstance.getLabel(Labels.Field.APPLICATION_NAME));
         ApiFactory.initializeApis(loader.getApiData());
     }
 
@@ -33,6 +34,10 @@ public class Chassis {
 
     public Labels labels() {
         return this.labelsInstance;
+    }
+
+    public TelemetryAgent getTelemetryAgent() {
+        return this.telemetryAgent;
     }
 
     public void setConfig(Configuration config) {

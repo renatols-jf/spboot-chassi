@@ -58,22 +58,36 @@ public class AppRegistry {
             object = c.newInstance();
         }
 
-        Class<?> currentType = type;
-        while (currentType != Object.class) {
-            Field[] fields = type.getDeclaredFields();
+        Map<String, Object> currentInjections = new HashMap<>();
+        Class<?> currentType;
+        if (delegate != null) {
+            currentType = delegate.getClass(); //should I call getSuperClass first?
+            while (currentType != null && currentType != Object.class) {
+                Field[] fields = currentType.getDeclaredFields();
+                for (Field field : fields) {
+                    if (field.isAnnotationPresent(Inject.class)) {
+                        field.trySetAccessible();
+                        Object child = field.get(delegate);
+                        child = createObject(field.getType(), child);
+                        field.set(delegate, child);
+                        currentInjections.put(field.getName(), child);
+                    }
+                }
+                currentType = currentType.getSuperclass();
+            }
+        }
+
+        //TODO it might not make sense to do this because an abstract class would be caught in the above loop and interfaces do not have fields.
+        currentType = type;
+        while (currentType != null && currentType != Object.class) {
+            Field[] fields = currentType.getDeclaredFields();
             for (Field field : fields) {
                 if (field.isAnnotationPresent(Inject.class)) {
-
                     field.trySetAccessible();
-
-                    Object child;
-                    if (delegate != null) {
-                        child = field.get(delegate);
-                    } else {
-                        child = null;
+                    Object child = currentInjections.get(field.getName());
+                    if (child == null) {
+                        child = createObject(field.getType(), child);
                     }
-
-                    child = createObject(field.getType(), child);
                     field.set(object, child);
                 }
             }

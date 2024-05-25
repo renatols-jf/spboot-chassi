@@ -119,9 +119,10 @@ public abstract class Request {
                     .log();
 
             Media m;
-            if (Chassis.getInstance().getConfig().distributedTracingEnabled()) {
-                Span span = this.context.getTelemetryAgent().getTracer()
-                        .spanBuilder("doProcess").startSpan();
+            if (Chassis.getInstance().getConfig().distributedTracingEnabled() &&
+                    this.context.isBeingTraced()) {
+                Span span = this.context.getTelemetryContext().getTracer()
+                        .spanBuilder(this.getClass().getSimpleName()).startSpan();
                 try(Scope scope = span.makeCurrent()) {
                     m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
                 } finally {
