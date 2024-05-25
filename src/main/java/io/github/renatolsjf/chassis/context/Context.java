@@ -139,10 +139,8 @@ public class Context {
         return this;
     }
 
-    public Context withTracing(String traceName) {
-        if (Chassis.getInstance().getConfig().distributedTracingEnabled()) {
-            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName);
-        }
+    public Context withTracing(String traceName, String tracingHeader) {
+        this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName, tracingHeader);
         return this;
     }
 
@@ -151,7 +149,7 @@ public class Context {
     }
 
     public boolean isBeingTraced() {
-        return this.telemetryContext != null;
+        return this.telemetryContext.isBeingTraced();
     }
 
     public Map<String, String> getRequestContext() {

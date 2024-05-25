@@ -3,6 +3,7 @@ package io.github.renatolsjf.chassis.integration.dsl;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
 import io.github.renatolsjf.chassis.util.genesis.BuildIgnore;
@@ -274,7 +275,13 @@ public abstract class ApiCall {
         TimedOperation<ApiResponse> timedOperation =
                 TimedOperation.http().traced(method.toString() + " " + this.getEndpoint());
 
-        ApiResponse apiResponse = timedOperation.execute(() -> this.doExecute(method, body));
+        ApiResponse apiResponse = timedOperation.execute(() ->  {
+            if (Context.forRequest().getTelemetryContext().isTracingContextAvailable()) {
+                TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
+                this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
+            }
+            return this.doExecute(method, body);
+        });
         long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = apiResponse.getHttpStatus();
 

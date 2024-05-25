@@ -1,6 +1,8 @@
 package io.github.renatolsjf.chassis;
 
 import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
+import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -23,8 +25,21 @@ public class TelemetryAgent {
 
     }
 
-    public TelemetryContext start(String traceName) {
-        return new TelemetryContext(sdkTracerProvider.get(traceName));
+    public TelemetryContext start(String traceName, String traceHeader) {
+
+        TracingContext tracingContext = null;
+        if (traceHeader != null) {
+            tracingContext = TracingContext.fromHeader(traceHeader);
+        }
+
+        Tracer tracer = null;
+        if (Chassis.getInstance().getConfig().distributedTracingEnabled()
+                && (tracingContext == null || tracingContext.isBeginTraced())) {
+            tracer = sdkTracerProvider.get(traceName);
+        }
+
+        return new TelemetryContext(tracer, tracingContext);
+
     }
 
 }

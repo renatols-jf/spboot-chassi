@@ -8,6 +8,7 @@ import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
+import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
 import io.github.renatolsjf.chassis.validation.ValidationException;
@@ -38,11 +39,11 @@ public abstract class Request {
     protected RequestOutcome outcome;
 
     public Request(String operation, String transactionId, String correlationId) {
-        this(operation, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap());
+        this(operation, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap(), null);
     }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection) {
-        this(operation, transactionId, correlationId, projection, Collections.emptyMap());
+        this(operation, transactionId, correlationId, projection, Collections.emptyMap(), null);
     }
 
     public Request(String operation, String transactionId, String correlationId, String requestContextEntries) {
@@ -50,17 +51,26 @@ public abstract class Request {
     }
 
     public Request(String operation, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
-        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
+        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries, null);
     }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    String requestContextEntries) {
-        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation());
+        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation(), null);
     }
 
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   String requestContextEntries, String traceParent) {
+        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation(), traceParent);
+    }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
+        this (operation, transactionId, correlationId, projection, requestContextEntries, null);
+    }
+
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   Map<String, String> requestContextEntries, String traceParent) {
 
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
@@ -71,7 +81,7 @@ public abstract class Request {
                 .withProjection(projection);
 
         if (!this.getClass().isAnnotationPresent(NotTraceable.class)) {
-            this.context.withTracing(this.getClass().getSimpleName());
+            this.context.withTracing(this.getClass().getSimpleName(), traceParent);
         }
 
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
@@ -128,13 +138,31 @@ public abstract class Request {
             Media m;
             if (Chassis.getInstance().getConfig().distributedTracingEnabled() &&
                     this.context.isBeingTraced()) {
-                Span span = this.context.getTelemetryContext().getTracer()
-                        .spanBuilder(this.getClass().getSimpleName()).startSpan();
-                try(Scope scope = span.makeCurrent()) {
-                    m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
-                } finally {
-                    span.end();
+
+                TelemetryContext telemetryContext = this.context.getTelemetryContext();
+
+                io.opentelemetry.context.Context extractedContext = telemetryContext.getParentContext();
+                if (extractedContext != null) {
+                    try (Scope parent = extractedContext.makeCurrent()) {
+                        Span span = telemetryContext.getTracer()
+                                .spanBuilder(this.getClass().getSimpleName()).startSpan();
+                        try(Scope scope = span.makeCurrent()) {
+                            m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+                        } finally {
+                            span.end();
+                        }
+                    }
+                } else {
+                    Span span = telemetryContext.getTracer()
+                            .spanBuilder(this.getClass().getSimpleName()).startSpan();
+                    try(Scope scope = span.makeCurrent()) {
+                        m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+                    } finally {
+                        span.end();
+                    }
                 }
+
+
             } else {
                 m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
             }
