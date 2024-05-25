@@ -272,7 +272,7 @@ public abstract class ApiCall {
     private <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
         TimedOperation<ApiResponse> timedOperation =
-                TimedOperation.http();
+                TimedOperation.http().traced(method.toString() + " " + this.getEndpoint());
 
         ApiResponse apiResponse = timedOperation.execute(() -> this.doExecute(method, body));
         long duration = timedOperation.getExecutionTimeInMillis();

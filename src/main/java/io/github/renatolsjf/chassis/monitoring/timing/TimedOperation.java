@@ -1,6 +1,8 @@
 package io.github.renatolsjf.chassis.monitoring.timing;
 
 import io.github.renatolsjf.chassis.context.Context;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Scope;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -12,6 +14,7 @@ public class TimedOperation<T> {
 
     private final String tag;
     private long executionTime;
+    private String traceName;
 
     public static <Q> TimedOperation<Q> http() {
         return new TimedOperation<>(HTTP_OPERATION);
@@ -28,7 +31,24 @@ public class TimedOperation<T> {
     public void run(Runnable r) {
         long l = System.currentTimeMillis();
         try {
-            r.run();
+
+            if (Context.isAvailable()
+                    && Context.forRequest().isBeingTraced()
+                    && this.traceName != null
+                    && !this.traceName.isBlank()) {
+
+                Span span = Context.forRequest().getTelemetryContext().getTracer()
+                        .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                try (Scope scope = span.makeCurrent()) {
+                    r.run();
+                } finally {
+                    span.end();
+                }
+
+            } else {
+                r.run();
+            }
+
         } finally {
             this.executionTime = System.currentTimeMillis() - l;
             Context.forRequest().recordOperationTime(this.tag, this.executionTime);
@@ -39,8 +59,26 @@ public class TimedOperation<T> {
         long l = System.currentTimeMillis();
         T t = null;
         try {
-            t = e.call();
+
+            if (Context.isAvailable()
+                    && Context.forRequest().isBeingTraced()
+                    && this.traceName != null
+                    && !this.traceName.isBlank()) {
+
+                Span span = Context.forRequest().getTelemetryContext().getTracer()
+                        .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                try (Scope scope = span.makeCurrent()) {
+                    t = e.call();
+                } finally {
+                    span.end();
+                }
+
+            } else {
+                t = e.call();
+            }
+
             return t;
+
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -54,9 +92,15 @@ public class TimedOperation<T> {
         }
     }
 
+    public TimedOperation traced(String traceName) {
+        this.traceName = traceName;
+        return this;
+    }
+
     public long getExecutionTimeInMillis() {
         return this.executionTime;
     }
+
     public double getExecutionTimeInSeconds() {
         return this.getExecutionTimeInMillis() / 1000d;
     }
