@@ -38,6 +38,10 @@ public class TelemetryAgent {
             tracer = sdkTracerProvider.get(traceName);
         }
 
+        /*if (tracingContext != null && tracer == null) { //Should mark as not sample for downstream? Probably a config.
+            tracingContext = tracingContext.notSampled();
+        }*/
+
         return new TelemetryContext(tracer, tracingContext);
 
     }

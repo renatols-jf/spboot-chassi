@@ -69,7 +69,7 @@ public class TracingContext {
 
     public Context getSpanContext() {
 
-        if (this.isTracingContextAvailable()) {
+        if (!this.isTracingContextAvailable()) {
             throw new IllegalStateException("No trace context available");
         }
 
@@ -100,6 +100,22 @@ public class TracingContext {
 
     public boolean isBeginTraced() {
         return this.w3cHeaderValue.charAt(FLAGS_OFFSET + 1) == '1';
+    }
+
+    public TracingContext notSampled() {
+        if (!this.isTracingContextAvailable()) {
+            throw new IllegalStateException("No trace context available");
+        }
+        this.w3cHeaderValue = this.w3cHeaderValue.substring(0, this.w3cHeaderValue.length() - 1) + "0";
+        return this;
+    }
+
+    public TracingContext sampled() {
+        if (!this.isTracingContextAvailable()) {
+            throw new IllegalStateException("No trace context available");
+        }
+        this.w3cHeaderValue = this.w3cHeaderValue.substring(0, this.w3cHeaderValue.length() - 1) + "1";
+        return this;
     }
 
 }
