@@ -22,7 +22,7 @@ public class TracingEnhancer implements TypeEnhancer{
                     || !Context.isAvailable()
                     || !Context.forRequest().isBeingTraced()) {
                 if (delegate != null) {
-                    return method.invoke(delegate, args);
+                    return methodProxy.invoke(delegate, args);
                 } else {
                     return methodProxy.invokeSuper(o, args);
                 }
@@ -43,7 +43,7 @@ public class TracingEnhancer implements TypeEnhancer{
             Span span = tracer.spanBuilder(spanName).startSpan();
             try (Scope scope = span.makeCurrent()) {
                 if (delegate != null) {
-                    return method.invoke(delegate, args);
+                    return methodProxy.invoke(delegate, args);
                 } else {
                     return methodProxy.invokeSuper(o, args);
                 }
