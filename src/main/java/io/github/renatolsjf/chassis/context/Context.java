@@ -75,8 +75,6 @@ public class Context {
     private Map<String, String> requestContext = new HashMap<>();
     private TelemetryContext telemetryContext;
 
-    private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
-
     private long requestStartingTime = System.currentTimeMillis();
     private Map<String, Long> operationTimeCounter = new HashMap<>();
 
@@ -173,7 +171,7 @@ public class Context {
                     StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass(),
                     this.createFixedLoggingAttributes());
         } else {
-            return this.logger;
+            return new ApplicationLogger(this.createFixedLoggingAttributes());
         }
     }
 
@@ -217,9 +215,8 @@ public class Context {
         if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isBeingTraced()) {
             TracingContext tracingContext = this.telemetryContext.getTracingContext();
             String traceId = tracingContext.getTraceId();
-            String spanId = tracingContext.getSpanId();
             loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
-            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> spanId);
+            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> this.telemetryContext.getTracingContext().getSpanId());
         }
 
         if (overrideDefaultAttributes) {

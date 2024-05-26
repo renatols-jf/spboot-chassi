@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis.monitoring.timing;
 
 import io.github.renatolsjf.chassis.context.Context;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Scope;
 
 import java.time.Duration;
@@ -15,6 +16,8 @@ public class TimedOperation<T> {
     private final String tag;
     private long executionTime;
     private String traceName;
+    private String traceId;
+    private String spanId;
 
     public static <Q> TimedOperation<Q> http() {
         return new TimedOperation<>(HTTP_OPERATION);
@@ -40,6 +43,9 @@ public class TimedOperation<T> {
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
                         .spanBuilder(this.tag + "::" + this.traceName).startSpan();
                 try (Scope scope = span.makeCurrent()) {
+                    SpanContext spc = span.getSpanContext();
+                    this.traceId = spc.getTraceId();
+                    this.spanId = spc.getSpanId();
                     r.run();
                 } finally {
                     span.end();
@@ -68,6 +74,9 @@ public class TimedOperation<T> {
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
                         .spanBuilder(this.tag + "::" + this.traceName).startSpan();
                 try (Scope scope = span.makeCurrent()) {
+                    SpanContext spc = span.getSpanContext();
+                    this.traceId = spc.getTraceId();
+                    this.spanId = spc.getSpanId();
                     t = e.call();
                 } finally {
                     span.end();
@@ -107,6 +116,14 @@ public class TimedOperation<T> {
 
     public Duration getDuration() {
         return Duration.ofMillis(this.getExecutionTimeInMillis());
+    }
+
+    public String getTraceId() {
+        return this.traceId;
+    }
+
+    public String getSpanId() {
+        return this.spanId;
     }
 
 }
