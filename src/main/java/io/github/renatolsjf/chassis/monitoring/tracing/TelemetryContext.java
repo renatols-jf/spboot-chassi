@@ -79,5 +79,9 @@ public class TelemetryContext {
 
     }
 
+    public static TelemetryContext empty() {
+        return new TelemetryContext(null, null);
+    }
+
 
 }

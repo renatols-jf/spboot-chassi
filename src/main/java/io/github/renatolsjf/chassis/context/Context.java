@@ -74,7 +74,7 @@ public class Context {
     private String operation;
     private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
-    private TelemetryContext telemetryContext;
+    private TelemetryContext telemetryContext = Chassis.getInstance().getTelemetryAgent().empty();
 
     private long requestStartingTime = System.currentTimeMillis();
     private Map<String, Long> operationTimeCounter = new HashMap<>();

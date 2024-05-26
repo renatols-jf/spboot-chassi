@@ -46,4 +46,8 @@ public class TelemetryAgent {
 
     }
 
+    public TelemetryContext empty() {
+        return TelemetryContext.empty();
+    }
+
 }
