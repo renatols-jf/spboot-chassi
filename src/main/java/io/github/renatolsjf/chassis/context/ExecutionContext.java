@@ -5,7 +5,7 @@ public interface ExecutionContext {
     String getSpanId();
     default boolean isExecutionContextAvailable() {
         String s = this.getSpanId();
-        return s != null & !s.isBlank();
+        return s != null && !s.isBlank();
     }
 
     static ExecutionContext unavailable() {
