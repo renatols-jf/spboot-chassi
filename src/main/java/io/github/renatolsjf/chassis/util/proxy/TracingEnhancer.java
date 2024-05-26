@@ -12,7 +12,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
 
-public class TracingEnhancer implements TypeEnhancer{
+public class TracingEnhancer implements TypeEnhancer {
 
     public MethodInterceptor createInterceptor(Object delegate) {
         return (Object o, Method method, Object[] args, MethodProxy methodProxy) -> {

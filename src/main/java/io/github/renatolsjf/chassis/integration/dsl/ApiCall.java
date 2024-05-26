@@ -272,8 +272,10 @@ public abstract class ApiCall {
 
     private <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
-        TimedOperation<ApiResponse> timedOperation =
-                TimedOperation.http().traced(method.toString() + " " + this.getEndpoint());
+        TimedOperation<ApiResponse> timedOperation = TimedOperation.http()
+                .traced(method.toString() + " " + this.getEndpoint())
+                .withTraceAttribute("method", method.toString())
+                .withTraceAttribute("url", this.getEndpoint());
 
         ApiResponse apiResponse = timedOperation.execute(() ->  {
             if (Context.forRequest().getTelemetryContext().isTracingContextAvailable()) {

@@ -2,11 +2,14 @@ package io.github.renatolsjf.chassis.monitoring.timing;
 
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.context.ExecutionContext;
+import io.github.renatolsjf.chassis.util.StringConcatenator;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Scope;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class TimedOperation<T> implements ExecutionContext {
@@ -19,6 +22,7 @@ public class TimedOperation<T> implements ExecutionContext {
     private String traceName;
     private String traceId;
     private String spanId;
+    private Map<String, String> traceAttributes = new HashMap<>();
 
     public static <Q> TimedOperation<Q> http() {
         return new TimedOperation<>(HTTP_OPERATION);
@@ -43,6 +47,7 @@ public class TimedOperation<T> implements ExecutionContext {
 
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
                         .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                this.traceAttributes.forEach(span::setAttribute);
                 try (Scope scope = span.makeCurrent()) {
                     SpanContext spc = span.getSpanContext();
                     this.traceId = spc.getTraceId();
@@ -74,6 +79,7 @@ public class TimedOperation<T> implements ExecutionContext {
 
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
                         .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                this.traceAttributes.forEach(span::setAttribute);
                 try (Scope scope = span.makeCurrent()) {
                     SpanContext spc = span.getSpanContext();
                     this.traceId = spc.getTraceId();
@@ -104,6 +110,11 @@ public class TimedOperation<T> implements ExecutionContext {
 
     public TimedOperation traced(String traceName) {
         this.traceName = traceName;
+        return this;
+    }
+
+    public TimedOperation withTraceAttribute(String key, String value) {
+        this.traceAttributes.put(new StringConcatenator(this.tag, key).dot(), value);
         return this;
     }
 
