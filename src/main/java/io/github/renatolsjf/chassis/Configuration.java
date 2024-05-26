@@ -15,7 +15,7 @@ public class Configuration {
     public enum Properties implements Loadable<Object> {
         LOGGER_USE_CALLING_CLASS("logging.use-calling-class", Boolean.TRUE),
         LOGGER_PRINT_CONTEXT_AS_JSON("logging.print-context-as-json", Boolean.TRUE),
-        //LOGGER_EXPLODE_ATTACHED_OBJECTS("logging.explode-attached-objects", Boolean.FALSE),
+        LOGGER_PRINT_TRACE_ID("logging.print-trace-id", Boolean.TRUE),
         LOGGER_ENABLE_DEFAULT_ATTRIBUTES_OVERWRITE("logging.enable-default-attributes-overwrite", Boolean.FALSE),
         VALIDATOR_FAIL_ON_EXECUTION_ERROR("validation.fail-on-execution-error", Boolean.TRUE),
         CONTEXT_FORBID_UNAUTHORIZED_CREATION("context.forbid-unauthorized-creation", Boolean.TRUE),
@@ -69,6 +69,10 @@ public class Configuration {
 
     public Boolean printLoggingContextAsJson() {
         return (Boolean) Properties.LOGGER_PRINT_CONTEXT_AS_JSON.initializeIfNeededAndGet(this.configData, Boolean.class);
+    }
+
+    public Boolean printTraceIdOnLogs() {
+        return (Boolean) Properties.LOGGER_PRINT_TRACE_ID.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public Boolean allowDefaultLoggingAttributesOverride() {

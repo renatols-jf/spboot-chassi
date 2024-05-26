@@ -4,6 +4,7 @@ import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 
 import java.time.Duration;
@@ -212,6 +213,14 @@ public class Context {
             operationTimes.put("total", this.getElapsedMillis());
             return operationTimes.toString();
         });
+
+        if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isBeingTraced()) {
+            TracingContext tracingContext = this.telemetryContext.getTracingContext();
+            String traceId = tracingContext.getTraceId();
+            String spanId = tracingContext.getSpanId();
+            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
+            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> spanId);
+        }
 
         if (overrideDefaultAttributes) {
             this.requestContext.entrySet().forEach(e -> loggingAttributes.put(e.getKey(), () -> e.getValue()));

@@ -17,6 +17,9 @@ public class TracingContext {
     private static final int SPAN_ID_OFFSET = 36;
     private static final int FLAGS_OFFSET = 53;
 
+    private static final int TRACE_ID_LENGTH = 32;
+    private static final int SPAN_ID_LENGTH = 16;
+
     private String w3cHeaderValue;
 
     private TracingContext() {
@@ -65,6 +68,20 @@ public class TracingContext {
             throw new IllegalStateException("No trace context available");
         }
         return this.w3cHeaderValue;
+    }
+
+    public String getTraceId() {
+        if (!this.isTracingContextAvailable()) {
+            throw new IllegalStateException("No trace context available");
+        }
+        return this.w3cHeaderValue.substring(TRACE_ID_OFFSET, TRACE_ID_OFFSET + TRACE_ID_LENGTH);
+    }
+
+    public String getSpanId() {
+        if (!this.isTracingContextAvailable()) {
+            throw new IllegalStateException("No trace context available");
+        }
+        return this.w3cHeaderValue.substring(SPAN_ID_OFFSET, SPAN_ID_OFFSET + SPAN_ID_LENGTH);
     }
 
     public Context getSpanContext() {
