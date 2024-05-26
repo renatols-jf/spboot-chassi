@@ -29,4 +29,8 @@ public class StringConcatenator {
         return joiner.toString();
     }
 
+    public static StringConcatenator of(String... values) {
+        return new StringConcatenator(values);
+    }
+
 }

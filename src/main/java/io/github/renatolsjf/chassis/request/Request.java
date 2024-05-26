@@ -8,12 +8,10 @@ import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
-import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
+import io.github.renatolsjf.chassis.util.StringConcatenator;
 import io.github.renatolsjf.chassis.validation.ValidationException;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.context.Scope;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -81,7 +79,7 @@ public abstract class Request {
                 .withProjection(projection);
 
         if (!this.getClass().isAnnotationPresent(NotTraceable.class)) {
-            this.context.withTracing(this.getClass().getSimpleName() + "::" + operation, traceParent);
+            this.context.withTracing(StringConcatenator.of(this.getClass().getSimpleName(), operation).twoColons(), traceParent);
         }
 
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));

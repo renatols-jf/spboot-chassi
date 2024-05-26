@@ -46,7 +46,7 @@ public class TimedOperation<T> implements ExecutionContext {
                     && !this.traceName.isBlank()) {
 
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
-                        .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons()).startSpan();
                 this.traceAttributes.forEach(span::setAttribute);
                 try (Scope scope = span.makeCurrent()) {
                     SpanContext spc = span.getSpanContext();
@@ -78,7 +78,7 @@ public class TimedOperation<T> implements ExecutionContext {
                     && !this.traceName.isBlank()) {
 
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
-                        .spanBuilder(this.tag + "::" + this.traceName).startSpan();
+                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons()).startSpan();
                 this.traceAttributes.forEach(span::setAttribute);
                 try (Scope scope = span.makeCurrent()) {
                     SpanContext spc = span.getSpanContext();

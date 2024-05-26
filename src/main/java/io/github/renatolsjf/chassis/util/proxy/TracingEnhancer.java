@@ -4,6 +4,7 @@ import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.monitoring.tracing.Traceable;
+import io.github.renatolsjf.chassis.util.StringConcatenator;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
@@ -35,9 +36,9 @@ public class TracingEnhancer implements TypeEnhancer {
             String spanName = spanAnnotation.value();
             if (spanName.isBlank()) {
                 if (delegate != null) {
-                    spanName = delegate.getClass().getSimpleName() + "::" + method.getName();
+                    spanName = StringConcatenator.of(delegate.getClass().getSimpleName(), method.getName()).twoColons();
                 } else {
-                    spanName = o.getClass().getSuperclass().getSimpleName() + "::" + method.getName();
+                    spanName = StringConcatenator.of(o.getClass().getSuperclass().getSimpleName(), method.getName()).twoColons();
                 }
             }
             Span span = tracer.spanBuilder(spanName).startSpan();
