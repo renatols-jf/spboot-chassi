@@ -26,16 +26,19 @@ public class AppRegistry {
 
     public static <T> T getResource(Class<T> type) {
 
-            Object instance = instanceMap.get(type);
-            if (instance != null) {
-                return (T) instance;
-            }
+        //TODO I should propbably store created types based on the delegate rather than the classe. Inject
+        //a service interface and inject a service implementation will yield different object when spring will
+        //provide the same object.
+        Object instance = instanceMap.get(type);
+        if (instance != null) {
+            return (T) instance;
+        }
 
-            try {
-                instance = context.getBean(type);
-            } catch (Exception e) {
-                //DO NOTHING
-            }
+        try {
+            instance = context.getBean(type);
+        } catch (Exception e) {
+            //DO NOTHING
+        }
 
         try {
             return (T) createObject(type, instance);

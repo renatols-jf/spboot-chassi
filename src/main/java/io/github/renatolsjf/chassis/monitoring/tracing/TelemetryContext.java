@@ -1,7 +1,7 @@
 package io.github.renatolsjf.chassis.monitoring.tracing;
 
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanContext;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
@@ -51,8 +51,9 @@ public class TelemetryContext {
         return this.originatingTracingContext != null;
     }
 
-    public void clear() {
+    public void clear(boolean success) {
         if (this.isBeingTraced()) {
+            this.rootSpan.setStatus(success ? StatusCode.OK : StatusCode.ERROR);
             this.rootScope.close();
             this.rootSpan.end();
             if (this.parentScope != null) {

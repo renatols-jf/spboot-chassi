@@ -168,7 +168,7 @@ public abstract class Request {
             if (!healthIgnore) {
                 Chassis.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
             }
-            this.context.clear();
+            this.context.clear(this.outcome == RequestOutcome.SUCCESS);
 
         }
     }
