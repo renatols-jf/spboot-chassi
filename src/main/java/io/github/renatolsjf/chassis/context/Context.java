@@ -62,7 +62,8 @@ public class Context {
         }
     }
 
-    public static void clear() {
+    public void clear() {
+        this.telemetryContext.clear();
         tlContext.remove();
     }
 

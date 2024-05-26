@@ -42,7 +42,7 @@ public class TelemetryAgent {
             tracingContext = tracingContext.notSampled();
         }*/
 
-        return new TelemetryContext(tracer, tracingContext);
+        return TelemetryContext.start(tracer, tracingContext, traceName);
 
     }
 

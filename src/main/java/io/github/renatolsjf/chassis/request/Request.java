@@ -135,37 +135,7 @@ public abstract class Request {
                     .attachObject(this)
                     .log();
 
-            Media m;
-            if (Chassis.getInstance().getConfig().distributedTracingEnabled() &&
-                    this.context.isBeingTraced()) {
-
-                TelemetryContext telemetryContext = this.context.getTelemetryContext();
-
-                io.opentelemetry.context.Context extractedContext = telemetryContext.getParentContext();
-                if (extractedContext != null) {
-                    try (Scope parent = extractedContext.makeCurrent()) {
-                        Span span = telemetryContext.getTracer()
-                                .spanBuilder(this.getClass().getSimpleName()).startSpan();
-                        try(Scope scope = span.makeCurrent()) {
-                            m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
-                        } finally {
-                            span.end();
-                        }
-                    }
-                } else {
-                    Span span = telemetryContext.getTracer()
-                            .spanBuilder(this.getClass().getSimpleName()).startSpan();
-                    try(Scope scope = span.makeCurrent()) {
-                        m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
-                    } finally {
-                        span.end();
-                    }
-                }
-
-
-            } else {
-                m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
-            }
+            Media m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
 
             this.context.createLogger()
                     .info("Completed request: {}", this.getClass().getSimpleName())
@@ -198,7 +168,7 @@ public abstract class Request {
             if (!healthIgnore) {
                 Chassis.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
             }
-            Context.clear();
+            this.context.clear();
 
         }
     }

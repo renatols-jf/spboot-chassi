@@ -1,15 +1,21 @@
 package io.github.renatolsjf.chassis.monitoring.tracing;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 
 
 public class TelemetryContext {
 
     private Tracer tracer;
     private TracingContext originatingTracingContext;
+    private Span rootSpan;
+    private Scope parentScope;
+    private Scope rootScope;
 
-    public TelemetryContext(Tracer tracer, TracingContext originatingTracingContext) {
+    private TelemetryContext(Tracer tracer, TracingContext originatingTracingContext) {
         this.tracer = tracer;
         this.originatingTracingContext = originatingTracingContext;
     }
@@ -43,6 +49,33 @@ public class TelemetryContext {
 
     public boolean isOriginatingTracingContextAvailable() {
         return this.originatingTracingContext != null;
+    }
+
+    public void clear() {
+        if (this.isBeingTraced()) {
+            this.rootScope.close();
+            this.rootSpan.end();
+            if (this.parentScope != null) {
+                this.parentScope.close();
+            }
+        }
+    }
+
+    public static TelemetryContext start(Tracer tracer, TracingContext originatingTracingContext, String rootSpanName) {
+
+        TelemetryContext telemetryContext = new TelemetryContext(tracer, originatingTracingContext);
+
+        if (telemetryContext.isBeingTraced()) {
+            io.opentelemetry.context.Context originatingContext = telemetryContext.getParentContext();
+            if (originatingContext != null) {
+                telemetryContext.parentScope = originatingContext.makeCurrent();
+            }
+            telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName).startSpan();
+            telemetryContext.rootScope = telemetryContext.rootSpan.makeCurrent();
+        }
+
+        return telemetryContext;
+
     }
 
 
