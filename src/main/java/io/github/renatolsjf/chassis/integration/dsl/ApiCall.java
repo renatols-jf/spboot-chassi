@@ -285,7 +285,7 @@ public abstract class ApiCall {
         long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = apiResponse.getHttpStatus();
 
-        Context.forRequest().createLogger()
+        Context.forRequest().createLogger(timedOperation)
                 .info("API CALL: " + method.toString() + " " + this.getEndpoint() +
                         " " + statusCode + " " + duration)
                 .attach(LOGGING_FIELD_PROVIDER, this.provider)

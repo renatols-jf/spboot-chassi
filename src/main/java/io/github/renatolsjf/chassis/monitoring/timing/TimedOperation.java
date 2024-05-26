@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis.monitoring.timing;
 
 import io.github.renatolsjf.chassis.context.Context;
+import io.github.renatolsjf.chassis.context.ExecutionContext;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Scope;
@@ -8,7 +9,7 @@ import io.opentelemetry.context.Scope;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
-public class TimedOperation<T> {
+public class TimedOperation<T> implements ExecutionContext {
 
     public static final String HTTP_OPERATION = "http";
     public static final String DATABASE_OPERATION = "db";
@@ -118,10 +119,12 @@ public class TimedOperation<T> {
         return Duration.ofMillis(this.getExecutionTimeInMillis());
     }
 
+    @Override
     public String getTraceId() {
         return this.traceId;
     }
 
+    @Override
     public String getSpanId() {
         return this.spanId;
     }

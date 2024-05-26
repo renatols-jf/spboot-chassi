@@ -166,17 +166,22 @@ public class Context {
     }
 
     public ApplicationLogger createLogger() {
+        return this.createLogger(ExecutionContext.unavailable());
+    }
+
+
+    public ApplicationLogger createLogger(ExecutionContext executionContext) {
         if (Chassis.getInstance().getConfig().useCallingClassNameForLogging()) {
             return new ApplicationLogger(StackWalker.getInstance(
                     StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass(),
-                    this.createFixedLoggingAttributes());
+                    this.createFixedLoggingAttributes(executionContext));
         } else {
-            return new ApplicationLogger(this.createFixedLoggingAttributes());
+            return new ApplicationLogger(this.createFixedLoggingAttributes(executionContext));
         }
     }
 
-    public ApplicationLogger createLogger(Class<?> clazz) {
-        return new ApplicationLogger(clazz, this.createFixedLoggingAttributes());
+    public ApplicationLogger createLogger(Class<?> clazz, ExecutionContext executionContext) {
+        return new ApplicationLogger(clazz, this.createFixedLoggingAttributes(executionContext));
     }
 
     public Map<String, Long> getOperationTimeByType() {
@@ -189,7 +194,7 @@ public class Context {
         return times;
     }
 
-    private Map<String, LoggingAttribute> createFixedLoggingAttributes() {
+    private Map<String, LoggingAttribute> createFixedLoggingAttributes(ExecutionContext executionContext) {
 
         Chassis c = Chassis.getInstance();
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
@@ -213,10 +218,19 @@ public class Context {
         });
 
         if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isBeingTraced()) {
-            TracingContext tracingContext = this.telemetryContext.getTracingContext();
-            String traceId = tracingContext.getTraceId();
-            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
-            loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> this.telemetryContext.getTracingContext().getSpanId());
+
+            if (executionContext.isExecutionContextAvailable()) {
+                String traceId = executionContext.getTraceId();
+                String spanId = executionContext.getSpanId();
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> spanId);
+            } else {
+                TracingContext tracingContext = this.telemetryContext.getTracingContext();
+                String traceId = tracingContext.getTraceId();
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> this.telemetryContext.getTracingContext().getSpanId());
+            }
+
         }
 
         if (overrideDefaultAttributes) {
