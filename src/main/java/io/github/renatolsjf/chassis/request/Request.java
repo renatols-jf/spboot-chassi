@@ -81,7 +81,7 @@ public abstract class Request {
                 .withProjection(projection);
 
         if (!this.getClass().isAnnotationPresent(NotTraceable.class)) {
-            this.context.withTracing(this.getClass().getSimpleName(), traceParent);
+            this.context.withTracing(this.getClass().getSimpleName() + "::" + operation, traceParent);
         }
 
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
