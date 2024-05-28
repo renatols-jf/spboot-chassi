@@ -17,7 +17,7 @@ public class Chassis {
         this.config = new Configuration(loader.getConfigData());
         this.labelsInstance = new Labels(loader.getLabelsData());
         this.telemetryAgent = new TelemetryAgent(this.labelsInstance.getLabel(Labels.Field.APPLICATION_NAME),
-                this.config.tracingStrategy());
+                this.config);
         ApiFactory.initializeApis(loader.getApiData());
     }
 
