@@ -139,9 +139,9 @@ public class Context {
         return this;
     }
 
-    public Context withTracing(String traceName, String tracingHeader) {
+    public Context withTracing(String scopeOwner, String traceName, String tracingHeader) {
         if (Chassis.getInstance().getConfig().tracingEnabled()) {
-            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName, tracingHeader);
+            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(scopeOwner, traceName, tracingHeader);
         }
         return this;
     }

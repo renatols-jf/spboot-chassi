@@ -26,7 +26,7 @@ public class Configuration {
         HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
         HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST),
         INSTRUMENTATION_TRACING_ENABLED("instrumentation.tracing.enabled", Boolean.FALSE),
-        INSTRUMENTATION_TRACING_STRATEGY("instrumentation.tracing.strategy", TracingStrategy.NEVER_SAMPLE),
+        INSTRUMENTATION_TRACING_STRATEGY("instrumentation.tracing.strategy", TracingStrategy.ALWAYS_SAMPLE),
         INSTRUMENTATION_TRACING_RATIO("instrumentation.tracing.ratio", 0.1d);
 
         private final String keyValue;

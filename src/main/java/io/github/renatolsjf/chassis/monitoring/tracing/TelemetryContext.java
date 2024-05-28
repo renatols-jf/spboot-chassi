@@ -9,6 +9,8 @@ import io.opentelemetry.context.Scope;
 
 public class TelemetryContext {
 
+    public static final String SCOPE_OWNER_ATTRIBUTE = "custom.owner";
+
     private Tracer tracer;
     private TracingContext originatingTracingContext;
     private Span rootSpan;
@@ -64,7 +66,7 @@ public class TelemetryContext {
         }
     }
 
-    public static TelemetryContext start(Tracer tracer, TracingContext originatingTracingContext, String rootSpanName) {
+    public static TelemetryContext start(Tracer tracer, TracingContext originatingTracingContext, String rootSpanName, String scopeOwner) {
 
         TelemetryContext telemetryContext = new TelemetryContext(tracer, originatingTracingContext);
 
@@ -73,7 +75,9 @@ public class TelemetryContext {
             telemetryContext.parentScope = originatingContext.makeCurrent();
         }
 
-        telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName).startSpan();
+        telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName)
+                .setAttribute(SCOPE_OWNER_ATTRIBUTE, scopeOwner)
+                .startSpan();
         telemetryContext.rootScope = telemetryContext.rootSpan.makeCurrent();
 
         return telemetryContext;
