@@ -6,6 +6,7 @@ import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
+import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.time.Duration;
 import java.util.*;
@@ -141,7 +142,20 @@ public class Context {
 
     public Context withTracing(String scopeOwner, String traceName, String tracingHeader) {
         if (Chassis.getInstance().getConfig().isTracingEnabled()) {
-            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(scopeOwner, traceName, tracingHeader);
+            Labels l = Chassis.getInstance().labels();
+
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                    l.getLabel(Labels.Field.LOGGING_TRANSACTION_ID)), this.transactionId);
+            attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                    l.getLabel(Labels.Field.LOGGING_OPERATION)), this.operation);
+            if (this.correlationId != null) {
+                attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                        l.getLabel(Labels.Field.LOGGING_CORRELATION_ID)), this.correlationId);
+            }
+
+            this.telemetryContext = Chassis.getInstance().getTelemetryAgent()
+                    .start(scopeOwner, traceName, tracingHeader, attributes);
         }
         return this;
     }

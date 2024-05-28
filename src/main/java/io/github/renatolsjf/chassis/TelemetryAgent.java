@@ -18,6 +18,7 @@ import io.opentelemetry.sdk.trace.samplers.SamplingResult;
 import io.opentelemetry.semconv.ResourceAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 public class TelemetryAgent {
 
@@ -36,7 +37,7 @@ public class TelemetryAgent {
 
     }
 
-    public TelemetryContext start(String scopeOwner, String traceName, String traceHeader) {
+    public TelemetryContext start(String scopeOwner, String traceName, String traceHeader, Map<String, String> attributes) {
 
         if (!Chassis.getInstance().getConfig().isTracingEnabled()) {
             throw new IllegalStateException("Tracing is not enabled");
@@ -49,7 +50,7 @@ public class TelemetryAgent {
 
         Tracer tracer = sdkTracerProvider.get(traceName);
 
-        return TelemetryContext.start(tracer, tracingContext, traceName, scopeOwner);
+        return TelemetryContext.start(tracer, tracingContext, traceName, scopeOwner, attributes);
 
     }
 

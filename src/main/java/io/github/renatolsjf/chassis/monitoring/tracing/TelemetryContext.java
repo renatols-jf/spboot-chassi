@@ -1,10 +1,13 @@
 package io.github.renatolsjf.chassis.monitoring.tracing;
 
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
+
+import java.util.Map;
 
 
 public class TelemetryContext {
@@ -66,7 +69,7 @@ public class TelemetryContext {
         }
     }
 
-    public static TelemetryContext start(Tracer tracer, TracingContext originatingTracingContext, String rootSpanName, String scopeOwner) {
+    public static TelemetryContext start(Tracer tracer, TracingContext originatingTracingContext, String rootSpanName, String scopeOwner, Map<String, String> attributes) {
 
         TelemetryContext telemetryContext = new TelemetryContext(tracer, originatingTracingContext);
 
@@ -75,9 +78,10 @@ public class TelemetryContext {
             telemetryContext.parentScope = originatingContext.makeCurrent();
         }
 
-        telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName)
-                .setAttribute(SCOPE_OWNER_ATTRIBUTE, scopeOwner)
-                .startSpan();
+        SpanBuilder spanBuilder = telemetryContext.tracer.spanBuilder(rootSpanName)
+                .setAttribute(SCOPE_OWNER_ATTRIBUTE, scopeOwner);
+        attributes.forEach(spanBuilder::setAttribute);
+        telemetryContext.rootSpan = spanBuilder.startSpan();
         telemetryContext.rootScope = telemetryContext.rootSpan.makeCurrent();
 
         return telemetryContext;
