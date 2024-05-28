@@ -27,7 +27,8 @@ public class Configuration {
         HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST),
         INSTRUMENTATION_TRACING_ENABLED("instrumentation.tracing.enabled", Boolean.FALSE),
         INSTRUMENTATION_TRACING_STRATEGY("instrumentation.tracing.strategy", TracingStrategy.ALWAYS_SAMPLE),
-        INSTRUMENTATION_TRACING_RATIO("instrumentation.tracing.ratio", 0.1d);
+        INSTRUMENTATION_TRACING_RATIO("instrumentation.tracing.ratio", 0.1d),
+        INSTRUMENTATION_TRACING_AUTO_PROPAGATION_ENABLED("instrumentation.tracing.auto-propagation-enabled", Boolean.TRUE);
 
         private final String keyValue;
         private final Object defaultValue;
@@ -120,6 +121,10 @@ public class Configuration {
 
     public Double tracingRatio() {
         return (Double) Properties.INSTRUMENTATION_TRACING_RATIO.initializeIfNeededAndGet(this.configData, Double.class);
+    }
+
+    public Boolean isTracingAutoPropagationEnabled() {
+        return (Boolean) Properties.INSTRUMENTATION_TRACING_AUTO_PROPAGATION_ENABLED.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
 }

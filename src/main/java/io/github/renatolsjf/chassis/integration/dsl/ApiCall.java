@@ -61,6 +61,9 @@ public abstract class ApiCall {
     private final Map<String, String> urlReplacements = new HashMap<>();
     private ApiMethod method;
 
+    @BuildIgnore
+    private Boolean propagateTraceOverride = null;
+
 
     public ApiCall withOperation(String operation) {
         this.operation = operation;
@@ -116,6 +119,11 @@ public abstract class ApiCall {
 
     public ApiCall withApiMethod(ApiMethod apiMethod) {
         this.method = apiMethod;
+        return this;
+    }
+
+    public ApiCall withPropagateTrace(Boolean propagateTraceOverride) {
+        this.propagateTraceOverride = propagateTraceOverride;
         return this;
     }
 
@@ -278,7 +286,7 @@ public abstract class ApiCall {
                 .withTraceAttribute("url", this.getEndpoint());
 
         ApiResponse apiResponse = timedOperation.execute(() ->  {
-            if (Context.isTracingEnabled()) {
+            if (this.shouldPropagateTracing()) {
                 TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
                 this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
             }
@@ -337,6 +345,14 @@ public abstract class ApiCall {
 
         return apiResponse;
 
+    }
+
+    private final boolean shouldPropagateTracing() {
+        boolean shouldPropagate = this.propagateTraceOverride != null
+                ? this.propagateTraceOverride
+                : Chassis.getInstance().getConfig().isTracingAutoPropagationEnabled();
+        return Context.isTracingEnabled()
+                && shouldPropagate;
     }
 
     protected abstract <T> ApiResponse doExecute(ApiMethod method, T Body);
