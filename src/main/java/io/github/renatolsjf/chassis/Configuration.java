@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis;
 
 import io.github.renatolsjf.chassis.loader.Loadable;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingStrategy;
 
 import java.time.Duration;
 import java.util.Map;
@@ -24,7 +25,9 @@ public class Configuration {
         METRIC_REQUEST_DURATION_EXPORT_BY_TYPE("metrics.request.duration.export-by-type", Boolean.TRUE),
         HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
         HEALTH_VALUE_TYPE("metrics.health-value-type", Configuration.HealthValueType.LOWEST),
-        INSTRUMENTATION_DISTRIBUTED_TRACING_ENABLED("instrumentation.distributed-tracing-enabled", Boolean.FALSE);
+        INSTRUMENTATION_TRACING_ENABLED("instrumentation.tracing.enabled", Boolean.FALSE),
+        INSTRUMENTATION_TRACING_STRATEGY("instrumentation.tracing.strategy", TracingStrategy.NEVER_SAMPLE),
+        INSTRUMENTATION_TRACING_RATIO("instrumentation.tracing.ratio", 0.1d);
 
         private final String keyValue;
         private final Object defaultValue;
@@ -104,11 +107,19 @@ public class Configuration {
     }
 
     public HealthValueType healthValueType() {
-        return (HealthValueType) Properties.HEALTH_VALUE_TYPE.initializeAndGet(this.configData, HealthValueType.class);
+        return (HealthValueType) Properties.HEALTH_VALUE_TYPE.initializeIfNeededAndGet(this.configData, HealthValueType.class);
     }
 
-    public Boolean distributedTracingEnabled() {
-        return (Boolean) Properties.INSTRUMENTATION_DISTRIBUTED_TRACING_ENABLED.initializeIfNeededAndGet(this.configData, Boolean.class);
+    public Boolean tracingEnabled() {
+        return (Boolean) Properties.INSTRUMENTATION_TRACING_ENABLED.initializeIfNeededAndGet(this.configData, Boolean.class);
+    }
+
+    public TracingStrategy tracingStrategy() {
+        return (TracingStrategy) Properties.INSTRUMENTATION_TRACING_STRATEGY.initializeIfNeededAndGet(this.configData, TracingStrategy.class);
+    }
+
+    public Double tracingRatio() {
+        return (Double) Properties.INSTRUMENTATION_TRACING_RATIO.initializeIfNeededAndGet(this.configData, Double.class);
     }
 
 }

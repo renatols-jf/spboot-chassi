@@ -140,16 +140,14 @@ public class Context {
     }
 
     public Context withTracing(String traceName, String tracingHeader) {
-        this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName, tracingHeader);
+        if (Chassis.getInstance().getConfig().tracingEnabled()) {
+            this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(traceName, tracingHeader);
+        }
         return this;
     }
 
     public TelemetryContext getTelemetryContext() {
         return this.telemetryContext;
-    }
-
-    public boolean isBeingTraced() {
-        return this.telemetryContext.isBeingTraced();
     }
 
     public Map<String, String> getRequestContext() {
@@ -218,7 +216,7 @@ public class Context {
             return operationTimes.toString();
         });
 
-        if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isBeingTraced()) {
+        if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isTracingEnabled()) {
 
             if (executionContext.isExecutionContextAvailable()) {
                 String traceId = executionContext.getTraceId();
@@ -240,6 +238,10 @@ public class Context {
 
         return loggingAttributes;
 
+    }
+
+    public static boolean isTracingEnabled() {
+        return Context.isAvailable() && Context.forRequest().getTelemetryContext().isTracingEnabled();
     }
 
 }

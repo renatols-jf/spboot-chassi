@@ -30,7 +30,8 @@ public class TracingContext {
 
         TracingContext tracingContext = new TracingContext();
 
-        SpanContext spanContext = Span.current().getSpanContext();
+        Span span = Span.current();
+        SpanContext spanContext = span.getSpanContext();
         char[] header = new char[W3C_HEADER_VALUE_LENGTH];
         header[0] = '0';
         header[1] = '0';
@@ -45,7 +46,7 @@ public class TracingContext {
 
         header[FLAGS_OFFSET - 1] = '-';
         header[FLAGS_OFFSET] = '0';
-        header[FLAGS_OFFSET + 1] = '1';
+        header[FLAGS_OFFSET + 1] = span.isRecording() ? '1' : '0';
 
         tracingContext.w3cHeaderValue = new String(header);
 
@@ -115,7 +116,7 @@ public class TracingContext {
         return w3cHeaderValue != null;
     }
 
-    public boolean isBeginTraced() {
+    public boolean isRecording() {
         return this.w3cHeaderValue.charAt(FLAGS_OFFSET + 1) == '1';
     }
 

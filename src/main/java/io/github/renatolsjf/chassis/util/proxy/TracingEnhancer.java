@@ -4,6 +4,7 @@ import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.monitoring.tracing.Traceable;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingStrategy;
 import io.github.renatolsjf.chassis.util.StringConcatenator;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
@@ -20,8 +21,7 @@ public class TracingEnhancer implements TypeEnhancer {
 
             io.github.renatolsjf.chassis.monitoring.tracing.Span spanAnnotation;
             if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)
-                    || !Context.isAvailable()
-                    || !Context.forRequest().isBeingTraced()) {
+                    || !Context.isTracingEnabled()) {
                 if (delegate != null) {
                     return methodProxy.invoke(delegate, args);
                 } else {
@@ -57,8 +57,7 @@ public class TracingEnhancer implements TypeEnhancer {
 
     @Override
     public boolean isEnhanceable(Class<?> type) {
-        return Chassis.getInstance().getConfig().distributedTracingEnabled()
-                && Context.isAvailable()
+        return Context.isAvailable()
                 && type.isAnnotationPresent(Traceable.class)
                 && !type.isAnnotationPresent(NotTraceable.class);
     }

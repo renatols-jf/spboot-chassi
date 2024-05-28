@@ -25,26 +25,28 @@ public class TelemetryContext {
     }
 
     public TracingContext getTracingContext() {
-        if (this.isBeingTraced()) {
-            return TracingContext.fromContext();
-        } else {
-            return this.originatingTracingContext;
+        if (!this.isTracingEnabled()) {
+            throw new IllegalStateException("Tracing is not enabled");
         }
+        return TracingContext.fromContext();
     }
 
     public Context getParentContext() {
-        if (this.isBeingTraced() && this.isOriginatingTracingContextAvailable()) {
+        if (this.isTracingEnabled() && this.isOriginatingTracingContextAvailable()) {
             return this.originatingTracingContext.getSpanContext();
         }
         return null;
     }
 
-    public boolean isBeingTraced(){
-        return this.tracer != null;
+    public boolean isTraceRecording(){
+        if (!this.isTracingEnabled()) {
+            throw new IllegalStateException("Tracing is not enabled");
+        }
+        return this.getTracingContext().isRecording();
     }
 
-    public boolean isTracingContextAvailable() {
-        return this.isBeingTraced() || this.originatingTracingContext != null;
+    public boolean isTracingEnabled() {
+        return this.tracer != null;
     }
 
     public boolean isOriginatingTracingContextAvailable() {
@@ -52,7 +54,7 @@ public class TelemetryContext {
     }
 
     public void clear(boolean success) {
-        if (this.isBeingTraced()) {
+        if (this.isTracingEnabled()) {
             this.rootSpan.setStatus(success ? StatusCode.OK : StatusCode.ERROR);
             this.rootScope.close();
             this.rootSpan.end();
@@ -66,14 +68,13 @@ public class TelemetryContext {
 
         TelemetryContext telemetryContext = new TelemetryContext(tracer, originatingTracingContext);
 
-        if (telemetryContext.isBeingTraced()) {
-            io.opentelemetry.context.Context originatingContext = telemetryContext.getParentContext();
-            if (originatingContext != null) {
-                telemetryContext.parentScope = originatingContext.makeCurrent();
-            }
-            telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName).startSpan();
-            telemetryContext.rootScope = telemetryContext.rootSpan.makeCurrent();
+        io.opentelemetry.context.Context originatingContext = telemetryContext.getParentContext();
+        if (originatingContext != null) {
+            telemetryContext.parentScope = originatingContext.makeCurrent();
         }
+
+        telemetryContext.rootSpan = telemetryContext.tracer.spanBuilder(rootSpanName).startSpan();
+        telemetryContext.rootScope = telemetryContext.rootSpan.makeCurrent();
 
         return telemetryContext;
 

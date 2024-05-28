@@ -278,12 +278,13 @@ public abstract class ApiCall {
                 .withTraceAttribute("url", this.getEndpoint());
 
         ApiResponse apiResponse = timedOperation.execute(() ->  {
-            if (Context.forRequest().getTelemetryContext().isTracingContextAvailable()) {
+            if (Context.isTracingEnabled()) {
                 TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
                 this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
             }
             return this.doExecute(method, body);
         });
+
         long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = apiResponse.getHttpStatus();
 

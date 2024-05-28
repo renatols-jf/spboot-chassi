@@ -40,13 +40,13 @@ public class TimedOperation<T> implements ExecutionContext {
         long l = System.currentTimeMillis();
         try {
 
-            if (Context.isAvailable()
-                    && Context.forRequest().isBeingTraced()
+            if (Context.isTracingEnabled()
                     && this.traceName != null
                     && !this.traceName.isBlank()) {
 
                 Span span = Context.forRequest().getTelemetryContext().getTracer()
-                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons()).startSpan();
+                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons())
+                        .startSpan();
                 this.traceAttributes.forEach(span::setAttribute);
                 try (Scope scope = span.makeCurrent()) {
                     SpanContext spc = span.getSpanContext();
@@ -72,8 +72,7 @@ public class TimedOperation<T> implements ExecutionContext {
         T t = null;
         try {
 
-            if (Context.isAvailable()
-                    && Context.forRequest().isBeingTraced()
+            if (Context.isTracingEnabled()
                     && this.traceName != null
                     && !this.traceName.isBlank()) {
 
