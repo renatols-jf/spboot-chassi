@@ -110,7 +110,7 @@ public class Configuration {
         return (HealthValueType) Properties.HEALTH_VALUE_TYPE.initializeIfNeededAndGet(this.configData, HealthValueType.class);
     }
 
-    public Boolean tracingEnabled() {
+    public Boolean isTracingEnabled() {
         return (Boolean) Properties.INSTRUMENTATION_TRACING_ENABLED.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 

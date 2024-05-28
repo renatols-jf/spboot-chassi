@@ -140,7 +140,7 @@ public class Context {
     }
 
     public Context withTracing(String scopeOwner, String traceName, String tracingHeader) {
-        if (Chassis.getInstance().getConfig().tracingEnabled()) {
+        if (Chassis.getInstance().getConfig().isTracingEnabled()) {
             this.telemetryContext = Chassis.getInstance().getTelemetryAgent().start(scopeOwner, traceName, tracingHeader);
         }
         return this;

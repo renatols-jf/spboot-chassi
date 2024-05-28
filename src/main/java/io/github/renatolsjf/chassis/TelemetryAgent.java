@@ -3,7 +3,6 @@ package io.github.renatolsjf.chassis;
 import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
-import io.github.renatolsjf.chassis.monitoring.tracing.TracingStrategy;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanKind;
@@ -39,7 +38,7 @@ public class TelemetryAgent {
 
     public TelemetryContext start(String scopeOwner, String traceName, String traceHeader) {
 
-        if (!Chassis.getInstance().getConfig().tracingEnabled()) {
+        if (!Chassis.getInstance().getConfig().isTracingEnabled()) {
             throw new IllegalStateException("Tracing is not enabled");
         }
 
