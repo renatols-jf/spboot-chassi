@@ -24,7 +24,7 @@ public class TelemetryAgent {
 
     private SdkTracerProvider sdkTracerProvider;
 
-    TelemetryAgent(String appName, TracingStrategy tracingStrategy) {
+    TelemetryAgent(String appName, Configuration configuration) {
 
         Resource resource = Resource.getDefault().toBuilder()
                 .put(ResourceAttributes.SERVICE_NAME, appName).build();
@@ -32,7 +32,7 @@ public class TelemetryAgent {
         this.sdkTracerProvider = SdkTracerProvider.builder()
                 .addSpanProcessor(BatchSpanProcessor.builder(ZipkinSpanExporter.builder().setEndpoint("http://localhost:9411/api/v2/spans").build()).build())
                 .setResource(resource)
-                .setSampler(createSampler(tracingStrategy))
+                .setSampler(createSampler(configuration))
                 .build();
 
     }
@@ -58,15 +58,15 @@ public class TelemetryAgent {
         return TelemetryContext.empty();
     }
 
-    private static Sampler createSampler(TracingStrategy tracingStrategy) {
+    private static Sampler createSampler(Configuration configuration) {
 
-        Sampler rootSampler = switch (tracingStrategy) {
+        Sampler rootSampler = switch (configuration.tracingStrategy()) {
             case ALWAYS_SAMPLE -> Sampler.alwaysOn();
             case NEVER_SAMPLE -> Sampler.alwaysOff();
-            case RATIO_BASED_SAMPLE -> Sampler.traceIdRatioBased(Chassis.getInstance().getConfig().tracingRatio());
+            case RATIO_BASED_SAMPLE -> Sampler.traceIdRatioBased(configuration.tracingRatio());
             case PARENT_BASED_OR_ALWAYS_SAMPLE -> Sampler.parentBased(Sampler.alwaysOn());
             case PARENT_BASED_OR_NEVER_SAMPLE -> Sampler.parentBased(Sampler.alwaysOff());
-            case PARENT_BASED_OR_RATIO_BASED_SAMPLE -> Sampler.parentBased(Sampler.traceIdRatioBased(Chassis.getInstance().getConfig().tracingRatio()));
+            case PARENT_BASED_OR_RATIO_BASED_SAMPLE -> Sampler.parentBased(Sampler.traceIdRatioBased(configuration.tracingRatio()));
         };
 
         return new Sampler() {
@@ -95,9 +95,6 @@ public class TelemetryAgent {
                         return rootSampler.shouldSample(context, s, s1, spanKind, attributes, list);
                     }
                 }
-
-
-
 
             }
 
