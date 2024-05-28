@@ -122,8 +122,8 @@ public abstract class ApiCall {
         return this;
     }
 
-    public ApiCall withPropagateTrace(Boolean propagateTraceOverride) {
-        this.propagateTraceOverride = propagateTraceOverride;
+    public ApiCall withPropagateTrace(Boolean propagateTrace) {
+        this.propagateTraceOverride = propagateTrace;
         return this;
     }
 
