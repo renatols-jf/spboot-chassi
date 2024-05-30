@@ -4,6 +4,7 @@
 
 ## 0.1.0
 - Implemented distributed tracing 
+- Enhanced `@Inject` behavior
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -262,6 +263,46 @@ to do conversions if needed, though.
 
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
+
+## A note on @Inject
+Prior to version `0.1.0`, `@Inject` was meant as a means to inject Spring beans inside requests.
+
+From version `0.1.0` forward, `@Inject` is a more general dependency injection feature and can inject objects
+which lifecycle is not controlled by Spring. Moreover, it also enables behavior enhancement, e.g, all objects which methods
+are annotated with `@Span` to enable tracing have to be annotated with `@Inject` somewhere down the injection tree. 
+`@Inject` will only enhance behavior of classes with the appropriate annotations, but it will create an instance of
+a class whether its behavior should be enhanced or not, only requiring a no-args constructor. Also, the beginning of an injection 
+tree must be inside a `Request` - the first objects injected must be request fields.
+
+The injection tree is the traversable graph of objects related to a request. Let's suppose that you have a `Request` class
+called `RequestA`, a class `A`, and a class `B`. `RequestA` has a field of type `A`, and `A` has a field of type `B`.
+
+```
+public class RequestA extends Request {
+...
+    @Inject
+    private A a;
+...
+}
+
+public class A {
+...
+    @Inject 
+    private B b;
+...
+}
+
+public class B {
+...
+}
+```
+
+The above snippet will result in `A` being injected inside `RequestA` and `B` being injected inside `A`. If we
+remove the `@Inject` annotation from the `A` field inside `RequestA`, that field will be null and, if 
+instantiated manually, there will be no injection of `B` inside `A`.
+
+A injection tree can be triggered outside a `Request` if so desired. Calling `AppRegistry::getResource`
+for a type will trigger the injection process for the object graph starting with that type.
 
 ## Context
 [Context](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/Context.java)
@@ -1422,6 +1463,8 @@ default resources folder. The following configurations can be changed:
   attributes, such as `transactionId`, can have their value replaced with a call for 
   `Context#withRequestContextEntry` as in
   `Context.forRequest.withRequestContextEntry("transactionId", aNewValue)`.
+- `logging.print-trace-id`: Boolean, defaults to `true`. Indicates whether traceId and spanId will be available in
+  log messages.
 - `validation.fail-on-execution-error`: Boolean, defaults to `true`. Governs whether an unexpected error
   in a validation attempt results in an exception. Every validation that fails for not matching
   the annotations for the current operation will result in an exception. For whatever
