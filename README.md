@@ -264,6 +264,11 @@ to do conversions if needed, though.
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
 
+### traceparent
+Tracing information, if available, should be propagated from service to service. Initializing
+this information with the W3C trace context `traceparent` header will enable the chassis to
+configure the tracing behavior and information for the request.
+
 ## A note on @Inject
 Prior to version `0.1.0`, `@Inject` was meant as a means to inject Spring beans inside requests.
 
