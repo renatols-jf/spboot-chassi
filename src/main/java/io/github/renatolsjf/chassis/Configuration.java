@@ -29,7 +29,8 @@ public class Configuration {
         INSTRUMENTATION_TRACING_STRATEGY("instrumentation.tracing.strategy", TracingStrategy.ALWAYS_SAMPLE),
         INSTRUMENTATION_TRACING_RATIO("instrumentation.tracing.ratio", 0.1d),
         INSTRUMENTATION_TRACING_AUTO_PROPAGATION_ENABLED("instrumentation.tracing.auto-propagation-enabled", Boolean.TRUE),
-        INSTRUMENTATION_TRACING_ADD_CUSTOM_PREFIX("instrumentation.tracing.add-custom-prefix", Boolean.TRUE);
+        INSTRUMENTATION_TRACING_ADD_CUSTOM_PREFIX("instrumentation.tracing.add-custom-prefix", Boolean.TRUE),
+        INSTRUMENTATION_TRACING_ZIPKIN_URL("instrumentation.tracing.zipkin-url", "");
 
         private final String keyValue;
         private final Object defaultValue;
@@ -130,6 +131,10 @@ public class Configuration {
 
     public Boolean tracingAddCustomPrefix() {
         return (Boolean) Properties.INSTRUMENTATION_TRACING_ADD_CUSTOM_PREFIX.initializeIfNeededAndGet(this.configData, Boolean.class);
+    }
+
+    public String tracingZipkinUrl() {
+        return (String) Properties.INSTRUMENTATION_TRACING_ZIPKIN_URL.initializeIfNeededAndGet(this.configData, String.class);
     }
 
 }

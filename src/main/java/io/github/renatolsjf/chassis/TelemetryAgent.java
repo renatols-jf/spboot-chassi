@@ -11,6 +11,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.exporter.zipkin.ZipkinSpanExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.SdkTracerProviderBuilder;
 import io.opentelemetry.sdk.trace.data.LinkData;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
@@ -29,9 +30,14 @@ public class TelemetryAgent {
         Resource resource = Resource.getDefault().toBuilder()
                 .put(ResourceAttributes.SERVICE_NAME, appName).build();
 
-        this.sdkTracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(BatchSpanProcessor.builder(ZipkinSpanExporter.builder().setEndpoint("http://localhost:9411/api/v2/spans").build()).build())
-                .setResource(resource)
+        SdkTracerProviderBuilder builder = SdkTracerProvider.builder();
+
+        String zipkinUrl = configuration.tracingZipkinUrl();
+        if (zipkinUrl != null && !zipkinUrl.isBlank()) { //"http://localhost:9411/api/v2/spans"
+            builder.addSpanProcessor(BatchSpanProcessor.builder(ZipkinSpanExporter.builder().setEndpoint(zipkinUrl).build()).build());
+        }
+
+        this.sdkTracerProvider = builder.setResource(resource)
                 .setSampler(createSampler(configuration))
                 .build();
 
