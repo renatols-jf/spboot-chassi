@@ -1365,6 +1365,19 @@ case the method name will be used.
 Tracing works via behavior enhancement, which only happens via injections. In other words, for tracing
 to work, the `@Traceable` object has to be inside the injection graph and must be annotated with `@Inject`.
 
+To add custom span attributes to a `Span`, there are two annotations:
+- [@SpanAttribute](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/SpanAttribute.java):
+  Supports a key and a value that will be added as an attribute for the span that represents the method. Both the
+  method and the class can be annotated with `SpanAttribute`. `SpanAttribute` belonging to the class will
+  be used in all methods annotated with `@Span`. If both a class and method `SpanAttribute` have the
+  same key, the method's value will be used.
+
+- [@SpanAttributeParameter](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/SpanAttributeParameter.java):
+  Used to annotate a parameter for a method annotated with `@Span`. Supports a `value` which is the key
+  of the attribute. If none is provided, the method name will be used as key. The value for the attribute
+  is the actual parameter value.  `@SpanAttributeParameter` takes precedence over `@SpanAttribute` if
+  conflicting keys are found.
+
 ## Timing operations and timer classification
 The framework enables us to classify the time taken while processing an operation. 
 The classification is done using a simple `String` as a `Tag`. To measure the time for a block of code, 
