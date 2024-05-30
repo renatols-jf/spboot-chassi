@@ -1,6 +1,7 @@
 package io.github.renatolsjf.chassis.monitoring.request;
 
 import io.github.renatolsjf.chassis.Chassis;
+import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.request.Request;
 import io.github.renatolsjf.chassis.request.RequestOutcome;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @HealthIgnore
+@NotTraceable
 public class HealthRequest extends Request {
 
     private static String OPERATION_NAME = "HEALTH_CHECK";
