@@ -33,7 +33,7 @@ public class TelemetryAgent {
         SdkTracerProviderBuilder builder = SdkTracerProvider.builder();
 
         String zipkinUrl = configuration.tracingZipkinUrl();
-        if (zipkinUrl != null && !zipkinUrl.isBlank()) { //"http://localhost:9411/api/v2/spans"
+        if (zipkinUrl != null && !zipkinUrl.isBlank()) {
             builder.addSpanProcessor(BatchSpanProcessor.builder(ZipkinSpanExporter.builder().setEndpoint(zipkinUrl).build()).build());
         }
 

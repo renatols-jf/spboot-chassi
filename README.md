@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.1.0
+- Implemented distributed tracing 
+
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
 
@@ -69,7 +72,7 @@ is planned.
 
 # What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
-applications. It deals with a few common concerns for distributed 
+applications. It deals with a few common concerns for distributed
 (or not so distributed) applications:
 
 - Logging
@@ -97,13 +100,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.11</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.11'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -1413,15 +1416,12 @@ default resources folder. The following configurations can be changed:
   as in `Context.forRequest().createLogger()`, this configuration will be used to initialize
   the class. If it's true, the class will be the calling class. If it's false, it will
   always be `ApplicatonLogger`.
-  
 - `logging.print-context-as-json`: Boolean, defaults to `true`. Governs whether the `context` field present
   in log messages will be exported as `json`.
-  
 - `logging.enable-default-attributes-overwrite`: Boolean, defaults fo `false`. Governs whether automatic logging
   attributes, such as `transactionId`, can have their value replaced with a call for 
   `Context#withRequestContextEntry` as in
   `Context.forRequest.withRequestContextEntry("transactionId", aNewValue)`.
-  
 - `validation.fail-on-execution-error`: Boolean, defaults to `true`. Governs whether an unexpected error
   in a validation attempt results in an exception. Every validation that fails for not matching
   the annotations for the current operation will result in an exception. For whatever
@@ -1429,30 +1429,45 @@ default resources folder. The following configurations can be changed:
   that is being validated throws an exception. If this configuration is true, the validation 
   will not happen, and an exception will be thrown. If this configuration is false, the validation
   will not happen, but it will be ignored, and if no other validation fails, the `Validatable`
-  would be deemed valid.
-  
+  would be deemed valid. 
 - `context.forbid-unauthorized-creation`: Boolean, defatuls to `true`. `Context.initialize` can't be called
   anywhere to create a `Context`. Allowing the `Context` creation is error-prone and, in almost
   all cases, not needed. If this configuration is true, unless the class in which 
   `Context.initialize` is being called is annotated with `@ContextCreator`, an exception will
   be thrown.
-
 - `context.allow-correlation-id-update`: Boolean, defaults to `true`. Governs whether a `correlationId` can be
-  updated after the context has been initialized.
-  
+  updated after the context has been initialized. 
 - `metrics.request.duration.histogram-range`: Integer list, defaults to `[200, 500, 1000, 2000, 5000, 10000]`.
-  Govern the default `Histogram` buckets for request duration in milliseconds.
-  
+  Govern the default `Histogram` buckets for request duration in milliseconds. 
 - `metrics.request.duration.export-by-type`: Boolean, defaults to `true`. Governs whether `Histogram` metrics
-  for request duration will be tagged with timer types.
-  
+  for request duration will be tagged with timer types. 
 - `metrics.health-window-duration-minutes`: Integer, defaults to 5. Governs the maximum age of requests
   to be used in health calculations.
-
 - `metrics.health-value-type`: String, defaults to `lowest`. The type of health calculation used to export
   the overral application health. Either `lowest`, to use the lowest operation health as the application heatlh,
   or `average`, to calculate the average of the health of the operations.
-  
+- `instrumentation.tracing.enabled`: Boolean, defaults to `false`. Determines if (distributed) tracing is enabled
+  or not. If disabled, no tracing information will be recorded or created. Trace headers won't be created.
+- `instrumentation.tracing.strategy`: String, defaults to `ALWAYS_SAMPLE`. Determine the sampling strategy for
+  tracing information. If tracing is disabled, this configuration has no effect. Can be one of:
+  - `ALWAYS_SAMPLE`: records every request.
+  - `NEVER_SAMPLE`: records no request. Note that this is not the same as having the tracing disabled. This will still
+    generate traceparent header for propagation.
+  - `RATIO_BASED_SAMPLE`: partially records the sampling information based on `instrumentation.tracing.ratio` configuration.
+  - `PARENT_BASED_OR_ALWAYS_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `ALWAYS_SAMPLE`.
+  - `PARENT_BASED_OR_NEVER_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `NEVER_SAMPLE`.
+  - `PARENT_BASED_OR_RATIO_BASED_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `RATIO_BASED_SAMPLE`.
+- `instrumentation.tracing.ratio`: Double, defaults to 0.1. Determines the percentage of requests which should be recorded, in
+  which 0 means none and 1 means all.
+- `instrumentation.tracing.auto-propagation-enable`: Boolean, defaults to `true`. Determines if `ApiCall` requests will
+  automatically propagate the traceparent header. `ApiCall` supports an override for request by request configuration.
+- `instrumentation.tracing.add-custom-prefix`: Boolean, defaults to `true`. Indicates whether the `custom.` preffix will be 
+  added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.
+- `instrumentation.tracing.zipkin-url`: String, no default. Stores the zipkin url to which the traces will be sent.
+
 ## Labels
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
 a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
@@ -1509,7 +1524,6 @@ in the future.
   being done.
 - Create a configuration to control whether an exception in a request will be wrapped in
   a `RequestException` that holds the original exception, and the outcome of the request.
-- Implement distributed tracing.
 - Implement default validators.
 - Implement yml configuration for things like validations, and more.
 - Create a circuit breaker or failsafe structure that can be used to wrap calls.
