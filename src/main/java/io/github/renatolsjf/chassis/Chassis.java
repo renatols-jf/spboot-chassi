@@ -2,6 +2,7 @@ package io.github.renatolsjf.chassis;
 
 import io.github.renatolsjf.chassis.integration.dsl.ApiFactory;
 import io.github.renatolsjf.chassis.loader.Loader;
+import io.github.renatolsjf.chassis.util.proxy.ChassisEnhancer;
 
 public class Chassis {
 
@@ -11,6 +12,7 @@ public class Chassis {
     private MetricRegistry metricRegistry = new MetricRegistry();
     private ApplicationHealthEngine applicationHealthEngine = new ApplicationHealthEngine();
     private TelemetryAgent telemetryAgent;
+    private ChassisEnhancer enhancer = new ChassisEnhancer();
 
     private Chassis() {
         Loader loader = Loader.defaultLoader();
@@ -39,6 +41,10 @@ public class Chassis {
 
     public TelemetryAgent getTelemetryAgent() {
         return this.telemetryAgent;
+    }
+
+    public ChassisEnhancer getEnhancer() {
+        return this.enhancer;
     }
 
     public void setConfig(Configuration config) {

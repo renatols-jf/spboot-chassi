@@ -1378,6 +1378,8 @@ To add custom span attributes to a `Span`, there are two annotations:
   is the actual parameter value.  `@SpanAttributeParameter` takes precedence over `@SpanAttribute` if
   conflicting keys are found.
 
+Currently, tracing information can only be exported to a `Zipkin` instance.
+
 ## Timing operations and timer classification
 The framework enables us to classify the time taken while processing an operation. 
 The classification is done using a simple `String` as a `Tag`. To measure the time for a block of code, 
@@ -1528,7 +1530,7 @@ default resources folder. The following configurations can be changed:
 - `context.allow-correlation-id-update`: Boolean, defaults to `true`. Governs whether a `correlationId` can be
   updated after the context has been initialized. 
 - `metrics.request.duration.histogram-range`: Integer list, defaults to `[200, 500, 1000, 2000, 5000, 10000]`.
-  Govern the default `Histogram` buckets for request duration in milliseconds. 
+  Governs the default `Histogram` buckets for request duration in milliseconds. 
 - `metrics.request.duration.export-by-type`: Boolean, defaults to `true`. Governs whether `Histogram` metrics
   for request duration will be tagged with timer types. 
 - `metrics.health-window-duration-minutes`: Integer, defaults to 5. Governs the maximum age of requests
@@ -1552,7 +1554,7 @@ default resources folder. The following configurations can be changed:
     is to be recorded. If not available, defaults to `RATIO_BASED_SAMPLE`.
 - `instrumentation.tracing.ratio`: Double, defaults to 0.1. Determines the percentage of requests which should be recorded, in
   which 0 means none and 1 means all.
-- `instrumentation.tracing.auto-propagation-enable`: Boolean, defaults to `true`. Determines if `ApiCall` requests will
+- `instrumentation.tracing.auto-propagation-enabled`: Boolean, defaults to `true`. Determines if `ApiCall` requests will
   automatically propagate the traceparent header. `ApiCall` supports an override for request by request configuration.
 - `instrumentation.tracing.add-custom-prefix`: Boolean, defaults to `true`. Indicates whether the `custom.` preffix will be 
   added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.

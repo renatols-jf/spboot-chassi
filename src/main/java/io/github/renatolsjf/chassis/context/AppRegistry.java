@@ -1,5 +1,6 @@
 package io.github.renatolsjf.chassis.context;
 
+import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.request.Inject;
 import io.github.renatolsjf.chassis.util.proxy.ChassisEnhancer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class AppRegistry {
 
     private static Object createObject(Class type, Object delegate) throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
 
-        ChassisEnhancer chassisEnhancer = new ChassisEnhancer();
+        ChassisEnhancer chassisEnhancer = Chassis.getInstance().getEnhancer();
         Object object;
         if (chassisEnhancer.isEnhanceable(type)) {
             object = chassisEnhancer.enhance(type, delegate);
