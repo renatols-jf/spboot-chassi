@@ -204,6 +204,10 @@ public abstract class ApiCall {
         return this.post(Media.ofCollection(body).render());
     }
 
+    public ApiResponse post(Media body) throws ApiException {
+        return this.post(body.render());
+    }
+
     protected <T> ApiResponse post(T body) {
         return this.execute(ApiMethod.POST, body);
     }
@@ -219,6 +223,10 @@ public abstract class ApiCall {
 
     public ApiResponse put(Renderable... body) throws ApiException {
         return this.put(Media.ofCollection(body).render());
+    }
+
+    public ApiResponse put(Media body) throws ApiException {
+        return this.put(body.render());
     }
 
     protected <T> ApiResponse put(T body) {
@@ -238,6 +246,10 @@ public abstract class ApiCall {
         return this.patch(Media.ofCollection(body).render());
     }
 
+    public ApiResponse patch(Media body) throws ApiException {
+        return this.patch(body.render());
+    }
+
     protected <T> ApiResponse patch(T body) {
         return this.execute(ApiMethod.PATCH, body);
     }
@@ -255,10 +267,16 @@ public abstract class ApiCall {
         return this.delete(Media.ofCollection(body).render());
     }
 
+    public ApiResponse delete(Media body) throws ApiException {
+        return this.delete(body.render());
+    }
+
     protected <T> ApiResponse delete(T body) throws ApiException {
         return this.execute(ApiMethod.DELETE, body);
     }
 
+
+    //---------- EXECUTE
     public ApiResponse execute() throws ApiException {
         return this.execute((Object) null);
     }
@@ -269,6 +287,10 @@ public abstract class ApiCall {
 
     public ApiResponse execute(Renderable... body) throws ApiException {
         return this.execute(Media.ofCollection(body).render());
+    }
+
+    public ApiResponse execute(Media body) throws ApiException {
+        return this.execute(body.render());
     }
 
     public <T> ApiResponse execute(T body) throws ApiException {

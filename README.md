@@ -2,9 +2,10 @@
 
 # Changelist
 
-## 0.1.0 (RELEASE CANDIDATE 1)
+## 0.1.0 (RELEASE CANDIDATE 2)
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
+- Added ApiCall methods that accept a Media
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -680,10 +681,11 @@ To make the request, we have a few behavior methods available. We have a method 
 method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
 Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such
 initialization is needed will be treated bellow. Except for `ApiCall::get()`, which expects no body,
-all other methods described above have 3 different implementations:
+all other methods described above have 4 different implementations:
 
-- One that expects a Renderable, which will render the single object as the body of the request.
-- One that expects multiple Renderable, which will render them as a list as the body of the request.
+- One that expects a `Renderable`, which will render the single object as the body of the request.
+- One that expects multiple `Renderable`, which will render them as a list as the body of the request.
+- One that expects a `Media`, which will be rendered as the body of the request.
 - One that accepts any object. The API will make the best effort to export the object as the body. This is
   fine for Collections, Maps, etc. For a POJO, it will export the public getters.
 
