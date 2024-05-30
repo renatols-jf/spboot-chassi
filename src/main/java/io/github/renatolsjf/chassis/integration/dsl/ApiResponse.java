@@ -83,9 +83,17 @@ public class ApiResponse implements TimeSensitive {
     }
 
     public <T> T getBody(Class<T> type) {
-        return Try.of(() -> objectMapper.readValue(this.body, type))
-                .getOrElseThrow(t -> new ResponseParsingException("Error while parsing response : " +
-                        t.getMessage(), t));
+        if (this.isBodyAvailable()) {
+            return Try.of(() -> objectMapper.readValue(this.body, type))
+                    .getOrElseThrow(t -> new ResponseParsingException("Error while parsing response : " +
+                            t.getMessage(), t));
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isBodyAvailable() {
+        return this.body != null && !this.body.isBlank();
     }
 
     @Override

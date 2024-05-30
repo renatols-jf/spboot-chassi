@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.0.11
+- Added `isBodyAvailable` to `ApiResponse`
+
 ## 0.0.10
 - Fixed a bug related to API loading
 
@@ -94,13 +97,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.10'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.11'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -659,6 +662,7 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getHeaders(): Map<String, String>`: Returns the headers present in the response.
 - `getCause(): Throwable`: Returns an exception in case a connection error happened.
 - `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
+- `isBodyAvailable(): boolean`: Indicates wheter a Response Body is available or not.
 
 If `failOnError` is true, an exception will be thrown in case the request is not successful :
 - [IOApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/IOApiException.java)
