@@ -810,7 +810,7 @@ Here is an example of the same ApiCall created and exe
 
 ### RestOperation
 DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
-later release.
+later release. Also, it does not support tracing.
 
 Each HTTP request should be made using the 
 [RestOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/RestOperation.java) 
@@ -1439,6 +1439,10 @@ output, and the health request output. That happens because these calculations h
 of the request, but the timer is still ticking. We could stop the timer as soon as the domain logic
 is over for this wrap-up to use a stopped timer, but this is part of the request after all. 
 Be it as it may, a future release will include a configuration to stop the timer.
+
+A `TimedOperation` can be automatically traced by adding the span name, calling `TimedOperation::traced`.
+Span attributes can be added by calling `TimedOperation::withTraceAttribute`, providing a `String` for the
+attribute key and a `String` for the attribute value.
 
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
