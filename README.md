@@ -1346,13 +1346,32 @@ A sample result:
 }
 ```
 
+## Tracing
+As of version `0.1.0`, the framework supports tracing / distributed tracing. Every `Request` is
+traced by default - note that traced is used in general since tracing might be disabled, or a
+specific execution of a request might not be sampled, depending on the configuration.
+If a `Request` is never to be sampled, it can be annotated with
+[@NotTraceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/NotTraceable.java).
+
+Considering that a request is traced and sampled, by default, a single `Span` will be created with the
+request's name. The framework considers a method as the scope of a `Span`. To add more spans, 
+the class in which a method or methods will be exported as spans, has to be annotated with
+[@Traceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Traceable.java).
+This will not trigger automatic span creations, as the methods which will be traced also need to be annotated with
+[@Span](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Span.java).
+`@Span` supports a single attribute, `value` for the name of the span. `value` can be omitted, in which
+case the method name will be used.
+
+Tracing works via behavior enhancement, which only happens via injections. In other words, for tracing
+to work, the `@Traceable` object has to be inside the injection graph and must be annotated with `@Inject`.
+
 ## Timing operations and timer classification
 The framework enables us to classify the time taken while processing an operation. 
 The classification is done using a simple `String` as a `Tag`. To measure the time for a block of code, 
 we use [TimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/TimedOperation.java).
 
 A `TimedOperation` will record the time it took automatically to the `Context`. 
-You can tag the `TimedOperation` however you like, using `new TimedOperation(myTag)`, or using one of two
+You can tag the `TimedOperation` however you'd like, using `new TimedOperation(myTag)`, or using one of two
 pre-defined tags: http `TimedOperation.http()`, used for HTTP calls, and db `TimedOperation.db()`,
 used for database calls. 
 
