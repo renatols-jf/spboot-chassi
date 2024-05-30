@@ -33,7 +33,6 @@ public class TracingEnhancer implements TypeEnhancer {
                 spanAnnotation = method.getAnnotation(io.github.renatolsjf.chassis.monitoring.tracing.Span.class);
             }
 
-            System.out.println("ENHANCED: " + o.getClass().getSimpleName() + " - " + method.getName());
             Tracer tracer = Context.forRequest().getTelemetryContext().getTracer(); // TODO this needs to be in the context so the tracer is already initialized
             String spanName = spanAnnotation.value();
             if (spanName.isBlank()) {

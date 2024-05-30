@@ -1116,7 +1116,10 @@ The application has a default
 that exports health information in `json`.
 It exports health percentage, request count, quantiles for the time taken for each type, and
 result count by type. It does so by each operation, and also aggregates as application information.
-The application health is not an average. Instead, it reflects the health of the worst operation.
+The application health is not an average by default (but can be configured to be so). 
+Instead, it reflects the health of the worst operation. A `HealthRequest` is not traceable and
+does not affect application health. In other words, it's marked with both `@NotTraceable` and
+`@HealthIgnore`.
 To use it, create a `HealthRequest`, process it and render the result, such as 
 `new HealthRequest().process().render()`. To tie this to a Spring rest entry point, just use something like:
 
