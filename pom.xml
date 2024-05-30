@@ -5,7 +5,7 @@
 
 	<groupId>io.github.renatols-jf</groupId>
 	<artifactId>spboot-chassis</artifactId>
-	<version>UNRELEASED</version>
+	<version>0.1.0-rc1</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Multipurpose microservice chassis for spring boot</description>
 	<url>https://github.com/renatols-jf/spboot-chassis</url>
