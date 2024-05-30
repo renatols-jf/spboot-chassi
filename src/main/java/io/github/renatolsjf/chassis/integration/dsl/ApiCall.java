@@ -3,11 +3,12 @@ package io.github.renatolsjf.chassis.integration.dsl;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
-import io.github.renatolsjf.chassis.util.build.BuildIgnore;
-import io.github.renatolsjf.chassis.util.build.Buildable;
-import io.github.renatolsjf.chassis.util.build.Multi;
+import io.github.renatolsjf.chassis.util.genesis.BuildIgnore;
+import io.github.renatolsjf.chassis.util.genesis.Buildable;
+import io.github.renatolsjf.chassis.util.genesis.Multi;
 
 import java.net.*;
 import java.time.Duration;
@@ -59,6 +60,9 @@ public abstract class ApiCall {
     private final Map<String, String> queryParams = new HashMap<>();
     private final Map<String, String> urlReplacements = new HashMap<>();
     private ApiMethod method;
+
+    @BuildIgnore
+    private Boolean propagateTraceOverride = null;
 
 
     public ApiCall withOperation(String operation) {
@@ -115,6 +119,11 @@ public abstract class ApiCall {
 
     public ApiCall withApiMethod(ApiMethod apiMethod) {
         this.method = apiMethod;
+        return this;
+    }
+
+    public ApiCall withPropagateTrace(Boolean propagateTrace) {
+        this.propagateTraceOverride = propagateTrace;
         return this;
     }
 
@@ -271,14 +280,23 @@ public abstract class ApiCall {
 
     private <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
-        TimedOperation<ApiResponse> timedOperation =
-                TimedOperation.http();
+        TimedOperation<ApiResponse> timedOperation = TimedOperation.http()
+                .traced(method.toString() + " " + this.getEndpoint())
+                .withTraceAttribute("method", method.toString())
+                .withTraceAttribute("url", this.getEndpoint());
 
-        ApiResponse apiResponse = timedOperation.execute(() -> this.doExecute(method, body));
+        ApiResponse apiResponse = timedOperation.execute(() ->  {
+            if (this.shouldPropagateTracing()) {
+                TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
+                this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
+            }
+            return this.doExecute(method, body);
+        });
+
         long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = apiResponse.getHttpStatus();
 
-        Context.forRequest().createLogger()
+        Context.forRequest().createLogger(timedOperation)
                 .info("API CALL: " + method.toString() + " " + this.getEndpoint() +
                         " " + statusCode + " " + duration)
                 .attach(LOGGING_FIELD_PROVIDER, this.provider)
@@ -327,6 +345,14 @@ public abstract class ApiCall {
 
         return apiResponse;
 
+    }
+
+    private final boolean shouldPropagateTracing() {
+        boolean shouldPropagate = this.propagateTraceOverride != null
+                ? this.propagateTraceOverride
+                : Chassis.getInstance().getConfig().isTracingAutoPropagationEnabled();
+        return Context.isTracingEnabled()
+                && shouldPropagate;
     }
 
     protected abstract <T> ApiResponse doExecute(ApiMethod method, T Body);

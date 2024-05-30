@@ -1,4 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import io.github.renatolsjf.chassis.util.conversion.ConversionFactory;
 

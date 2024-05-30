@@ -1,4 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
 public class UnableToBuildObjectException extends Exception {
 

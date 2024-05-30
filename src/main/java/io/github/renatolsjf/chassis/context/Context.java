@@ -3,7 +3,10 @@ package io.github.renatolsjf.chassis.context;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.Labels;
 import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
+import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
+import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.time.Duration;
 import java.util.*;
@@ -19,12 +22,16 @@ import java.util.concurrent.atomic.AtomicLong;
  * Be it as it may, by default, a context can not be created anywhere. It's necessary to annotate the calling as a ContextCreator
  * @see ContextCreator
  *
- * The currently implementation nas no support for NIO. A relatively easy solution is to implement a snapshot, which holds a context object
+ * The current implementation has no support for NIO. A relatively easy solution is to implement a snapshot, which holds a context object
  * and clears the context ThreadLocal. A restore method then would reinitialize it. A less manual solution would likely require code manipulation.
  */
 public class Context {
 
     private static ThreadLocal<Context> tlContext = new ThreadLocal<>();
+
+    public static boolean isAvailable() {
+        return tlContext.get() != null;
+    }
 
     public static Context forRequest() {
         Context c = tlContext.get();
@@ -56,7 +63,8 @@ public class Context {
         }
     }
 
-    public static void clear() {
+    public void clear(boolean success) {
+        this.telemetryContext.clear(success);
         tlContext.remove();
     }
 
@@ -67,8 +75,7 @@ public class Context {
     private String operation;
     private Projection projection = new Projection(Collections.emptyList());
     private Map<String, String> requestContext = new HashMap<>();
-
-    private ApplicationLogger logger = new ApplicationLogger(this.createFixedLoggingAttributes());
+    private TelemetryContext telemetryContext = Chassis.getInstance().getTelemetryAgent().empty();
 
     private long requestStartingTime = System.currentTimeMillis();
     private Map<String, Long> operationTimeCounter = new HashMap<>();
@@ -133,6 +140,30 @@ public class Context {
         return this;
     }
 
+    public Context withTracing(String scopeOwner, String traceName, String tracingHeader) {
+        if (Chassis.getInstance().getConfig().isTracingEnabled()) {
+            Labels l = Chassis.getInstance().labels();
+
+            Map<String, String> attributes = new HashMap<>();
+            attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                    l.getLabel(Labels.Field.LOGGING_TRANSACTION_ID)), this.transactionId);
+            attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                    l.getLabel(Labels.Field.LOGGING_OPERATION)), this.operation);
+            if (this.correlationId != null) {
+                attributes.put("custom." + CaseString.getValue(CaseString.CaseType.SNAKE,
+                        l.getLabel(Labels.Field.LOGGING_CORRELATION_ID)), this.correlationId);
+            }
+
+            this.telemetryContext = Chassis.getInstance().getTelemetryAgent()
+                    .start(scopeOwner, traceName, tracingHeader, attributes);
+        }
+        return this;
+    }
+
+    public TelemetryContext getTelemetryContext() {
+        return this.telemetryContext;
+    }
+
     public Map<String, String> getRequestContext() {
         return this.requestContext;
     }
@@ -148,17 +179,22 @@ public class Context {
     }
 
     public ApplicationLogger createLogger() {
+        return this.createLogger(ExecutionContext.unavailable());
+    }
+
+
+    public ApplicationLogger createLogger(ExecutionContext executionContext) {
         if (Chassis.getInstance().getConfig().useCallingClassNameForLogging()) {
             return new ApplicationLogger(StackWalker.getInstance(
                     StackWalker.Option.RETAIN_CLASS_REFERENCE).getCallerClass(),
-                    this.createFixedLoggingAttributes());
+                    this.createFixedLoggingAttributes(executionContext));
         } else {
-            return this.logger;
+            return new ApplicationLogger(this.createFixedLoggingAttributes(executionContext));
         }
     }
 
-    public ApplicationLogger createLogger(Class<?> clazz) {
-        return new ApplicationLogger(clazz, this.createFixedLoggingAttributes());
+    public ApplicationLogger createLogger(Class<?> clazz, ExecutionContext executionContext) {
+        return new ApplicationLogger(clazz, this.createFixedLoggingAttributes(executionContext));
     }
 
     public Map<String, Long> getOperationTimeByType() {
@@ -171,7 +207,7 @@ public class Context {
         return times;
     }
 
-    private Map<String, LoggingAttribute> createFixedLoggingAttributes() {
+    private Map<String, LoggingAttribute> createFixedLoggingAttributes(ExecutionContext executionContext) {
 
         Chassis c = Chassis.getInstance();
         Map<String, LoggingAttribute> loggingAttributes = new HashMap<>();
@@ -194,12 +230,32 @@ public class Context {
             return operationTimes.toString();
         });
 
+        if (c.getConfig().printTraceIdOnLogs() && this.getTelemetryContext().isTracingEnabled()) {
+
+            if (executionContext.isExecutionContextAvailable()) {
+                String traceId = executionContext.getTraceId();
+                String spanId = executionContext.getSpanId();
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> spanId);
+            } else {
+                TracingContext tracingContext = this.telemetryContext.getTracingContext();
+                String traceId = tracingContext.getTraceId();
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_TRACE_ID), () -> traceId);
+                loggingAttributes.put(c.labels().getLabel(Labels.Field.LOGGING_SPAN_ID), () -> this.telemetryContext.getTracingContext().getSpanId());
+            }
+
+        }
+
         if (overrideDefaultAttributes) {
             this.requestContext.entrySet().forEach(e -> loggingAttributes.put(e.getKey(), () -> e.getValue()));
         }
 
         return loggingAttributes;
 
+    }
+
+    public static boolean isTracingEnabled() {
+        return Context.isAvailable() && Context.forRequest().getTelemetryContext().isTracingEnabled();
     }
 
 }

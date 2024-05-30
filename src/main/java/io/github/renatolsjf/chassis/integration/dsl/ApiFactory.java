@@ -2,8 +2,8 @@ package io.github.renatolsjf.chassis.integration.dsl;
 
 import io.github.renatolsjf.chassis.integration.dsl.resttemplate.RestTemplateApiCall;
 import io.github.renatolsjf.chassis.util.CaseString;
-import io.github.renatolsjf.chassis.util.build.ObjectBuilder;
-import io.github.renatolsjf.chassis.util.build.UnableToBuildObjectException;
+import io.github.renatolsjf.chassis.util.genesis.ObjectBuilder;
+import io.github.renatolsjf.chassis.util.genesis.UnableToBuildObjectException;
 
 import java.util.HashMap;
 import java.util.Map;
