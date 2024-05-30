@@ -674,6 +674,8 @@ as in `ApiFactory.createApiCall()`. The following methors are available to confi
 
 - `withContenType(String contentType)`: Adds the `Content-Type` header.
 
+- `withPropagateTrace(Boolean propagateTrace)`: Overrides the default trace propagation setting.
+
 To make the request, we have a few behavior methods available. We have a method for each HTTP
 method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
 Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such
@@ -742,6 +744,7 @@ under the default resources folder. The following attributes can be configured (
 - `header`: List with 2 elements - key and value. Supports multiple.
 - `query-param`: List with 2 elements - key and value. Supports multiple.
 - `url-replacement`: List with 2 elements - key and value. Supports multiple.
+- `propagate-trace`: Boolean.
 
 If an attribute supports multiple initializations, to initialize it multiple times an array with
 a multiple of its total parameter count should be provided, e.g, to add 2 query parameters, a
