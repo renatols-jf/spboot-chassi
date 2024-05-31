@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ExtractedMethod extends ExtractedMember<Method> {
 
@@ -52,14 +52,52 @@ public class ExtractedMethod extends ExtractedMember<Method> {
 
         List<Class<?>> paramTypes = Arrays.stream(this.member.getParameterTypes())
                 .map(c -> wrapperTypes.getOrDefault(c, c)).collect(Collectors.toList());
-
-        if (params.length == 0 && paramTypes.isEmpty()) {
+        if (this.affinity == 0 || (paramTypes.isEmpty() && params.length > 0)) {
+            return;
+        } else if (params.length == 0 && paramTypes.isEmpty()) {
             this.affinity = 0xF0 | affinity;
-        } else if (params.length == 1 && params[0] instanceof Collection<?>) {
+        } else if (paramTypes.size() > 1 && params.length == 1 && params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
-        } else if (paramTypes.size() == params.length) {
+        } else if (paramTypes.size() <= params.length && params.length % paramTypes.size() == 0) {
 
-            if (paramTypes.containsAll(Arrays.stream(params).map(Object::getClass).collect(Collectors.toList()))) {
+            boolean containsNull = Arrays.stream(params).anyMatch(Objects::isNull);
+            boolean needsConversion = false;
+            boolean isMulti = params.length > paramTypes.size();
+
+            /*boolean isApplicable = IntStream.range(0, params.length)
+                    .allMatch(i -> params[i] == null
+                            || params[i].getClass() == paramTypes.get(i - ((i / paramTypes.size()) * paramTypes.size()))
+                            || ConversionFactory.isConverterAvailable(params[i].getClass(), paramTypes.get((i - ((i / paramTypes.size()) * paramTypes.size())))));
+            if (isApplicable) {*/
+            Object[] newParams = new Object[params.length];
+            for (int i = 0; i < params.length; i++) {
+                Object o = params[i];
+                if (o == null || o.getClass() == paramTypes.get(i - ((i / paramTypes.size()) * paramTypes.size()))) {
+                    newParams[i] = o;
+                } else if (ConversionFactory.isConverterAvailable(params[i].getClass(), paramTypes.get((i - ((i / paramTypes.size()) * paramTypes.size()))))) {
+                    needsConversion = true;
+                    newParams[i] = ConversionFactory.converter(params[i].getClass(), paramTypes.get((i - ((i / paramTypes.size()) * paramTypes.size())))).convert(params[i]);
+                } else {
+                    return;
+                }
+            }
+            this.params = newParams;
+            this.affinity = 0xF0 | affinity;
+
+            if (isMulti) {
+                this.affinity -= 0x60;
+            }
+            if (containsNull) {
+                this.affinity -= 0x30;
+            }
+            if (needsConversion) {
+                this.affinity -= 0x30;
+            }
+        }
+
+
+
+            /*if (paramTypes.containsAll(Arrays.stream(params).map(Object::getClass).collect(Collectors.toList()))) {
                 this.params = params;
                 this.affinity = 0xF0 | affinity;
             } else if (IntStream.range(0, paramTypes.size())
@@ -86,7 +124,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
                 this.affinity = 0x70 | affinity;
             }
 
-        }
+        }*/
 
     }
 

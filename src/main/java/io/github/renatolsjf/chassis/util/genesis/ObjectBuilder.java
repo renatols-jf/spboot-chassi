@@ -1,6 +1,8 @@
 package io.github.renatolsjf.chassis.util.genesis;
 
 
+import io.github.renatolsjf.chassis.util.expression.ExpressionParser;
+
 import java.lang.reflect.*;
 import java.util.Map;
 
@@ -41,8 +43,9 @@ public class ObjectBuilder {
 
         map.forEach((k, v) -> {
 
+            Object parsedValue = ExpressionParser.parse(v);
             if (this.initializationType == InitializationType.METHOD_FIRST || this.initializationType == InitializationType.METHOD_ONLY) {
-                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
+                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(parsedValue);
                 if (ex != null) {
                     try {
                         ex.callOrSet();
@@ -52,7 +55,7 @@ public class ObjectBuilder {
             }
 
             if (this.initializationType != InitializationType.METHOD_ONLY) {
-                ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(v);
+                ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(parsedValue);
                 if (ex != null) {
                     try {
                         ex.callOrSet();
@@ -62,7 +65,7 @@ public class ObjectBuilder {
             }
 
             if (this.initializationType == InitializationType.FIELD_FIRST) {
-                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
+                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(parsedValue);
                 try {
                     ex.callOrSet();
                 } catch (UnableToSetMemberException e) {}
