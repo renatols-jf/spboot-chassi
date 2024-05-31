@@ -6,6 +6,7 @@
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
 - Added ApiCall methods that accept a Media
+- Made it possible to attach Context information to an ApiCall created though `chassis.api.yaml`
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
