@@ -52,11 +52,15 @@ public class ExtractedMethod extends ExtractedMember<Method> {
 
         List<Class<?>> paramTypes = Arrays.stream(this.member.getParameterTypes())
                 .map(c -> wrapperTypes.getOrDefault(c, c)).collect(Collectors.toList());
-        if (this.affinity == 0 || (paramTypes.isEmpty() && params.length > 0)) {
+        if (this.affinity == 0
+                || (paramTypes.isEmpty() && params.length > 0)
+                || (!paramTypes.isEmpty() && params.length == 0)) {
             return;
         } else if (params.length == 0 && paramTypes.isEmpty()) {
             this.affinity = 0xF0 | affinity;
-        } else if (paramTypes.size() > 1 && params.length == 1 && params[0] instanceof Collection<?>) {
+        } else if (params.length == 1
+                && params[0] instanceof Collection<?>
+                && params[0].getClass() != paramTypes.get(0)) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (paramTypes.size() <= params.length && params.length % paramTypes.size() == 0) {
 

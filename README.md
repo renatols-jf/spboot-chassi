@@ -755,6 +755,21 @@ list with 4 elements needs to be provided.
 Also, the first element of the hierarchy will be the label by which that ApiCall is retrieved.
 Here is an example of two different ApiCalls initialized by code and yaml.
 
+You might want to initialize some contextual information within a request, like the current
+transactionId in a header. For that, you can grab the current context with `$Context` and access
+the transactionId, correlationId, or Operation calling `@Context.transactionId`,
+`@Context.correlationId`, or `@Context.operation` respectively.
+```
+...
+header:
+  - X-TRANSACTION-ID
+  - $Context.transactionId
+  - X-CORRELATION-ID
+  - $Context.correlationId
+  - X-OPERATION
+  - $Context.operation
+```
+
 YAML file
 ```
 #label used to retrieve the operation
@@ -768,6 +783,9 @@ google-search:
   failOnError: false
   basicAuth: ["user", "pass"]
   queryParam: [test1, test2, test3, test4]
+  header:
+    - X-TRANSACTION-ID
+    - $Context.transactionId
   
 a-random-api
   operation: RANDOM_OPERATION
@@ -791,6 +809,7 @@ ApiResponse apiResponse = ApiFactory.createApiCall()
   .withBasicAuth("user", "pass")
   .withQueryParam("test1", "test2")
   .withQueryParam("test3", "test4")
+  .withHeader("X-TRANSACTION-ID", Context.forRequest().getTransactionId())
   .get();
   
 ApiResponse apiResponse = ApiFactory.createApiCall()
@@ -1482,7 +1501,7 @@ attribute key and a `String` for the attribute value.
 
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
-${}. It's also possible to use a default value in case the environment variable is not set by using 
+${} - do not confound with $ in $Context mentioned above. It's also possible to use a default value in case the environment variable is not set by using 
 a colon followed by a dash as in ${:-}.
 
 The following uses MY_ENV to initialize the day
