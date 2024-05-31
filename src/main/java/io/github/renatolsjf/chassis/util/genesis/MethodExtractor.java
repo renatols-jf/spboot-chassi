@@ -35,6 +35,18 @@ public final class MethodExtractor extends MemberExtractor<Method, MethodExtract
         });
     }
 
+    public MethodExtractor getter() {
+        this.resetPrefix();
+        return this.withPrefix("get")
+                .withPrefix("is");
+    }
+
+    public MethodExtractor setter() {
+        this.resetPrefix();
+        return this.withPrefix("set")
+                .withPrefix("with");
+    }
+
     public MethodExtractor withPrefix(String prefix) {
         this.acceptablePrefixes.add(prefix);
         return this;

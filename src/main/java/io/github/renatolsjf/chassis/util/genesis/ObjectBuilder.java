@@ -35,9 +35,7 @@ public class ObjectBuilder {
         }
 
         ObjectExtractor<T> objectExtractor = new ObjectExtractor<>(t);
-        MethodExtractor methodExtractor = objectExtractor.methodExtractor()
-                .withPrefix("set")
-                .withPrefix("with");
+        MethodExtractor methodExtractor = objectExtractor.methodExtractor().setter();
         FieldExtractor fieldExtractor = objectExtractor.fieldExtractor();
 
 
@@ -46,26 +44,28 @@ public class ObjectBuilder {
             if (this.initializationType == InitializationType.METHOD_FIRST || this.initializationType == InitializationType.METHOD_ONLY) {
                 ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
                 if (ex != null) {
-                    if (ex.setAndIgnore()) {
+                    try {
+                        ex.callOrSet();
                         return;
-                    }
+                    } catch (UnableToSetMemberException e) {}
                 }
             }
 
             if (this.initializationType != InitializationType.METHOD_ONLY) {
                 ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(v);
                 if (ex != null) {
-                    if (ex.setAndIgnore()) {
+                    try {
+                        ex.callOrSet();
                         return;
-                    }
+                    } catch (UnableToSetMemberException e) {}
                 }
             }
 
             if (this.initializationType == InitializationType.FIELD_FIRST) {
                 ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
-                if (ex != null) {
-                    ex.setAndIgnore();
-                }
+                try {
+                    ex.callOrSet();
+                } catch (UnableToSetMemberException e) {}
             }
 
         });

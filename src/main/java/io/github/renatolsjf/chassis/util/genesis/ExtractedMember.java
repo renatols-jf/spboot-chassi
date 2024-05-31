@@ -16,7 +16,7 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
 
     protected Object object;
     protected T member;
-    protected Object[] params;
+    protected Object[] params = new Object[0];
     protected int affinity;
 
     public ExtractedMember(Object object, String memberName, T member) {
@@ -54,27 +54,34 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
 
     }
 
-    public boolean setAndIgnore() {
+    /*public boolean setAndIgnore() {
         try {
             this.set();
             return true;
         } catch (UnableToSetMemberException ex) {
             return false;
         }
-    }
+    }*/
 
-    public void set() throws UnableToSetMemberException {
+    public void callOrSet() throws UnableToSetMemberException {
 
-        if (params.length == 0) {
+        /*if (params.length == 0) {
             throw new UnableToSetMemberException(new IllegalStateException("Params not set"));
-        }
+        }*/
 
         if (!this.hasAffinity()) {
             throw new UnableToSetMemberException("Provided params can't be used to set member");
         }
 
-        this.doSet();
+        this.doCallOrSet();
 
+    }
+
+    public Object callOrGet() throws UnableToGetMemberException {
+        if (!this.hasAffinity()) {
+            throw new UnableToGetMemberException("Provided params can't be used to set member");
+        }
+        return this.doCallOrGet();
     }
 
     @Override
@@ -93,7 +100,8 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
                 && (this.affinity & 0x0F) > 0;
     }
 
-    protected abstract void doSet() throws UnableToSetMemberException;
+    protected abstract void doCallOrSet() throws UnableToSetMemberException;
+    protected abstract Object doCallOrGet() throws UnableToGetMemberException;
     protected abstract void setParams(Object... params);
 
 

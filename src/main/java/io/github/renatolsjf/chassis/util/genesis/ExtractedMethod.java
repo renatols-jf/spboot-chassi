@@ -17,7 +17,7 @@ public class ExtractedMethod extends ExtractedMember<Method> {
     }
 
     @Override
-    protected void doSet() throws UnableToSetMemberException {
+    protected void doCallOrSet() throws UnableToSetMemberException {
         try {
             this.member.trySetAccessible();
             int numberOfParameters = this.member.getParameterTypes().length;
@@ -32,12 +32,30 @@ public class ExtractedMethod extends ExtractedMember<Method> {
     }
 
     @Override
+    protected Object doCallOrGet() throws UnableToGetMemberException {
+
+        if (this.member.getParameterTypes().length != this.params.length) {
+            throw new UnableToGetMemberException("Can't get with multiple parameters");
+        }
+
+        this.member.trySetAccessible();
+        try {
+            return this.member.invoke(this.object, this.params);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new UnableToGetMemberException(e);
+        }
+
+    }
+
+    @Override
     protected void setParams(Object... params) {
 
         List<Class<?>> paramTypes = Arrays.stream(this.member.getParameterTypes())
                 .map(c -> wrapperTypes.getOrDefault(c, c)).collect(Collectors.toList());
 
-        if (params.length == 1 && params[0] instanceof Collection<?>) {
+        if (params.length == 0 && paramTypes.isEmpty()) {
+            this.affinity = 0xF0 | affinity;
+        } else if (params.length == 1 && params[0] instanceof Collection<?>) {
             this.setParams(((Collection<?>) params[0]).toArray());
         } else if (paramTypes.size() == params.length) {
 
