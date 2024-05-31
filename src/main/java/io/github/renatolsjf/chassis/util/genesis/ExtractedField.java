@@ -44,8 +44,10 @@ public class ExtractedField extends ExtractedMember<Field> {
             return;
         } else if (params.length == 0) {
             this.affinity = 0x80 | affinity;
+            return;
         } else if (params[0] == null) {
             this.affinity = 0x10 | affinity;
+            return;
         }
 
         Class<?> paramType = wrapperTypes.containsKey(this.member.getType())

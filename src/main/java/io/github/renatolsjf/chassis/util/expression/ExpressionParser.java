@@ -69,7 +69,7 @@ public class ExpressionParser {
                     .withName(part).mostAdequateOrNull();
             if (member == null) {
                 try {
-                    extractor.fieldExtractor().withName(part).mostAdequate();
+                    member = extractor.fieldExtractor().withName(part).mostAdequate();
                 } catch (NoAdequateMemberException e) {
                     return null;
                 }
