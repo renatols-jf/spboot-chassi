@@ -40,8 +40,8 @@ public class TimedEnhancer implements TypeEnhancer {
             boolean traced = method.isAnnotationPresent(Span.class);
             if (traced && timed) {
                 Context.logger().warn("Method " + method.getName() + " for class "
-                        + method.getDeclaringClass().getName() + " has both @TimeRecording and @Span annotations. @TimeRecording is ignored. " +
-                        "To trace a @TimeRecording method, set @TimeRecording::traced to true").log();
+                        + method.getDeclaringClass().getName() + " has both @AsTimedOperation and @Span annotations. @AsTimedOperation is ignored. " +
+                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true").log();
             } else if (timed) {
                 shouldEnhance = true;
             }
