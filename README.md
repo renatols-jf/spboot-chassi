@@ -6,7 +6,7 @@
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
 - Added `ApiCall` methods that accept a `Media`
-- Made it possible to attach Context information to an ApiCall created through `chassis-api.yaml`
+- Made it possible to attach `Context` information to an `ApiCall` created through `chassis-api.yaml`
 - Added `@AsTimedOperation` annotation
 
 ## 0.0.11
