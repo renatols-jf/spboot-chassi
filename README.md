@@ -1507,7 +1507,8 @@ attribute key and a `String` for the attribute value.
 Since version `0.1.0`,
 [@AsTimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/AsTimedOperation.java)
 enables auto time recording for methods. Simply annotate a method with `@AsTimedOperation`, and it will
-automatically add the time to the context. Since this is a behavior enhancement, the object has to
+automatically add the time to the context. You can also annotate the class, in which case all of its methods
+will be converted do `TimedOperation`. Since this is a behavior enhancement, the object has to
 be in the injection graph - see [above](#dependency-injection). Since `@AsTimedOperation`
 can also be configured to trace / create a span, `@AsTimedOperation` and `@Span` are incompatible.
 `@AsTimedOperation` will be ignored if a method is also annotated with `@Span`.
@@ -1519,7 +1520,9 @@ The following attributes are supported for `@AsTimedOperation`:
 - `traced`: Boolean, defaults to false. Indicates if the method will also be traced, create a span.
   The same `@SpanAttribute` and `@SpanAttributeParameter` also applies to a `@AsTimedOperation`method.
 - `spanName`: String, defaults to empty. The name of the span to be used if the operation is traced.
-  If empty, the method name will be used.
+  If empty, the method name will be used. Mind that, if it's the class that is annotated with
+  `@AsTimedOperation`, the spanName shall be a concatenation of both the `spanName` attribute plus
+  the method name.
 
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
