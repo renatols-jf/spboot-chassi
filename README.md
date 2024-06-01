@@ -1669,6 +1669,6 @@ in the future.
 - Cross-field or cross-concern validation.
 - Creation of behavior flows using yml or other configuration tools. Possibly another project 
 that uses this one as lib.
-  
+- Refactor undocumented proxy and genesis APIs to support external use.
 # Sample project
 [Demo Application](https://github.com/renatols-jf/spboot-chassis-demo)
