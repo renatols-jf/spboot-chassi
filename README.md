@@ -1670,5 +1670,7 @@ in the future.
 - Creation of behavior flows using yml or other configuration tools. Possibly another project 
 that uses this one as lib.
 - Refactor undocumented proxy and genesis APIs to support external use.
+- 
 # Sample project
+The Sample project is based on version `0.0.2`. An update is soon to come.
 [Demo Application](https://github.com/renatols-jf/spboot-chassis-demo)
