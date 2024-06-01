@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 
 public class ChassisEnhancer {
 
-    private TypeEnhancer[] enhancers = new TypeEnhancer[] {new TracingEnhancer()};
-    //private TracingEnhancer tracingEnhancer = new TracingEnhancer();
+    private TypeEnhancer[] enhancers = new TypeEnhancer[] {new TracingEnhancer(), new TimedEnhancer()};
 
     public <T> T enhance(Class<T> type) {
         return this.enhance(type, null);
@@ -21,16 +20,19 @@ public class ChassisEnhancer {
 
     public <T> T enhance(Class<T> type, T delegate) {
 
-        List<Enhancement> enhancements = Arrays.stream(enhancers)
+        List<TypeEnhancer> availabeEnhancers = Arrays.stream(enhancers)
                 .filter(e -> e.isEnhanceable(type))
-                .map(e -> e.createEnhancement())
                 .collect(Collectors.toList());
 
-        if (enhancements.isEmpty()) {
+        if (availabeEnhancers.isEmpty()) {
             throw new TypeNotEnhanceableException();
         }
 
         MethodInterceptor interceptor = (Object o, Method method, Object[] args, MethodProxy methodProxy) -> {
+
+            List<Enhancement> enhancements = availabeEnhancers.stream()
+                    .map(e -> e.createEnhancement())
+                    .toList();
 
             try {
                 enhancements.forEach(e -> e.preInvocation(o, delegate, method, args));
@@ -54,7 +56,6 @@ public class ChassisEnhancer {
 
     public boolean isEnhanceable(Class<?> type) {
         return Arrays.stream(this.enhancers).anyMatch(enhancer -> enhancer.isEnhanceable(type));
-        //return tracingEnhancer.isEnhanceable(type);
     }
 
 }

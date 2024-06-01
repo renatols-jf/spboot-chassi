@@ -197,6 +197,15 @@ public class Context {
         return new ApplicationLogger(clazz, this.createFixedLoggingAttributes(executionContext));
     }
 
+    public static ApplicationLogger logger() {
+        Context c = tlContext.get();
+        if (c != null) {
+            return c.createLogger();
+        } else {
+            return new ApplicationLogger(Collections.emptyMap());
+        }
+    }
+
     public Map<String, Long> getOperationTimeByType() {
         Map<String, Long> times = new HashMap<>(this.operationTimeCounter);
         AtomicLong taggedValues = new AtomicLong(0);

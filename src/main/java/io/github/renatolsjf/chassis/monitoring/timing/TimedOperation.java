@@ -18,11 +18,15 @@ public class TimedOperation<T> implements ExecutionContext {
     public static final String DATABASE_OPERATION = "db";
 
     private final String tag;
+    private long startingTime;
     private long executionTime;
     private String traceName;
     private String traceId;
     private String spanId;
     private Map<String, String> traceAttributes = new HashMap<>();
+
+    private Span span;
+    private Scope scope;
 
     public static <Q> TimedOperation<Q> http() {
         return new TimedOperation<>(HTTP_OPERATION);
@@ -36,71 +40,62 @@ public class TimedOperation<T> implements ExecutionContext {
         this.tag = tag;
     }
 
+    public void start() {
+
+        this.startingTime = System.currentTimeMillis();
+        if (Context.isTracingEnabled()
+                && this.traceName != null
+                && !this.traceName.isBlank()) {
+
+            this.span = Context.forRequest().getTelemetryContext().getTracer()
+                    .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons())
+                    .startSpan();
+            this.traceAttributes.forEach(span::setAttribute);
+            this.scope = span.makeCurrent();
+
+            SpanContext spc = span.getSpanContext();
+            this.traceId = spc.getTraceId();
+            this.spanId = spc.getSpanId();
+
+        }
+
+    }
+
+    public void end() {
+
+        if (scope != null) {
+            scope.close();
+        }
+        if (span != null) {
+            span.end();
+        }
+
+        this.executionTime = System.currentTimeMillis() - this.startingTime;
+        Context.forRequest().recordOperationTime(this.tag, this.executionTime);
+
+    }
+
     public void run(Runnable r) {
-        long l = System.currentTimeMillis();
         try {
-
-            if (Context.isTracingEnabled()
-                    && this.traceName != null
-                    && !this.traceName.isBlank()) {
-
-                Span span = Context.forRequest().getTelemetryContext().getTracer()
-                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons())
-                        .startSpan();
-                this.traceAttributes.forEach(span::setAttribute);
-                try (Scope scope = span.makeCurrent()) {
-                    SpanContext spc = span.getSpanContext();
-                    this.traceId = spc.getTraceId();
-                    this.spanId = spc.getSpanId();
-                    r.run();
-                } finally {
-                    span.end();
-                }
-
-            } else {
-                r.run();
-            }
-
+            this.start();
+            r.run();
         } finally {
-            this.executionTime = System.currentTimeMillis() - l;
-            Context.forRequest().recordOperationTime(this.tag, this.executionTime);
+            this.end();
         }
     }
 
     public T execute(Callable<T> e) {
-        long l = System.currentTimeMillis();
         T t = null;
         try {
-
-            if (Context.isTracingEnabled()
-                    && this.traceName != null
-                    && !this.traceName.isBlank()) {
-
-                Span span = Context.forRequest().getTelemetryContext().getTracer()
-                        .spanBuilder(StringConcatenator.of(this.tag, this.traceName).twoColons()).startSpan();
-                this.traceAttributes.forEach(span::setAttribute);
-                try (Scope scope = span.makeCurrent()) {
-                    SpanContext spc = span.getSpanContext();
-                    this.traceId = spc.getTraceId();
-                    this.spanId = spc.getSpanId();
-                    t = e.call();
-                } finally {
-                    span.end();
-                }
-
-            } else {
-                t = e.call();
-            }
-
+            this.start();
+            t = e.call();
             return t;
-
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new TimedOperationException(ex);
         } finally {
-            this.executionTime = System.currentTimeMillis() - l;
-            Context.forRequest().recordOperationTime(this.tag, this.executionTime);
+            this.end();
             if (t instanceof TimeSensitive ts) {
                 ts.setDurationInMilliseconds(this.executionTime);
             }
