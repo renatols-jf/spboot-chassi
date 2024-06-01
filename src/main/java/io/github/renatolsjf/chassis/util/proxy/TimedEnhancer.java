@@ -1,7 +1,7 @@
 package io.github.renatolsjf.chassis.util.proxy;
 
 import io.github.renatolsjf.chassis.context.Context;
-import io.github.renatolsjf.chassis.monitoring.timing.Timed;
+import io.github.renatolsjf.chassis.monitoring.timing.TimeRecording;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.monitoring.tracing.Span;
 import io.github.renatolsjf.chassis.monitoring.tracing.SpanAttribute;
@@ -34,12 +34,12 @@ public class TimedEnhancer implements TypeEnhancer {
 
         boolean shouldEnhance = false;
         for (Method method : methods) {
-            boolean timed = method.isAnnotationPresent(Timed.class);
+            boolean timed = method.isAnnotationPresent(TimeRecording.class);
             boolean traced = method.isAnnotationPresent(Span.class);
             if (traced && timed) {
                 Context.logger().warn("Method " + method.getName() + " for class "
-                        + method.getDeclaringClass().getName() + " has both @Timed and @Span annotations. @Timed is ignored. " +
-                        "To trace a @Timed method, set @Timed::traced to true").log();
+                        + method.getDeclaringClass().getName() + " has both @TimeRecording and @Span annotations. @TimeRecording is ignored. " +
+                        "To trace a @TimeRecording method, set @TimeRecording::traced to true").log();
             } else if (timed) {
                 shouldEnhance = true;
             }
@@ -61,9 +61,9 @@ class TimingEnhancement implements Enhancement {
             return;
         }
 
-        if (method.isAnnotationPresent(Timed.class)) {
+        if (method.isAnnotationPresent(TimeRecording.class)) {
 
-            Timed timed = method.getAnnotation(Timed.class);
+            TimeRecording timed = method.getAnnotation(TimeRecording.class);
             timedOperation = new TimedOperation(timed.tag());
             if (timed.traced()) {
                 timedOperation.traced(timed.spanName().isBlank() ? method.getName() : timed.spanName());
