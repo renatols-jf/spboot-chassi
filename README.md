@@ -1524,6 +1524,12 @@ The following attributes are supported for `@AsTimedOperation`:
   `@AsTimedOperation`, the spanName shall be a concatenation of both the `spanName` attribute plus
   the method name.
 
+### TimedOperation limitations
+Currently, there is not a managed context for TimedOperations. That means that, if two TimedOperations are ran at
+the same time, either concurrently or one timedOperation starts another before it finishes, the total time of both
+will be count towards total execution time. Such cases will create errors in the total request execution time reported.
+A fix is scheduled for a near future.
+
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
 ${} - do not confound with $ in $Context mentioned above. It's also possible to use a default value in case the environment variable is not set by using 
@@ -1673,7 +1679,9 @@ in the future.
 - Creation of behavior flows using yml or other configuration tools. Possibly another project 
 that uses this one as lib.
 - Refactor undocumented proxy and genesis APIs to support external use.
-- 
+- Create context management for `TimedOperation` so that if two timed operations bein run concurrently or one
+  inside the other do not count twice towards total execution time.
+
 # Sample project
 The Sample project is based on version `0.0.2`. An update is soon to come.
 [Demo Application](https://github.com/renatols-jf/spboot-chassis-demo)
