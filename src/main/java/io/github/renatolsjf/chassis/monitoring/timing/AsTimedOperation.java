@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TimeRecording {
+public @interface AsTimedOperation {
 
     public static final String HTTP = "http";
     public static final String DB = "db";

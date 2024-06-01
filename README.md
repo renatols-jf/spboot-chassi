@@ -7,7 +7,7 @@
 - Enhanced `@Inject` behavior
 - Added `ApiCall` methods that accept a `Media`
 - Made it possible to attach Context information to an ApiCall created though `chassis.api.yaml`
-- Added `@TimeRecording` annotation
+- Added `@AsTimedOperation` annotation
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -272,7 +272,7 @@ Tracing information, if available, should be propagated from service to service.
 this information with the W3C trace context `traceparent` header will enable the chassis to
 configure the tracing behavior and information for the request.
 
-## Dependecy Injection 
+## Dependency Injection 
 ### A note on @Inject
 Prior to version `0.1.0`, `@Inject` was meant as a means to inject Spring beans inside requests.
 
@@ -1416,7 +1416,7 @@ used for database calls.
 
 `TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`, and
 `TimedOperation.db()` has to manually wrap a database call - since version `0.1.0` it's now possible
-to annotate such methods with @TimeRecording instead of manually wrapping them, see below. It's not uncommon for database calls
+to annotate such methods with `@AsTimedOperation` instead of manually wrapping them, see below. It's not uncommon for database calls
 to be automatic, having only the interface for the `Repository` created. To avoid wrapping every call
 to the repository in `TimedOperation`, you can create a delegate for such cases:
 
@@ -1503,21 +1503,21 @@ A `TimedOperation` can be automatically traced by adding the span name, calling 
 Span attributes can be added by calling `TimedOperation::withTraceAttribute`, providing a `String` for the
 attribute key and a `String` for the attribute value.
 
-### @Timed annotation
+### @AsTimedOperation annotation
 Since version `0.1.0`,
-[@TimeRecording](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/TimeRecording.java)
-enables auto time recording for methods. Simply annotate a method with `@TimeRecording`, and it will
+[@AsTimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/AsTimedOperation.java)
+enables auto time recording for methods. Simply annotate a method with `@AsTimedOperation`, and it will
 automatically add the time to the context. Since this is a behavior enhancement, the object has to
-be in the injection graph - see [above](#dependecy-injection). Since `@TimeRecording`
-can also be configured to trace / create a span, `@TimeRecording` and `@Span` are incompatible.
-`@TimeRecording` will be ignored if a method is also annotated with `@Span`.
+be in the injection graph - see [above](#dependency-injection). Since `@AsTimedOperation`
+can also be configured to trace / create a span, `@AsTimedOperation` and `@Span` are incompatible.
+`@AsTimedOperation` will be ignored if a method is also annotated with `@Span`.
 
-The following attributes are supported for `@TimeRecording`:
+The following attributes are supported for `@AsTimedOperation`:
 - `tag`: String, required. Defines the tag for the timed operation. You can define any String value. 
-  `TimeRecording` has 2 pre-defined constants: `TimeRecording.HTTP`, for a tag with the value `http`
-  and `TimeRecording.DB`, for a tag with the value db.
+  `AsTimedOperation` has 2 pre-defined constants: `AsTimedOperation.HTTP`, for a tag with the value `http`
+  and `AsTimedOperation.DB`, for a tag with the value db.
 - `traced`: Boolean, defaults to false. Indicates if the method will also be traced, create a span.
-  The same `@SpanAttribute` and `SpanAttributeParameter` also applies to a `@TimeRecording`method.
+  The same `@SpanAttribute` and `@SpanAttributeParameter` also applies to a `@AsTimedOperation`method.
 - `spanName`: String, defaults to empty. The name of the span to be used if the operation is traced.
   If empty, the method name will be used.
 
