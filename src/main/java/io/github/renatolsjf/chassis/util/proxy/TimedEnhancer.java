@@ -6,6 +6,7 @@ import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.monitoring.tracing.Span;
 import io.github.renatolsjf.chassis.monitoring.tracing.SpanAttribute;
 import io.github.renatolsjf.chassis.monitoring.tracing.SpanAttributeParameter;
+import io.github.renatolsjf.chassis.util.StringConcatenator;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -23,6 +24,8 @@ public class TimedEnhancer implements TypeEnhancer {
     @Override
     public boolean isEnhanceable(Class<?> type) {
 
+        boolean shouldEnhance = type.isAnnotationPresent(AsTimedOperation.class);
+
         Class<?> clazz = type;
         List<Method> methods = new ArrayList<>();
         while (clazz != null && clazz != Object.class) {
@@ -32,7 +35,6 @@ public class TimedEnhancer implements TypeEnhancer {
             clazz = clazz.getSuperclass();
         }
 
-        boolean shouldEnhance = false;
         for (Method method : methods) {
             boolean timed = method.isAnnotationPresent(AsTimedOperation.class);
             boolean traced = method.isAnnotationPresent(Span.class);
@@ -61,12 +63,33 @@ class TimingEnhancement implements Enhancement {
             return;
         }
 
-        if (method.isAnnotationPresent(AsTimedOperation.class)) {
+        AsTimedOperation timed = method.getAnnotation(AsTimedOperation.class);
+        boolean isMethodAnnotation = timed != null;
+        if (timed == null) {
+            timed = object.getClass().getSuperclass().getAnnotation(AsTimedOperation.class);
+        }
+        if (timed == null && delegate != null) {
+            timed = delegate.getClass().getAnnotation(AsTimedOperation.class);
+        }
 
-            AsTimedOperation timed = method.getAnnotation(AsTimedOperation.class);
+        if (timed != null) {
+
             timedOperation = new TimedOperation(timed.tag());
             if (timed.traced()) {
-                timedOperation.traced(timed.spanName().isBlank() ? method.getName() : timed.spanName());
+                String spanName = timed.spanName();
+                if (isMethodAnnotation) {
+                    if (spanName.isBlank()) {
+                        spanName = StringConcatenator.of(object.getClass().getSuperclass().getSimpleName(), method.getName()).twoColons();
+                    }
+                } else {
+                    if (spanName.isBlank()) {
+                        spanName = StringConcatenator.of(object.getClass().getSuperclass().getSimpleName(), method.getName()).twoColons();
+                    } else {
+                        spanName = StringConcatenator.of(spanName, method.getName()).twoColons();
+                    }
+                }
+
+                timedOperation.traced(spanName);
             }
 
             Map<String, String> attributes = new HashMap<>();

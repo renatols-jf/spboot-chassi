@@ -2,7 +2,7 @@ package io.github.renatolsjf.chassis.monitoring.timing;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AsTimedOperation {
 
