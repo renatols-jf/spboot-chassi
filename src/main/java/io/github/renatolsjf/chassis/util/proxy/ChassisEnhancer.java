@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class ChassisEnhancer {
 
-    private TypeEnhancer[] enhancers = new TypeEnhancer[] {new TracingEnhancer(), new TimedEnhancer()};
+    private final TypeEnhancer[] enhancers = new TypeEnhancer[] {new TracingEnhancer(), new TimedEnhancer()};
 
     public <T> T enhance(Class<T> type) {
         return this.enhance(type, null);
