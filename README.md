@@ -9,6 +9,7 @@
 - Made it possible to attach `Context` information to an `ApiCall` created through `chassis-api.yaml`
 - Added `@AsTimedOperation` annotation
 - Created configuration and `ApiCall` override to enable request entries to be auto propagated
+- `ApiFactory` now throws `NoSuchApiCallException` in case an `ApiCall` is not found.
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -637,7 +638,7 @@ default error message in case of a validation error.
 ### ApiCall
 [ApiCall](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiCall.java)
 is the preferred way to make HTTP requests. It's an attempt to create a more fluid API to configure and
-make HTTP calls. To create an ApiCall, um request an instancen from
+make HTTP calls. To create an ApiCall,  request an instance from
 [ApiFactory](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiFactory.java),
 as in `ApiFactory.createApiCall()`. The following methors are available to configure the ApiCall 
 (each returns the ApiCall object to enable chaining).
@@ -845,7 +846,9 @@ ApiResponse apiResponse = ApiFactory.apiFromLabel("googleSearch").execute();
 ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.
 ```
 
-Here is an example of the same ApiCall created and exe
+Note that if an API is not found, `ApiFactory.apiFromLabel` will throw a `NoSuchApiCallException`.
+
+
 
 ### RestOperation
 DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a

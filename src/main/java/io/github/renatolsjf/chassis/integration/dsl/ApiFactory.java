@@ -29,7 +29,7 @@ public class ApiFactory {
 
     }
 
-    public static ApiCall apiFromLabel(String label) {
+    public static ApiCall apiFromLabel(String label) throws NoSuchApiCallException {
         String s = CaseString.getValue(CaseString.CaseType.CAMEL, label);
         Map m = apiCalls.get(s);
         if (m != null) {
@@ -40,7 +40,7 @@ public class ApiFactory {
                 return null;
             }
         } else {
-            return null;
+            throw new NoSuchApiCallException();
         }
     }
 
