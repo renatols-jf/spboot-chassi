@@ -25,7 +25,10 @@ public class MetricRegistry implements MetricListener {
         }
 
         public MetricBuilder withTag(String tagName, String tagValue) {
-            this.tags.put(tagName, tagValue);
+            if (tagName != null && tagValue != null
+                    && !tagName.isBlank() && !tagValue.isBlank()) {
+                this.tags.put(tagName, tagValue);
+            }
             return this;
         }
 
