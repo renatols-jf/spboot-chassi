@@ -35,14 +35,14 @@ public class ChassisEnhancer {
                     .toList();
 
             try {
-                enhancements.forEach(e -> e.preInvocation(o, delegate, method, args));
+                enhancements.forEach(e -> e.preInvocation(type, o, delegate, method, args));
                 if (delegate != null) {
                     return methodProxy.invoke(delegate, args);
                 } else {
                     return methodProxy.invokeSuper(o, args);
                 }
             } finally {
-                enhancements.forEach(e -> e.postInvocation(o, delegate, method, args));
+                enhancements.forEach(e -> e.postInvocation(type, o, delegate, method, args));
             }
 
         };

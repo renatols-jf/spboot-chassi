@@ -104,7 +104,7 @@ class TracingEnhancement implements Enhancement {
     private Scope scope;
 
     @Override
-    public void preInvocation(Object o, Object delegate, Method method, Object[] args) {
+    public void preInvocation(Class<?> requestedType, Object o, Object delegate, Method method, Object[] args) {
 
         io.github.renatolsjf.chassis.monitoring.tracing.Span spanAnnotation;
         if (!method.isAnnotationPresent(io.github.renatolsjf.chassis.monitoring.tracing.Span.class)
@@ -159,7 +159,7 @@ class TracingEnhancement implements Enhancement {
     }
 
     @Override
-    public void postInvocation(Object o, Object delegate, Method method, Object[] args) {
+    public void postInvocation(Class<?> requestedType, Object o, Object delegate, Method method, Object[] args) {
         if (scope != null) {
             scope.close();
         }

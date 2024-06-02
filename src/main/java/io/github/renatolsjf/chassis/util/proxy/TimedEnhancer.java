@@ -57,7 +57,7 @@ class TimingEnhancement implements Enhancement {
     TimedOperation timedOperation;
 
     @Override
-    public void preInvocation(Object object, Object delegate, Method method, Object[] args) {
+    public void preInvocation(Class<?> requestedType, Object object, Object delegate, Method method, Object[] args) {
 
         if (method.isAnnotationPresent(Span.class)) {
             return;
@@ -70,6 +70,9 @@ class TimingEnhancement implements Enhancement {
         }
         if (timed == null && delegate != null) {
             timed = delegate.getClass().getAnnotation(AsTimedOperation.class);
+        }
+        if (timed == null) {
+            timed = requestedType.getAnnotation(AsTimedOperation.class);
         }
 
         if (timed != null) {
@@ -90,35 +93,39 @@ class TimingEnhancement implements Enhancement {
                 }
 
                 timedOperation.traced(spanName);
-            }
 
-            Map<String, String> attributes = new HashMap<>();
-            Arrays.stream(object.getClass().getSuperclass().getAnnotationsByType(SpanAttribute.class))
-                    .forEach(sa -> attributes.put(sa.key(), sa.value()));
-
-            if (delegate != null) {
-                Arrays.stream(delegate.getClass().getAnnotationsByType(SpanAttribute.class))
+                Map<String, String> attributes = new HashMap<>();
+                Arrays.stream(object.getClass().getSuperclass().getAnnotationsByType(SpanAttribute.class))
                         .forEach(sa -> attributes.put(sa.key(), sa.value()));
-            }
 
-            Arrays.stream(method.getAnnotationsByType(SpanAttribute.class))
-                    .forEach(sa -> attributes.put(sa.key(), sa.value()));
+                Arrays.stream(requestedType.getAnnotationsByType(SpanAttribute.class))
+                        .forEach(sa -> attributes.put(sa.key(), sa.value()));
 
-            int idx = 0;
-            for (Parameter parameter: method.getParameters()) {
-                if (parameter.isAnnotationPresent(SpanAttributeParameter.class)) {
-                    Object arg = args[idx];
-                    String s = arg != null ? arg.toString() : null;
-                    if (s != null && !s.isBlank()) {
-                        String name = parameter.getAnnotation(SpanAttributeParameter.class).value();
-                        if (name == null || name.isBlank()) {
-                            name = parameter.getName();
+                if (delegate != null) {
+                    Arrays.stream(delegate.getClass().getAnnotationsByType(SpanAttribute.class))
+                            .forEach(sa -> attributes.put(sa.key(), sa.value()));
+                }
+
+                Arrays.stream(method.getAnnotationsByType(SpanAttribute.class))
+                        .forEach(sa -> attributes.put(sa.key(), sa.value()));
+
+                int idx = 0;
+                for (Parameter parameter: method.getParameters()) {
+                    if (parameter.isAnnotationPresent(SpanAttributeParameter.class)) {
+                        Object arg = args[idx];
+                        String s = arg != null ? arg.toString() : null;
+                        if (s != null && !s.isBlank()) {
+                            String name = parameter.getAnnotation(SpanAttributeParameter.class).value();
+                            if (name == null || name.isBlank()) {
+                                name = parameter.getName();
+                            }
+                            attributes.put(name, s);
                         }
-                        attributes.put(name, s);
                     }
                 }
+                attributes.forEach((k, v) -> timedOperation.withTraceAttribute(k, v));
+
             }
-            attributes.forEach((k, v) -> timedOperation.withTraceAttribute(k, v));
 
             timedOperation.start();
 
@@ -127,7 +134,7 @@ class TimingEnhancement implements Enhancement {
     }
 
     @Override
-    public void postInvocation(Object object, Object delegate, Method method, Object[] args) {
+    public void postInvocation(Class<?> requestedType, Object object, Object delegate, Method method, Object[] args) {
         if (timedOperation != null) {
             timedOperation.end();
         }
