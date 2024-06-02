@@ -6,6 +6,7 @@ import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
 import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
+import io.github.renatolsjf.chassis.request.EntryResolver;
 import io.github.renatolsjf.chassis.util.genesis.BuildIgnore;
 import io.github.renatolsjf.chassis.util.genesis.Buildable;
 import io.github.renatolsjf.chassis.util.genesis.Multi;
@@ -63,6 +64,8 @@ public abstract class ApiCall {
 
     @BuildIgnore
     private Boolean propagateTraceOverride = null;
+    @BuildIgnore
+    private Boolean propagateRequestEntriesOverride = null;
 
 
     public ApiCall withOperation(String operation) {
@@ -124,6 +127,11 @@ public abstract class ApiCall {
 
     public ApiCall withPropagateTrace(Boolean propagateTrace) {
         this.propagateTraceOverride = propagateTrace;
+        return this;
+    }
+
+    public ApiCall withPropagateRequestEntries(Boolean propagateRequestEntries) {
+        this.propagateRequestEntriesOverride = propagateRequestEntries;
         return this;
     }
 
@@ -308,10 +316,16 @@ public abstract class ApiCall {
                 .withTraceAttribute("url", this.getEndpoint());
 
         ApiResponse apiResponse = timedOperation.execute(() ->  {
+
             if (this.shouldPropagateTracing()) {
                 TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
                 this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
             }
+
+            if (this.shouldPropagateRequestEntries()) {
+                this.withHeader(EntryResolver.HTTP_HEADER, Context.forRequest().getRequestContextAsString());
+            }
+
             return this.doExecute(method, body);
         });
 
@@ -369,11 +383,20 @@ public abstract class ApiCall {
 
     }
 
-    private final boolean shouldPropagateTracing() {
+    private boolean shouldPropagateTracing() {
         boolean shouldPropagate = this.propagateTraceOverride != null
                 ? this.propagateTraceOverride
                 : Chassis.getInstance().getConfig().isTracingAutoPropagationEnabled();
         return Context.isTracingEnabled()
+                && shouldPropagate;
+    }
+
+    private boolean shouldPropagateRequestEntries() {
+        boolean shouldPropagate = this.propagateRequestEntriesOverride != null
+                ? this.propagateRequestEntriesOverride
+                : Chassis.getInstance().getConfig().autoPropagateContextRequestEntries();
+        return Context.isAvailable()
+                && Context.forRequest().getRequestContextAsString() != null
                 && shouldPropagate;
     }
 

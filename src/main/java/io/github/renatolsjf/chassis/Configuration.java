@@ -21,6 +21,7 @@ public class Configuration {
         VALIDATOR_FAIL_ON_EXECUTION_ERROR("validation.fail-on-execution-error", Boolean.TRUE),
         CONTEXT_FORBID_UNAUTHORIZED_CREATION("context.forbid-unauthorized-creation", Boolean.TRUE),
         CONTEXT_ALLOW_CORRELATION_ID_UPDATE("context.allow-correlation-id-update", Boolean.TRUE),
+        CONTEXT_AUTO_PROPAGATE_REQUEST_ENTRIES("context.auto-propagate-request-entries", Boolean.TRUE),
         METRIC_REQUEST_DURATION_HISTOGRAM_RANGES("metrics.request.duration.histogram-range", new double[]{200, 500, 1000, 2000, 5000, 10000}),
         METRIC_REQUEST_DURATION_EXPORT_BY_TYPE("metrics.request.duration.export-by-type", Boolean.TRUE),
         HEALTH_TIME_WINDOW_DURATION("metrics.health-window-duration-minutes", 5),
@@ -95,6 +96,10 @@ public class Configuration {
 
     public Boolean allowContextCorrelationIdUpdate() {
         return (Boolean) Properties.CONTEXT_ALLOW_CORRELATION_ID_UPDATE.initializeIfNeededAndGet(this.configData, Boolean.class);
+    }
+
+    public Boolean autoPropagateContextRequestEntries() {
+        return (Boolean) Properties.CONTEXT_AUTO_PROPAGATE_REQUEST_ENTRIES.initializeIfNeededAndGet(this.configData, Boolean.class);
     }
 
     public double[] monitoringRequestDurationRanges() {

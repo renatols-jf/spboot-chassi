@@ -8,6 +8,7 @@
 - Added `ApiCall` methods that accept a `Media`
 - Made it possible to attach `Context` information to an `ApiCall` created through `chassis-api.yaml`
 - Added `@AsTimedOperation` annotation
+- Created configuration and `ApiCall` override to enable request entries to be auto propagated
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -262,7 +263,8 @@ duration. The entries can also be supplied as a `String`, separating key from va
 using `:` and separating entries using `;`, as in `aKey:aValue;anotherKey:anotherValue`.
 It's highly recommended to use 
 [EntryResolver](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/EntryResolver.java)
-to do conversions if needed, though.
+to do conversions if needed, though. The default header is accessible via `EntryResolver.HTTP_HEADER`,
+and its value is `X-CONTEXT-ENTRIES`.
 
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
@@ -335,6 +337,13 @@ you will be doing so needs to be annotated with
 [@ContextCreator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ContextCreator.java).
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
+
+Some useful information can be retrieved fom a `Context`. Below are a few of these:
+- `getTransactionId()`: The current transactionId.
+- `getCorrelationId()`: The current correlationId, if any.
+- `getRequestContext()`: A map containing the current request entries.
+- `getRequestContextAsString()`: A String representation o the current request entries
+- `getOperation()`: The current operation.
 
 ## Logging
 Logging can be done by requesting an 
@@ -680,6 +689,9 @@ as in `ApiFactory.createApiCall()`. The following methors are available to confi
 
 - `withPropagateTrace(Boolean propagateTrace)`: Overrides the default trace propagation setting.
 
+- `withPropagateRequestEntries(Boolean propagateRequestEntries)`: Overrides the default 
+  request entries propagation setting.
+
 To make the request, we have a few behavior methods available. We have a method for each HTTP
 method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
 Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such
@@ -750,6 +762,7 @@ under the default resources folder. The following attributes can be configured (
 - `query-param`: List with 2 elements - key and value. Supports multiple.
 - `url-replacement`: List with 2 elements - key and value. Supports multiple.
 - `propagate-trace`: Boolean.
+- `propagate-request-entries`: Boolean.
 
 If an attribute supports multiple initializations, to initialize it multiple times an array with
 a multiple of its total parameter count should be provided, e.g, to add 2 query parameters, a
@@ -760,8 +773,10 @@ Here is an example of two different ApiCalls initialized by code and yaml.
 
 You might want to initialize some contextual information within a request, like the current
 transactionId in a header. For that, you can grab the current context with `$Context` and access
-the transactionId, correlationId, or Operation calling `@Context.transactionId`,
-`@Context.correlationId`, or `@Context.operation` respectively.
+the transactionId, correlationId, or Operation calling `$Context.transactionId`,
+`$Context.correlationId`, or `$Context.operation` respectively. You could also get the context entries
+with `$Context.requestContextAsString`, but you'll generally want to set the request entries auto
+propagation to true.
 ```
 ...
 header:
@@ -1581,6 +1596,8 @@ default resources folder. The following configurations can be changed:
   be thrown.
 - `context.allow-correlation-id-update`: Boolean, defaults to `true`. Governs whether a `correlationId` can be
   updated after the context has been initialized. 
+- `context.auto-propagate-request-entries`: Boolean, defaults to `true`. Indicates whether an
+  `ApiCall` will automatically insert a header with the context entries.
 - `metrics.request.duration.histogram-range`: Integer list, defaults to `[200, 500, 1000, 2000, 5000, 10000]`.
   Governs the default `Histogram` buckets for request duration in milliseconds. 
 - `metrics.request.duration.export-by-type`: Boolean, defaults to `true`. Governs whether `Histogram` metrics
