@@ -40,7 +40,7 @@ public class ApiFactory {
                 return null;
             }
         } else {
-            throw new NoSuchApiCallException();
+            throw new NoSuchApiCallException("No ApiCall configured for label " + label + " under chassis-api.yaml");
         }
     }
 
