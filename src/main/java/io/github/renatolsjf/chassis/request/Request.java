@@ -7,10 +7,10 @@ import io.github.renatolsjf.chassis.context.ContextCreator;
 import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
-import io.github.renatolsjf.chassis.monitoring.tracing.NotTraceable;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
 import io.github.renatolsjf.chassis.util.StringConcatenator;
+import io.github.renatolsjf.chassis.util.genesis.ObjectExtractor;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 
 import java.lang.reflect.Field;
@@ -85,7 +85,7 @@ public abstract class Request {
 
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
 
-        for(Field f: this.getClass().getDeclaredFields()) {
+        for(Field f: new ObjectExtractor(this).getFields()) {
             if (f.getAnnotation(Inject.class) != null) {
                 try {
                     f.trySetAccessible();

@@ -64,7 +64,7 @@ public class ExpressionParser {
 
         for (String part : Arrays.copyOfRange(parts, 1, parts.length)) {
 
-            ObjectExtractor extractor = new ObjectExtractor<>(toReturn);
+            ObjectExtractor extractor = new ObjectExtractor(toReturn);
             ExtractedMember member = extractor.methodExtractor().getter()
                     .withName(part).mostAdequateOrNull();
             if (member == null) {

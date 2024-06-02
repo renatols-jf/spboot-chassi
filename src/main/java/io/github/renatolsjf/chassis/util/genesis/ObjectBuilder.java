@@ -36,7 +36,7 @@ public class ObjectBuilder {
             throw new UnableToBuildObjectException(e);
         }
 
-        ObjectExtractor<T> objectExtractor = new ObjectExtractor<>(t);
+        ObjectExtractor objectExtractor = new ObjectExtractor(t);
         MethodExtractor methodExtractor = objectExtractor.methodExtractor().setter();
         FieldExtractor fieldExtractor = objectExtractor.fieldExtractor();
 
