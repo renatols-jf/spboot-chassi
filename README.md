@@ -330,7 +330,7 @@ so calling `Context.initialize` outside of a request will result in an error.
 You also cannot call it manually inside a request, as it will result in an error
 since the context already exists.
 
-If you absolutely need to create a context outside of a request, the class in which
+If you absolutely need to create a context outside a request, the class in which
 you will be doing so needs to be annotated with 
 [@ContextCreator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ContextCreator.java).
 This will enable a context to be created. If a context already exists, an error will

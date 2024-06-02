@@ -6,6 +6,7 @@ import io.github.renatolsjf.chassis.context.data.LoggingAttribute;
 import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
+import io.github.renatolsjf.chassis.request.EntryResolver;
 import io.github.renatolsjf.chassis.util.CaseString;
 
 import java.time.Duration;
@@ -166,6 +167,12 @@ public class Context {
 
     public Map<String, String> getRequestContext() {
         return this.requestContext;
+    }
+
+    public String getRequestContextAsString() {
+        return this.requestContext != null
+                ? new EntryResolver(this.requestContext).getStringRepresentation()
+                : null;
     }
 
     public String getOperation() {
