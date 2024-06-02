@@ -302,9 +302,23 @@ public abstract class ApiCall {
     }
 
     public <T> ApiResponse execute(T body) throws ApiException {
+
         if (this.method == null) {
             throw new NullPointerException("Api method not set");
         }
+
+        if (this.provider == null || this.provider.isBlank()) {
+            throw new NullPointerException("Provider not set");
+        }
+
+        if (this.service == null || this.service.isBlank()) {
+            throw new NullPointerException("Service not set");
+        }
+
+        if (this.operation == null || this.operation.isBlank()) {
+            throw new NullPointerException("Operation not set");
+        }
+
         return this.execute(this.method, body);
     }
 

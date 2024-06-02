@@ -2,7 +2,7 @@
 
 # Changelist
 
-## 0.1.0 (RELEASE CANDIDATE 3)
+## 0.1.0 (RELEASE CANDIDATE)
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
 - Added `ApiCall` methods that accept a `Media`
@@ -106,13 +106,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.1.0-rc3</version>
+    <version>0.1.0-rc4</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0-rc3'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0-rc4'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -1433,11 +1433,11 @@ You can tag the `TimedOperation` however you'd like, using `new TimedOperation(m
 pre-defined tags: http `TimedOperation.http()`, used for HTTP calls, and db `TimedOperation.db()`,
 used for database calls. 
 
-`TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`, and
-`TimedOperation.db()` has to manually wrap a database call - since version `0.1.0` it's now possible
-to annotate such methods with `@AsTimedOperation` instead of manually wrapping them, see below. It's not uncommon for database calls
+`TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`. For `TimedOperation.db()`,
+you can annotate the repository with `@AsTimedOperation`, as shown in the next topic, or you can 
+manually wrap a database call. It's not uncommon for database calls
 to be automatic, having only the interface for the `Repository` created. To avoid wrapping every call
-to the repository in `TimedOperation`, you can create a delegate for such cases:
+to the repository in `TimedOperation`, you could create a delegate for such cases:
 
 ```
 package com.example.demo;
