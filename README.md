@@ -345,6 +345,7 @@ Some useful information can be retrieved fom a `Context`. Below are a few of the
 - `getRequestContext()`: A map containing the current request entries.
 - `getRequestContextAsString()`: A String representation o the current request entries
 - `getOperation()`: The current operation.
+- `getTraceParent()`: Returns the current tracing context in the `traceparent` W3C header value.
 
 ## Logging
 Logging can be done by requesting an 

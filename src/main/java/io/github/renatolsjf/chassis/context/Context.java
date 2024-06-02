@@ -165,6 +165,14 @@ public class Context {
         return this.telemetryContext;
     }
 
+    public String getTraceParent() {
+        if (!isTracingEnabled()) {
+            return null;
+        } else {
+            return this.telemetryContext.getTracingContext().getW3cHeaderValue();
+        }
+    }
+
     public Map<String, String> getRequestContext() {
         return this.requestContext;
     }
