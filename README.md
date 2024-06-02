@@ -2,7 +2,7 @@
 
 # Changelist
 
-## 0.1.0 (RELEASE CANDIDATE 2)
+## 0.1.0 (RELEASE CANDIDATE 3)
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
 - Added `ApiCall` methods that accept a `Media`
@@ -106,13 +106,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.1.0-rc2</version>
+    <version>0.1.0-rc3</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0-rc2'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0-rc3'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
