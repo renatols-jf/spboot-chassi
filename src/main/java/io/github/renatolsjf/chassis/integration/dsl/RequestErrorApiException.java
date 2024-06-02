@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.integration.dsl;
 
-class RequestErrorApiException extends ApiException {
+public class RequestErrorApiException extends ApiException {
 
     private ApiResponse apiResponse;
 
