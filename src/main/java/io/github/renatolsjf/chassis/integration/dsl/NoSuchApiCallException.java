@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.integration.dsl;
 
-public class NoSuchApiCallException extends Exception {
+public class NoSuchApiCallException extends RuntimeException {
 
     public NoSuchApiCallException() {
         super();
