@@ -93,8 +93,8 @@ public abstract class ApiCall {
         return this;
     }
 
-    public ApiCall withReadTimeOutSeconds(long seconds) {
-        this.readTimeOut = Duration.ofSeconds(seconds);;
+    public ApiCall withReadTimeoutSeconds(long seconds) {
+        this.readTimeOut = Duration.ofSeconds(seconds);
         return this;
     }
 
