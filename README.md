@@ -1625,7 +1625,7 @@ A fix is scheduled for a near future.
 
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
-${} - do not confound with $ in $Context mentioned above. It's also possible to use a default value in case the environment variable is not set by using 
+${} - do not confound with $ in `$Context` mentioned above. It's also possible to use a default value in case the environment variable is not set by using 
 a colon followed by a dash as in ${:-}.
 
 The following uses MY_ENV to initialize the day
