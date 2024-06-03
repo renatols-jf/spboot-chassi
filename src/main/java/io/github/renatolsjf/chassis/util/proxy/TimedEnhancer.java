@@ -77,6 +77,14 @@ class TimingEnhancement implements Enhancement {
 
         if (timed != null) {
 
+            if (method.isAnnotationPresent(Span.class)) {
+                Context.logger().warn("Method " + method.getName() + " for class "
+                        + method.getDeclaringClass().getName() + " has both @AsTimedOperation - either the method itself or the class - " +
+                        "and @Span annotations. @AsTimedOperation is ignored. " +
+                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true").log();
+                return;
+            }
+
             timedOperation = new TimedOperation(timed.tag());
             if (timed.traced()) {
                 String spanName = timed.spanName();
