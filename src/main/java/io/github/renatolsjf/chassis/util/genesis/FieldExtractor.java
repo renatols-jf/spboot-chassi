@@ -1,4 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import java.lang.reflect.Field;
 import java.util.List;

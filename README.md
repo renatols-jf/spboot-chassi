@@ -2,6 +2,15 @@
 
 # Changelist
 
+## 0.1.0 (RELEASE CANDIDATE)
+- Implemented distributed tracing 
+- Enhanced `@Inject` behavior
+- Added `ApiCall` methods that accept a `Media`
+- Made it possible to attach `Context` information to an `ApiCall` created through `chassis-api.yaml`
+- Added `@AsTimedOperation` annotation
+- Created configuration and `ApiCall` override to enable request entries to be auto propagated
+- `ApiFactory` now throws `NoSuchApiCallException` in case an `ApiCall` is not found.
+
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
 
@@ -46,12 +55,12 @@ non runtime exception happens.
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
-best to solve any issues, but a few issues are to be expected. This also means there
-is a lot to be done, and a lot that could be better. That being said, 
+best to solve any issues, but a few issues are to be expected, as with any project. 
+This also means there is a lot to be done, and a lot that could be better. That being said, 
 this is currently in use in a handful of professional microservices without 
 any issues. I'll continue to use it as it evolves, and I don't expect any 
-downsides to it. Be it as it may, a test suite is needed. Until a comprehensive 
-set of tests is written, this project's version will be labeled as less than 1.0.0.
+downsides to it. Be it as it may, more work is to be expected. Both features and overall enhancements,
+like a test suite, will be added.
 
 Also, this project does not currently support NIO (Spring Webflux)  as it uses ThreadLocal to control
 the request context. A simple solution is to add methods to take a snapshot of
@@ -59,7 +68,7 @@ the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
 This is not related to the standard NIO Thread pool.
 
-This was built and tested using Java 21 and Spring Boot 3.2.2. A Java 11 version with Sprint 2.x.x
+This was built and tested using Java 21 and Spring Boot 3.2.5. A Java 11 version with Spring 2.x.x
 is planned.
 
 # Terminology
@@ -69,7 +78,7 @@ is planned.
 
 # What is this project?
 This is an implementation of a microservice's chassis pattern for spring boot 
-applications. It deals with a few common concerns for distributed 
+applications. It deals with a few common concerns for distributed
 (or not so distributed) applications:
 
 - Logging
@@ -77,10 +86,11 @@ applications. It deals with a few common concerns for distributed
 - Stamp coupling
 - Data validation
 - Data transformation
+- Distributed tracing
 
 # Motivation
 I created this project based on the experiences I had while developing microservices
-in the last couple of years or so, and also based on the reading I've done so far.
+in the last four or five years, and also based on the reading I've done so far.
 It's not uncommon for application needs to be ignored in favor of domain behavior, 
 and the little code that exists is generally duplicated in many places. Also, I have
 seen my fair share of anemic models, and while I understand it's never so simple to
@@ -97,13 +107,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.0.11</version>
+    <version>0.1.0-rc4</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.0.11'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0-rc4'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -133,8 +143,9 @@ public class DemoApplication {
 [Request](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Request.java) 
 is a unit of behavior. Everything that happens in the application should be
 within a request. It automatically provides a means to log the request, update application
-metrics, and some other useful application behavior. The idea is to think of a request
-as a unit of processing, no matter the entry point. An HTTPS call should be mapped to
+metrics, add tracing information, track time taken by HTTP and database requests, 
+and some other useful application behavior. The idea is to think of a request
+as a unit of processing, no matter the entry point. An HTTP call should be mapped to
 a request, just as a message consumed from a queue.
 
 Request is an abstract class and needs to be extended to provide any functionality.
@@ -143,8 +154,8 @@ controls domain behavior.
 
 The domain logic is to be implemented in the method `doProcess()` - 
 it should **NEVER** be called directly, instead, `process()` should. At this point,
-you might want to access Spring-managed objects, such as services. 
-There are three ways of doing so (Note that an exception will be thrown if no beans qualify in all cases):
+you might want to access Spring-managed objects, - or any other object - such as services. 
+There are three ways of doing so:
 - Annotate the desired field with
   [Inject](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Inject.java).
   `@Inject` will only work inside requests.
@@ -169,7 +180,15 @@ There are a few request constructors available, but we will approach only the mo
 
 ```
 public Request(String operation, String transactionId, String correlationId, List<String> projection,
-                   Map<String, String> requestContextEntries)
+                   Map<String, String> requestContextEntries, String traceParent)
+                              
+```
+
+And / or
+
+```
+public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   String requestContextEntries, String traceParent)
 ```
 
 ### operation
@@ -179,8 +198,8 @@ initializes this value without it actually being one of its constructor paramete
 
 ```
 public CalculateMarginRequest(String transactionId, String correlationId, List<String> projection,
-                   Map<String, String> requestContextEntries) extends Request {
-    super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries);                  
+                   String requestContextEntries, String traceparent) extends Request {
+    super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries, traceparent);                  
 }
 ```
 
@@ -204,7 +223,7 @@ response. This could lead to traffic overcharges, the need to map unnecessary fi
 among other issues.
 
 Each request supports a list of field names that will be automatically filtered
-before the response is given. Nestesd fields are represented with dots. 
+before the response is given. Nested fields are represented with dots. 
 So, if a request returns the following json:
 
 ```
@@ -255,10 +274,69 @@ duration. The entries can also be supplied as a `String`, separating key from va
 using `:` and separating entries using `;`, as in `aKey:aValue;anotherKey:anotherValue`.
 It's highly recommended to use 
 [EntryResolver](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/EntryResolver.java)
-to do conversions if needed, though.
+to do conversions if needed, though. The default header is accessible via `EntryResolver.HTTP_HEADER`,
+and its value is `X-CONTEXT-ENTRIES`. If configured - which it is by default - HTTP calls will 
+automatically add this header to downstream calls. A downstream service just needs to get 
+the String header and supply it in its request creation.
 
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
+
+### traceparent
+Tracing information, if available, should be propagated from service to service. Initializing
+this information with the W3C trace context `traceparent` header will enable the chassis to
+configure the tracing behavior and information for the request.
+
+## Dependency Injection 
+### A note on @Inject
+Prior to version `0.1.0`, `@Inject` was meant as a means to inject Spring beans inside requests.
+
+From version `0.1.0` forward, `@Inject` is a more general dependency injection feature and can inject objects
+which lifecycle is not controlled by Spring. Moreover, it also enables behavior enhancement, e.g, all objects which methods
+are annotated with `@Span` to enable tracing have to be annotated with `@Inject` somewhere down the injection tree. 
+`@Inject` will only enhance behavior of classes with the appropriate annotations, but it will create an instance of
+a class whether its behavior should be enhanced or not, only requiring a no-args constructor. Also, the beginning of an injection 
+tree must be inside a `Request` - the first objects injected must be request fields.
+
+The injection tree is the traversable graph of objects related to a request. Let's suppose that you have a `Request` class
+called `RequestA`, a class `A`, and a class `B`. `RequestA` has a field of type `A`, and `A` has a field of type `B`.
+
+```
+public class RequestA extends Request {
+...
+    @Inject
+    private A a;
+...
+}
+
+public class A {
+...
+    @Inject 
+    private B b;
+...
+}
+
+public class B {
+...
+}
+```
+
+The above snippet will result in `A` being injected inside `RequestA` and `B` being injected inside `A`. If we
+remove the `@Inject` annotation from the `A` field inside `RequestA`, that field will be null and, if 
+instantiated manually, there will be no injection of `B` inside `A`.
+
+A injection tree can be triggered outside a `Request` if so desired. Calling `AppRegistry::getResource`
+for a type will trigger the injection process for the object graph starting with that type.
+
+Currently, if injecting a Spring bean, its scope should be the default Spring scope `singleton`. To
+avoid unnecessary bytecode manipulation, enhanced beans are currently cached. If a scope that
+recreates beans is used, the cached version will still be used.
+
+Note that Spring managed beans still need their default injection mechanism, like using the `@Autowired`
+annotation. If a repository referenced inside a service needs to have its behavior enhanced, it
+should be annotated with both `@Autowired`, and `@Inject`. Injecting a Spring bean inside an
+object that is not a Spring bean, - which lifecycle is not manageg by Spring - 
+like a request, does not require `@Autowired`, only `@Inject`.
 
 ## Context
 [Context](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/Context.java)
@@ -277,11 +355,19 @@ so calling `Context.initialize` outside of a request will result in an error.
 You also cannot call it manually inside a request, as it will result in an error
 since the context already exists.
 
-If you absolutely need to create a context outside of a request, the class in which
+If you absolutely need to create a context outside a request, the class in which
 you will be doing so needs to be annotated with 
 [@ContextCreator](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ContextCreator.java).
 This will enable a context to be created. If a context already exists, an error will
 still be thrown.
+
+Some useful information can be retrieved fom a `Context`. Below are a few of these:
+- `getTransactionId()`: The current transactionId.
+- `getCorrelationId()`: The current correlationId, if any.
+- `getRequestContext()`: A map containing the current request entries.
+- `getRequestContextAsString()`: A String representation o the current request entries
+- `getOperation()`: The current operation.
+- `getTraceParent()`: Returns the current tracing context, if available, in the `traceparent` W3C header value format.
 
 ## Logging
 Logging can be done by requesting an 
@@ -575,7 +661,7 @@ default error message in case of a validation error.
 ### ApiCall
 [ApiCall](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiCall.java)
 is the preferred way to make HTTP requests. It's an attempt to create a more fluid API to configure and
-make HTTP calls. To create an ApiCall, um request an instancen from
+make HTTP calls. To create an ApiCall,  request an instance from
 [ApiFactory](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/ApiFactory.java),
 as in `ApiFactory.createApiCall()`. The following methors are available to configure the ApiCall 
 (each returns the ApiCall object to enable chaining).
@@ -625,14 +711,20 @@ as in `ApiFactory.createApiCall()`. The following methors are available to confi
 
 - `withContenType(String contentType)`: Adds the `Content-Type` header.
 
+- `withPropagateTrace(Boolean propagateTrace)`: Overrides the default trace propagation setting.
+
+- `withPropagateRequestEntries(Boolean propagateRequestEntries)`: Overrides the default 
+  request entries propagation setting.
+
 To make the request, we have a few behavior methods available. We have a method for each HTTP
 method available: `ApiCall::get()`, `ApiCall::post()`, `ApiCall::put()`, `ApiCall::path()`, , `ApiCall::delete()`.
 Despite having the option to configure the method calling `withApiMethod()`, that is generally not needed - a case when such
 initialization is needed will be treated bellow. Except for `ApiCall::get()`, which expects no body,
-all other methods described above have 3 different implementations:
+all other methods described above have 4 different implementations:
 
-- One that expects a Renderable, which will render the single object as the body of the request.
-- One that expects multiple Renderable, which will render them as a list as the body of the request.
+- One that expects a `Renderable`, which will render the single object as the body of the request.
+- One that expects multiple `Renderable`, which will render them as a list as the body of the request.
+- One that expects a `Media`, which will be rendered as the body of the request.
 - One that accepts any object. The API will make the best effort to export the object as the body. This is
   fine for Collections, Maps, etc. For a POJO, it will export the public getters.
 
@@ -693,6 +785,8 @@ under the default resources folder. The following attributes can be configured (
 - `header`: List with 2 elements - key and value. Supports multiple.
 - `query-param`: List with 2 elements - key and value. Supports multiple.
 - `url-replacement`: List with 2 elements - key and value. Supports multiple.
+- `propagate-trace`: Boolean.
+- `propagate-request-entries`: Boolean.
 
 If an attribute supports multiple initializations, to initialize it multiple times an array with
 a multiple of its total parameter count should be provided, e.g, to add 2 query parameters, a
@@ -700,6 +794,23 @@ list with 4 elements needs to be provided.
 
 Also, the first element of the hierarchy will be the label by which that ApiCall is retrieved.
 Here is an example of two different ApiCalls initialized by code and yaml.
+
+You might want to initialize some contextual information within a request, like the current
+transactionId in a header. For that, you can grab the current context with `$Context` and access
+the transactionId, correlationId, or Operation calling `$Context.transactionId`,
+`$Context.correlationId`, or `$Context.operation` respectively. You could also get the context entries
+with `$Context.requestContextAsString`, but you'll generally want to set the request entries auto
+propagation to true.
+```
+...
+header:
+  - X-TRANSACTION-ID
+  - $Context.transactionId
+  - X-CORRELATION-ID
+  - $Context.correlationId
+  - X-OPERATION
+  - $Context.operation
+```
 
 YAML file
 ```
@@ -714,6 +825,9 @@ google-search:
   failOnError: false
   basicAuth: ["user", "pass"]
   queryParam: [test1, test2, test3, test4]
+  header:
+    - X-TRANSACTION-ID
+    - $Context.transactionId
   
 a-random-api
   operation: RANDOM_OPERATION
@@ -737,6 +851,7 @@ ApiResponse apiResponse = ApiFactory.createApiCall()
   .withBasicAuth("user", "pass")
   .withQueryParam("test1", "test2")
   .withQueryParam("test3", "test4")
+  .withHeader("X-TRANSACTION-ID", Context.forRequest().getTransactionId())
   .get();
   
 ApiResponse apiResponse = ApiFactory.createApiCall()
@@ -754,11 +869,13 @@ ApiResponse apiResponse = ApiFactory.apiFromLabel("googleSearch").execute();
 ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.
 ```
 
-Here is an example of the same ApiCall created and exe
+Note that if an API is not found, `ApiFactory.apiFromLabel` will throw a `NoSuchApiCallException`.
+
+
 
 ### RestOperation
 DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
-later release.
+later release. Also, it does not support tracing.
 
 Each HTTP request should be made using the 
 [RestOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/RestOperation.java) 
@@ -1064,7 +1181,10 @@ The application has a default
 that exports health information in `json`.
 It exports health percentage, request count, quantiles for the time taken for each type, and
 result count by type. It does so by each operation, and also aggregates as application information.
-The application health is not an average. Instead, it reflects the health of the worst operation.
+The application health is not an average by default (but can be configured to be so). 
+Instead, it reflects the health of the worst operation. A `HealthRequest` is not traceable and
+does not affect application health. In other words, it's marked with both `@NotTraceable` and
+`@HealthIgnore`.
 To use it, create a `HealthRequest`, process it and render the result, such as 
 `new HealthRequest().process().render()`. To tie this to a Spring rest entry point, just use something like:
 
@@ -1291,20 +1411,107 @@ A sample result:
 }
 ```
 
+## Tracing
+As of version `0.1.0`, the framework supports tracing / distributed tracing. Every `Request` is
+traced by default - note that traced is used in general since tracing might be disabled, or a
+specific execution of a request might not be sampled, depending on the configuration.
+If a `Request` is never to be sampled, even though general tracing is desired, it can be annotated with
+[@NotTraceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/NotTraceable.java).
+
+Considering that a request is traced and sampled, by default, a single `Span` will be created with the
+request's name. To add more spans, the class in which a method or methods will be exported as spans, has to be annotated with
+[@Traceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Traceable.java).
+This will not trigger automatic span creations, as the methods which will be traced also need to be annotated with
+[@Span](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Span.java).
+`@Span` supports a single attribute, `value` for the name of the span. `value` can be omitted, in which
+case the method name will be used.
+
+Tracing works via behavior enhancement, which only happens via injections. In other words, for tracing
+to work, the `@Traceable` object has to be inside the injection graph and must be annotated with `@Inject`.
+
+To add custom span attributes to a `Span`, there are two annotations:
+- [@SpanAttribute](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/SpanAttribute.java):
+  Supports a key and a value that will be added as an attribute for the span that represents the method. Both the
+  method and the class can be annotated with `SpanAttribute`. `SpanAttribute` belonging to the class will
+  be used in all methods annotated with `@Span`. If both a class and method `SpanAttribute` have the
+  same key, the method's value will be used.
+
+- [@SpanAttributeParameter](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/SpanAttributeParameter.java):
+  Used to annotate a parameter for a method annotated with `@Span`. Supports a `value` which is the key
+  of the attribute. If none is provided, the method name will be used as key. The value for the attribute
+  is the actual parameter value.  `@SpanAttributeParameter` takes precedence over `@SpanAttribute` if
+  conflicting keys are found.
+
+Currently, tracing information can only be exported to a `Zipkin` instance.
+
 ## Timing operations and timer classification
 The framework enables us to classify the time taken while processing an operation. 
 The classification is done using a simple `String` as a `Tag`. To measure the time for a block of code, 
 we use [TimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/TimedOperation.java).
 
 A `TimedOperation` will record the time it took automatically to the `Context`. 
-You can tag the `TimedOperation` however you like, using `new TimedOperation(myTag)`, or using one of two
+You can tag the `TimedOperation` however you'd like, using `new TimedOperation(myTag)`, or using one of two
 pre-defined tags: http `TimedOperation.http()`, used for HTTP calls, and db `TimedOperation.db()`,
 used for database calls. 
 
-`TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`, and
-`TimedOperation.db()` has to manually wrap a database call. It's not uncommon for database calls
+`TimedOperation.http()` is used internally in `RestOperation` and `ApiCall`. For `TimedOperation.db()`,
+you can annotate the repository with `@AsTimedOperation`, as shown in the next topic, or you can 
+manually wrap a database call. It's not uncommon for database calls
 to be automatic, having only the interface for the `Repository` created. To avoid wrapping every call
-to the repository in `TimedOperation`, you can create a delegate for such cases:
+to the repository in `TimedOperation`, you could create a delegate for such cases:
+
+`@AsTimedOperation` example:
+
+```
+package com.example.demo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+@AsTimedOperation(tag = AsTimedOperation.DB)
+public interface DemoRepository extends JpaRepository<Demo, String> {
+    List<Demo> findAllByStatus(Demo.Status status);
+    Optional<Demo> findByAField(String aFieldValue);
+}
+
+```
+
+Most likely, a service would have a reference for DemoRepository, and a Request a reference
+for the service. Overall, it would looke something like this:
+
+```
+...
+@AsTimedOperation(tag = AsTimedOperation.DB)
+@Repository
+public interface DemoRepository extends JpaRepository<Demo, String> {
+    List<Demo> findAllByStatus(Demo.Status status);
+    Optional<Demo> findByAField(String aFieldValue);
+}
+
+
+...
+@Service
+public class DemoService {
+    
+    @Autowired
+    @Inject
+    DemoRepository demoRepository;
+...    
+}
+
+...
+public DemoRequest extends Resquest {
+    
+    @Inject
+    DemoService demoService;
+    
+}
+
+```
+
+Manual wrapping example:
 
 ```
 package com.example.demo;
@@ -1385,9 +1592,40 @@ of the request, but the timer is still ticking. We could stop the timer as soon 
 is over for this wrap-up to use a stopped timer, but this is part of the request after all. 
 Be it as it may, a future release will include a configuration to stop the timer.
 
+A `TimedOperation` can be automatically traced by adding the span name, calling `TimedOperation::traced`.
+Span attributes can be added by calling `TimedOperation::withTraceAttribute`, providing a `String` for the
+attribute key and a `String` for the attribute value.
+
+### @AsTimedOperation annotation
+Since version `0.1.0`,
+[@AsTimedOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/timing/AsTimedOperation.java)
+enables auto time recording for methods. Simply annotate a method with `@AsTimedOperation`, and it will
+automatically add the time to the context. You can also annotate the class, in which case all of its methods
+will be converted do `TimedOperation`. Since this is a behavior enhancement, the object has to
+be in the injection graph - see [above](#dependency-injection). Since `@AsTimedOperation`
+can also be configured to trace / create a span, `@AsTimedOperation` and `@Span` are incompatible.
+`@AsTimedOperation` will be ignored if a method is also annotated with `@Span`.
+
+The following attributes are supported for `@AsTimedOperation`:
+- `tag`: String, required. Defines the tag for the timed operation. You can define any String value. 
+  `AsTimedOperation` has 2 pre-defined constants: `AsTimedOperation.HTTP`, for a tag with the value `http`
+  and `AsTimedOperation.DB`, for a tag with the value db.
+- `traced`: Boolean, defaults to false. Indicates if the method will also be traced, create a span.
+  The same `@SpanAttribute` and `@SpanAttributeParameter` also applies to a `@AsTimedOperation`method.
+- `spanName`: String, defaults to empty. The name of the span to be used if the operation is traced.
+  If empty, the method name will be used. Mind that, if it's the class that is annotated with
+  `@AsTimedOperation`, the spanName shall be a concatenation of both the `spanName` attribute plus
+  the method name.
+
+### TimedOperation limitations
+Currently, there is not a managed context for TimedOperations. That means that, if two TimedOperations are executed at
+the same time, either concurrently or one timedOperation starts another before it finishes, the total time of both
+will be count towards total execution time. Such cases will create errors in the total request execution time reported.
+A fix is scheduled for a near future.
+
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
-${}. It's also possible to use a default value in case the environment variable is not set by using 
+${} - do not confound with $ in $Context mentioned above. It's also possible to use a default value in case the environment variable is not set by using 
 a colon followed by a dash as in ${:-}.
 
 The following uses MY_ENV to initialize the day
@@ -1413,15 +1651,14 @@ default resources folder. The following configurations can be changed:
   as in `Context.forRequest().createLogger()`, this configuration will be used to initialize
   the class. If it's true, the class will be the calling class. If it's false, it will
   always be `ApplicatonLogger`.
-  
 - `logging.print-context-as-json`: Boolean, defaults to `true`. Governs whether the `context` field present
   in log messages will be exported as `json`.
-  
 - `logging.enable-default-attributes-overwrite`: Boolean, defaults fo `false`. Governs whether automatic logging
   attributes, such as `transactionId`, can have their value replaced with a call for 
   `Context#withRequestContextEntry` as in
   `Context.forRequest.withRequestContextEntry("transactionId", aNewValue)`.
-  
+- `logging.print-trace-id`: Boolean, defaults to `true`. Indicates whether traceId and spanId will be available in
+  log messages.
 - `validation.fail-on-execution-error`: Boolean, defaults to `true`. Governs whether an unexpected error
   in a validation attempt results in an exception. Every validation that fails for not matching
   the annotations for the current operation will result in an exception. For whatever
@@ -1429,30 +1666,47 @@ default resources folder. The following configurations can be changed:
   that is being validated throws an exception. If this configuration is true, the validation 
   will not happen, and an exception will be thrown. If this configuration is false, the validation
   will not happen, but it will be ignored, and if no other validation fails, the `Validatable`
-  would be deemed valid.
-  
+  would be deemed valid. 
 - `context.forbid-unauthorized-creation`: Boolean, defatuls to `true`. `Context.initialize` can't be called
   anywhere to create a `Context`. Allowing the `Context` creation is error-prone and, in almost
   all cases, not needed. If this configuration is true, unless the class in which 
   `Context.initialize` is being called is annotated with `@ContextCreator`, an exception will
   be thrown.
-
 - `context.allow-correlation-id-update`: Boolean, defaults to `true`. Governs whether a `correlationId` can be
-  updated after the context has been initialized.
-  
+  updated after the context has been initialized. 
+- `context.auto-propagate-request-entries`: Boolean, defaults to `true`. Indicates whether an
+  `ApiCall` will automatically insert a header with the context entries.
 - `metrics.request.duration.histogram-range`: Integer list, defaults to `[200, 500, 1000, 2000, 5000, 10000]`.
-  Govern the default `Histogram` buckets for request duration in milliseconds.
-  
+  Governs the default `Histogram` buckets for request duration in milliseconds. 
 - `metrics.request.duration.export-by-type`: Boolean, defaults to `true`. Governs whether `Histogram` metrics
-  for request duration will be tagged with timer types.
-  
+  for request duration will be tagged with timer types. 
 - `metrics.health-window-duration-minutes`: Integer, defaults to 5. Governs the maximum age of requests
   to be used in health calculations.
-
 - `metrics.health-value-type`: String, defaults to `lowest`. The type of health calculation used to export
   the overral application health. Either `lowest`, to use the lowest operation health as the application heatlh,
   or `average`, to calculate the average of the health of the operations.
-  
+- `instrumentation.tracing.enabled`: Boolean, defaults to `false`. Determines if (distributed) tracing is enabled
+  or not. If disabled, no tracing information will be recorded or created. Trace headers won't be created.
+- `instrumentation.tracing.strategy`: String, defaults to `ALWAYS_SAMPLE`. Determine the sampling strategy for
+  tracing information. If tracing is disabled, this configuration has no effect. Can be one of:
+  - `ALWAYS_SAMPLE`: records every request.
+  - `NEVER_SAMPLE`: records no request. Note that this is not the same as having the tracing disabled. This will still
+    generate traceparent header for propagation.
+  - `RATIO_BASED_SAMPLE`: partially records the sampling information based on `instrumentation.tracing.ratio` configuration.
+  - `PARENT_BASED_OR_ALWAYS_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `ALWAYS_SAMPLE`.
+  - `PARENT_BASED_OR_NEVER_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `NEVER_SAMPLE`.
+  - `PARENT_BASED_OR_RATIO_BASED_SAMPLE`: use the traceparent header information from the upstream service to determine if the request
+    is to be recorded. If not available, defaults to `RATIO_BASED_SAMPLE`.
+- `instrumentation.tracing.ratio`: Double, defaults to 0.1. Determines the percentage of requests which should be recorded, in
+  which 0 means none and 1 means all.
+- `instrumentation.tracing.auto-propagation-enabled`: Boolean, defaults to `true`. Determines if `ApiCall` requests will
+  automatically propagate the traceparent header. `ApiCall` supports an override for request by request configuration.
+- `instrumentation.tracing.add-custom-prefix`: Boolean, defaults to `true`. Indicates whether the `custom.` preffix will be 
+  added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.
+- `instrumentation.tracing.zipkin-url`: String, no default. Stores the zipkin url to which the traces will be sent.
+
 ## Labels
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
 a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
@@ -1509,7 +1763,6 @@ in the future.
   being done.
 - Create a configuration to control whether an exception in a request will be wrapped in
   a `RequestException` that holds the original exception, and the outcome of the request.
-- Implement distributed tracing.
 - Implement default validators.
 - Implement yml configuration for things like validations, and more.
 - Create a circuit breaker or failsafe structure that can be used to wrap calls.
@@ -1520,6 +1773,10 @@ in the future.
 - Cross-field or cross-concern validation.
 - Creation of behavior flows using yml or other configuration tools. Possibly another project 
 that uses this one as lib.
-  
+- Refactor undocumented proxy and genesis APIs to support external use.
+- Create context management for `TimedOperation` so that if two timed operations bein run concurrently or one
+  inside the other do not count twice towards total execution time.
+
 # Sample project
+The Sample project is based on version `0.0.2`. An update is soon to come.
 [Demo Application](https://github.com/renatols-jf/spboot-chassis-demo)

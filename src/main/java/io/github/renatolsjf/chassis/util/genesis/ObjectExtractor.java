@@ -1,6 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
-
-import io.github.renatolsjf.chassis.util.CaseString;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -10,13 +8,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ObjectExtractor<T> {
+public class ObjectExtractor {
 
-    private T object;
+    private Object object;
     private List<Method> methods;
     private List<Field> fields;
 
-    public ObjectExtractor(T object) {
+    public ObjectExtractor(Object object) {
         this.object = object;
     }
 
@@ -28,6 +26,16 @@ public class ObjectExtractor<T> {
     public FieldExtractor fieldExtractor() {
         this.ensureFields();
         return new FieldExtractor(this.object, this.fields);
+    }
+
+    public List<Method> getMethods() {
+        this.ensureMethods();
+        return this.methods;
+    }
+
+    public List<Field> getFields() {
+        this.ensureFields();
+        return this.fields;
     }
 
     private void ensureMethods() {

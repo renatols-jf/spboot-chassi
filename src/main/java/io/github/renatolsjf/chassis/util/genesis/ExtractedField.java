@@ -1,4 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import io.github.renatolsjf.chassis.util.conversion.ConversionFactory;
 
@@ -13,7 +13,12 @@ public class ExtractedField extends ExtractedMember<Field> {
     }
 
     @Override
-    protected void doSet() throws UnableToSetMemberException {
+    protected void doCallOrSet() throws UnableToSetMemberException {
+
+        if (this.params.length == 0) {
+            throw new UnableToSetMemberException("Can't set with no parameters");
+        }
+
         this.member.trySetAccessible();
         try {
             this.member.set(this.object, this.params[0]);
@@ -23,9 +28,25 @@ public class ExtractedField extends ExtractedMember<Field> {
     }
 
     @Override
+    protected Object doCallOrGet() throws UnableToGetMemberException {
+        this.member.trySetAccessible();
+        try {
+            return this.member.get(this.object);
+        } catch (IllegalAccessException e) {
+            throw new UnableToGetMemberException(e);
+        }
+    }
+
+    @Override
     protected void setParams(Object... params) {
 
         if (params.length > 1) {
+            return;
+        } else if (params.length == 0) {
+            this.affinity = 0x80 | affinity;
+            return;
+        } else if (params[0] == null) {
+            this.affinity = 0x10 | affinity;
             return;
         }
 

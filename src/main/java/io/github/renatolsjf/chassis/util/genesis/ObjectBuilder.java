@@ -1,5 +1,7 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
+
+import io.github.renatolsjf.chassis.util.expression.ExpressionParser;
 
 import java.lang.reflect.*;
 import java.util.Map;
@@ -34,38 +36,39 @@ public class ObjectBuilder {
             throw new UnableToBuildObjectException(e);
         }
 
-        ObjectExtractor<T> objectExtractor = new ObjectExtractor<>(t);
-        MethodExtractor methodExtractor = objectExtractor.methodExtractor()
-                .withPrefix("set")
-                .withPrefix("with");
+        ObjectExtractor objectExtractor = new ObjectExtractor(t);
+        MethodExtractor methodExtractor = objectExtractor.methodExtractor().setter();
         FieldExtractor fieldExtractor = objectExtractor.fieldExtractor();
 
 
         map.forEach((k, v) -> {
 
+            Object parsedValue = ExpressionParser.parse(v);
             if (this.initializationType == InitializationType.METHOD_FIRST || this.initializationType == InitializationType.METHOD_ONLY) {
-                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
+                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(parsedValue);
                 if (ex != null) {
-                    if (ex.setAndIgnore()) {
+                    try {
+                        ex.callOrSet();
                         return;
-                    }
+                    } catch (UnableToSetMemberException e) {}
                 }
             }
 
             if (this.initializationType != InitializationType.METHOD_ONLY) {
-                ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(v);
+                ExtractedMember<Field> ex = fieldExtractor.withName(k).mostAdequateOrNull(parsedValue);
                 if (ex != null) {
-                    if (ex.setAndIgnore()) {
+                    try {
+                        ex.callOrSet();
                         return;
-                    }
+                    } catch (UnableToSetMemberException e) {}
                 }
             }
 
             if (this.initializationType == InitializationType.FIELD_FIRST) {
-                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(v);
-                if (ex != null) {
-                    ex.setAndIgnore();
-                }
+                ExtractedMember<Method> ex = methodExtractor.withName(k).mostAdequateOrNull(parsedValue);
+                try {
+                    ex.callOrSet();
+                } catch (UnableToSetMemberException e) {}
             }
 
         });

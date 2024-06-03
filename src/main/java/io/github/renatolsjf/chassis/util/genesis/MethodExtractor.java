@@ -1,4 +1,4 @@
-package io.github.renatolsjf.chassis.util.build;
+package io.github.renatolsjf.chassis.util.genesis;
 
 import io.github.renatolsjf.chassis.util.CaseString;
 
@@ -33,6 +33,18 @@ public final class MethodExtractor extends MemberExtractor<Method, MethodExtract
             return false;
 
         });
+    }
+
+    public MethodExtractor getter() {
+        this.resetPrefix();
+        return this.withPrefix("get")
+                .withPrefix("is");
+    }
+
+    public MethodExtractor setter() {
+        this.resetPrefix();
+        return this.withPrefix("set")
+                .withPrefix("with");
     }
 
     public MethodExtractor withPrefix(String prefix) {

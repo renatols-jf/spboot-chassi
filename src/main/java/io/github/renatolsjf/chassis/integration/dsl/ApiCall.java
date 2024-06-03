@@ -3,11 +3,13 @@ package io.github.renatolsjf.chassis.integration.dsl;
 import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.monitoring.timing.TimedOperation;
+import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.Renderable;
-import io.github.renatolsjf.chassis.util.build.BuildIgnore;
-import io.github.renatolsjf.chassis.util.build.Buildable;
-import io.github.renatolsjf.chassis.util.build.Multi;
+import io.github.renatolsjf.chassis.request.EntryResolver;
+import io.github.renatolsjf.chassis.util.genesis.BuildIgnore;
+import io.github.renatolsjf.chassis.util.genesis.Buildable;
+import io.github.renatolsjf.chassis.util.genesis.Multi;
 
 import java.net.*;
 import java.time.Duration;
@@ -60,6 +62,11 @@ public abstract class ApiCall {
     private final Map<String, String> urlReplacements = new HashMap<>();
     private ApiMethod method;
 
+    @BuildIgnore
+    private Boolean propagateTraceOverride = null;
+    @BuildIgnore
+    private Boolean propagateRequestEntriesOverride = null;
+
 
     public ApiCall withOperation(String operation) {
         this.operation = operation;
@@ -86,8 +93,8 @@ public abstract class ApiCall {
         return this;
     }
 
-    public ApiCall withReadTimeOutSeconds(long seconds) {
-        this.readTimeOut = Duration.ofSeconds(seconds);;
+    public ApiCall withReadTimeoutSeconds(long seconds) {
+        this.readTimeOut = Duration.ofSeconds(seconds);
         return this;
     }
 
@@ -115,6 +122,16 @@ public abstract class ApiCall {
 
     public ApiCall withApiMethod(ApiMethod apiMethod) {
         this.method = apiMethod;
+        return this;
+    }
+
+    public ApiCall withPropagateTrace(Boolean propagateTrace) {
+        this.propagateTraceOverride = propagateTrace;
+        return this;
+    }
+
+    public ApiCall withPropagateRequestEntries(Boolean propagateRequestEntries) {
+        this.propagateRequestEntriesOverride = propagateRequestEntries;
         return this;
     }
 
@@ -195,6 +212,10 @@ public abstract class ApiCall {
         return this.post(Media.ofCollection(body).render());
     }
 
+    public ApiResponse post(Media body) throws ApiException {
+        return this.post(body.render());
+    }
+
     protected <T> ApiResponse post(T body) {
         return this.execute(ApiMethod.POST, body);
     }
@@ -210,6 +231,10 @@ public abstract class ApiCall {
 
     public ApiResponse put(Renderable... body) throws ApiException {
         return this.put(Media.ofCollection(body).render());
+    }
+
+    public ApiResponse put(Media body) throws ApiException {
+        return this.put(body.render());
     }
 
     protected <T> ApiResponse put(T body) {
@@ -229,6 +254,10 @@ public abstract class ApiCall {
         return this.patch(Media.ofCollection(body).render());
     }
 
+    public ApiResponse patch(Media body) throws ApiException {
+        return this.patch(body.render());
+    }
+
     protected <T> ApiResponse patch(T body) {
         return this.execute(ApiMethod.PATCH, body);
     }
@@ -246,10 +275,16 @@ public abstract class ApiCall {
         return this.delete(Media.ofCollection(body).render());
     }
 
+    public ApiResponse delete(Media body) throws ApiException {
+        return this.delete(body.render());
+    }
+
     protected <T> ApiResponse delete(T body) throws ApiException {
         return this.execute(ApiMethod.DELETE, body);
     }
 
+
+    //---------- EXECUTE
     public ApiResponse execute() throws ApiException {
         return this.execute((Object) null);
     }
@@ -262,23 +297,56 @@ public abstract class ApiCall {
         return this.execute(Media.ofCollection(body).render());
     }
 
+    public ApiResponse execute(Media body) throws ApiException {
+        return this.execute(body.render());
+    }
+
     public <T> ApiResponse execute(T body) throws ApiException {
+
         if (this.method == null) {
             throw new NullPointerException("Api method not set");
         }
+
+        if (this.provider == null || this.provider.isBlank()) {
+            throw new NullPointerException("Provider not set");
+        }
+
+        if (this.service == null || this.service.isBlank()) {
+            throw new NullPointerException("Service not set");
+        }
+
+        if (this.operation == null || this.operation.isBlank()) {
+            throw new NullPointerException("Operation not set");
+        }
+
         return this.execute(this.method, body);
     }
 
     private <T> ApiResponse execute(ApiMethod method, T body) throws ApiException {
 
-        TimedOperation<ApiResponse> timedOperation =
-                TimedOperation.http();
+        TimedOperation<ApiResponse> timedOperation = TimedOperation.http()
+                .traced(method.toString() + " " + this.getEndpoint())
+                .withTraceAttribute("method", method.toString())
+                .withTraceAttribute("url", this.getEndpoint());
 
-        ApiResponse apiResponse = timedOperation.execute(() -> this.doExecute(method, body));
+        ApiResponse apiResponse = timedOperation.execute(() ->  {
+
+            if (this.shouldPropagateTracing()) {
+                TracingContext tracingContext = Context.forRequest().getTelemetryContext().getTracingContext();
+                this.withHeader(tracingContext.getW3cHeaderName(), tracingContext.getW3cHeaderValue());
+            }
+
+            if (this.shouldPropagateRequestEntries()) {
+                this.withHeader(EntryResolver.HTTP_HEADER, Context.forRequest().getRequestContextAsString());
+            }
+
+            return this.doExecute(method, body);
+        });
+
         long duration = timedOperation.getExecutionTimeInMillis();
         String statusCode = apiResponse.getHttpStatus();
 
-        Context.forRequest().createLogger()
+        Context.forRequest().createLogger(timedOperation)
                 .info("API CALL: " + method.toString() + " " + this.getEndpoint() +
                         " " + statusCode + " " + duration)
                 .attach(LOGGING_FIELD_PROVIDER, this.provider)
@@ -327,6 +395,23 @@ public abstract class ApiCall {
 
         return apiResponse;
 
+    }
+
+    private boolean shouldPropagateTracing() {
+        boolean shouldPropagate = this.propagateTraceOverride != null
+                ? this.propagateTraceOverride
+                : Chassis.getInstance().getConfig().isTracingAutoPropagationEnabled();
+        return Context.isTracingEnabled()
+                && shouldPropagate;
+    }
+
+    private boolean shouldPropagateRequestEntries() {
+        boolean shouldPropagate = this.propagateRequestEntriesOverride != null
+                ? this.propagateRequestEntriesOverride
+                : Chassis.getInstance().getConfig().autoPropagateContextRequestEntries();
+        return Context.isAvailable()
+                && Context.forRequest().getRequestContextAsString() != null
+                && shouldPropagate;
     }
 
     protected abstract <T> ApiResponse doExecute(ApiMethod method, T Body);

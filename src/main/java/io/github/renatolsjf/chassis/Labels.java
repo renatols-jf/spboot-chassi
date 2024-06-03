@@ -46,6 +46,8 @@ public class Labels {
         LOGGING_ELAPSED_TIME(FieldType.LOGGING + ".elapsed-time", "elapsedTime"),
         LOGGING_OPERATION_TIME(FieldType.LOGGING + ".operation-times", "operationTimes"),
         LOGGING_CONTEXT(FieldType.LOGGING + ".context", "context"),
+        LOGGING_TRACE_ID(FieldType.LOGGING + ".trace-id", "traceId"),
+        LOGGING_SPAN_ID(FieldType.LOGGING + ".span-id", "spanId"),
 
         METRICS_NAME_OPERATION_HEALTH(FieldType.METRICS_NAME + ".operation-health", "operation_health"),
         METRICS_NAME_INTEGRATION_HEALTH(FieldType.METRICS_NAME + ".integration-health", "integration_health"),

@@ -2,8 +2,8 @@ package io.github.renatolsjf.chassis.integration.dsl;
 
 import io.github.renatolsjf.chassis.integration.dsl.resttemplate.RestTemplateApiCall;
 import io.github.renatolsjf.chassis.util.CaseString;
-import io.github.renatolsjf.chassis.util.build.ObjectBuilder;
-import io.github.renatolsjf.chassis.util.build.UnableToBuildObjectException;
+import io.github.renatolsjf.chassis.util.genesis.ObjectBuilder;
+import io.github.renatolsjf.chassis.util.genesis.UnableToBuildObjectException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ public class ApiFactory {
 
     }
 
-    public static ApiCall apiFromLabel(String label) {
+    public static ApiCall apiFromLabel(String label) throws NoSuchApiCallException {
         String s = CaseString.getValue(CaseString.CaseType.CAMEL, label);
         Map m = apiCalls.get(s);
         if (m != null) {
@@ -40,7 +40,7 @@ public class ApiFactory {
                 return null;
             }
         } else {
-            return null;
+            throw new NoSuchApiCallException("No ApiCall configured for label " + label + " under chassis-api.yaml");
         }
     }
 

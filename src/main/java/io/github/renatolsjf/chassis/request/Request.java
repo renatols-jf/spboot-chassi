@@ -9,6 +9,8 @@ import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
 import io.github.renatolsjf.chassis.rendering.Media;
 import io.github.renatolsjf.chassis.rendering.transforming.MediaTransformerFactory;
+import io.github.renatolsjf.chassis.util.StringConcatenator;
+import io.github.renatolsjf.chassis.util.genesis.ObjectExtractor;
 import io.github.renatolsjf.chassis.validation.ValidationException;
 
 import java.lang.reflect.Field;
@@ -35,11 +37,11 @@ public abstract class Request {
     protected RequestOutcome outcome;
 
     public Request(String operation, String transactionId, String correlationId) {
-        this(operation, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap());
+        this(operation, transactionId, correlationId, Collections.emptyList(), Collections.emptyMap(), null);
     }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection) {
-        this(operation, transactionId, correlationId, projection, Collections.emptyMap());
+        this(operation, transactionId, correlationId, projection, Collections.emptyMap(), null);
     }
 
     public Request(String operation, String transactionId, String correlationId, String requestContextEntries) {
@@ -47,24 +49,43 @@ public abstract class Request {
     }
 
     public Request(String operation, String transactionId, String correlationId, Map<String, String> requestContextEntries) {
-        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries);
+        this(operation, transactionId, correlationId, Collections.emptyList(), requestContextEntries, null);
     }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    String requestContextEntries) {
-        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation());
+        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation(), null);
     }
 
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   String requestContextEntries, String traceParent) {
+        this(operation, transactionId, correlationId, projection, new EntryResolver(requestContextEntries).getMapRepresentation(), traceParent);
+    }
 
     public Request(String operation, String transactionId, String correlationId, List<String> projection,
                    Map<String, String> requestContextEntries) {
+        this (operation, transactionId, correlationId, projection, requestContextEntries, null);
+    }
+
+    public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   Map<String, String> requestContextEntries, String traceParent) {
+
         if (requestContextEntries == null) {
             requestContextEntries = Collections.emptyMap();
         }
-        this.context = Context.initialize(transactionId, correlationId).withOperation(operation).withProjection(projection);
+
+        this.context = Context.initialize(transactionId, correlationId)
+                .withOperation(operation)
+                .withProjection(projection);
+
+        //if (!this.getClass().isAnnotationPresent(NotTraceable.class)) {
+            this.context.withTracing(this.getClass().getName(),
+                    StringConcatenator.of(this.getClass().getSimpleName(), operation).twoColons(), traceParent);
+        //}
+
         requestContextEntries.entrySet().forEach(e -> this.context.withRequestContextEntry(e.getKey(), e.getValue()));
 
-        for(Field f: this.getClass().getDeclaredFields()) {
+        for(Field f: new ObjectExtractor(this).getFields()) {
             if (f.getAnnotation(Inject.class) != null) {
                 try {
                     f.trySetAccessible();
@@ -113,7 +134,7 @@ public abstract class Request {
                     .attachObject(this)
                     .log();
 
-            Media m =  doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
+            Media m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
 
             this.context.createLogger()
                     .info("Completed request: {}", this.getClass().getSimpleName())
@@ -146,7 +167,7 @@ public abstract class Request {
             if (!healthIgnore) {
                 Chassis.getInstance().getApplicationHealthEngine().operationEnded(this.outcome);
             }
-            Context.clear();
+            this.context.clear(this.outcome == RequestOutcome.SUCCESS);
 
         }
     }
