@@ -68,7 +68,7 @@ the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
 This is not related to the standard NIO Thread pool.
 
-This was built and tested using Java 21 and Spring Boot 3.2.5. A Java 11 version with Sprint 2.x.x
+This was built and tested using Java 21 and Spring Boot 3.2.5. A Java 11 version with Spring 2.x.x
 is planned.
 
 # Terminology
