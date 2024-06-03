@@ -60,12 +60,12 @@ This also means there is a lot to be done, and a lot that could be better. That 
 this is currently in use in a handful of professional microservices without 
 any issues. I'll continue to use it as it evolves, and I don't expect any 
 downsides to it. Be it as it may, more work is to be expected. Both features and overall enhancements,
-like a test suite, will be added.
+such as a test suite, will be added.
 
-Also, this project does not currently support NIO (Spring Webflux)  as it uses ThreadLocal to control
+Additionally, this project does not currently support NIO (Spring Webflux)  as it uses ThreadLocal to control
 the request context. A simple solution is to add methods to take a snapshot of
 the context and reinitialize after the NIO code. A more automatic solution would
-require greater effort. Be it as it may, the snapshot is also not supported yet.
+require greater effort. Be that as it may, the snapshot is also not supported yet.
 This is not related to the standard NIO Thread pool.
 
 This was built and tested using Java 21 and Spring Boot 3.2.5. A Java 11 version with Spring 2.x.x
@@ -73,11 +73,11 @@ is planned.
 
 # Terminology
 - Entry point is used as a general term to represent an event that triggers a request to start.
-  It might be an HTTP request arriving at a rest endpoint (hereby called rest entry point), a message
+  It might be an HTTP request arriving at a REST endpoint (hereby called REST entry point), a message
   from a queue, etc.
 
 # What is this project?
-This is an implementation of a microservice's chassis pattern for spring boot 
+This is an implementation of a microservice's chassis pattern for Spring Boot 
 applications. It deals with a few common concerns for distributed
 (or not so distributed) applications:
 
@@ -93,7 +93,7 @@ I created this project based on the experiences I had while developing microserv
 in the last four or five years, and also based on the reading I've done so far.
 It's not uncommon for application needs to be ignored in favor of domain behavior, 
 and the little code that exists is generally duplicated in many places. Also, I have
-seen my fair share of anemic models, and while I understand it's never so simple to
+seen my fair share of anemic models, and while I understand it's never simple to
 get rid of data holders, I strive to use them the least possible.
 
 The whole framework is based on the idea that all that happens within an application
