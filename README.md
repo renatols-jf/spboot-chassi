@@ -55,12 +55,12 @@ non runtime exception happens.
 
 # Discalimer
 This project was and is being developed in my free time. This means I'll do my 
-best to solve any issues, but a few issues are to be expected. This also means there
-is a lot to be done, and a lot that could be better. That being said, 
+best to solve any issues, but a few issues are to be expected, as with any project. 
+This also means there is a lot to be done, and a lot that could be better. That being said, 
 this is currently in use in a handful of professional microservices without 
 any issues. I'll continue to use it as it evolves, and I don't expect any 
-downsides to it. Be it as it may, a test suite is needed. Until a comprehensive 
-set of tests is written, this project's version will be labeled as less than 1.0.0.
+downsides to it. Be it as it may, more work is to be expected. Both features and overall enhancements,
+like a test suite, will be added.
 
 Also, this project does not currently support NIO (Spring Webflux)  as it uses ThreadLocal to control
 the request context. A simple solution is to add methods to take a snapshot of
@@ -68,7 +68,7 @@ the context and reinitialize after the NIO code. A more automatic solution would
 require greater effort. Be it as it may, the snapshot is also not supported yet.
 This is not related to the standard NIO Thread pool.
 
-This was built and tested using Java 21 and Spring Boot 3.2.2. A Java 11 version with Sprint 2.x.x
+This was built and tested using Java 21 and Spring Boot 3.2.5. A Java 11 version with Sprint 2.x.x
 is planned.
 
 # Terminology
@@ -86,10 +86,11 @@ applications. It deals with a few common concerns for distributed
 - Stamp coupling
 - Data validation
 - Data transformation
+- Distributed tracing
 
 # Motivation
 I created this project based on the experiences I had while developing microservices
-in the last couple of years or so, and also based on the reading I've done so far.
+in the last four or five years, and also based on the reading I've done so far.
 It's not uncommon for application needs to be ignored in favor of domain behavior, 
 and the little code that exists is generally duplicated in many places. Also, I have
 seen my fair share of anemic models, and while I understand it's never so simple to
@@ -142,8 +143,9 @@ public class DemoApplication {
 [Request](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Request.java) 
 is a unit of behavior. Everything that happens in the application should be
 within a request. It automatically provides a means to log the request, update application
-metrics, and some other useful application behavior. The idea is to think of a request
-as a unit of processing, no matter the entry point. An HTTPS call should be mapped to
+metrics, add tracing information, track time taken by HTTP and database requests, 
+and some other useful application behavior. The idea is to think of a request
+as a unit of processing, no matter the entry point. An HTTP call should be mapped to
 a request, just as a message consumed from a queue.
 
 Request is an abstract class and needs to be extended to provide any functionality.
@@ -152,8 +154,8 @@ controls domain behavior.
 
 The domain logic is to be implemented in the method `doProcess()` - 
 it should **NEVER** be called directly, instead, `process()` should. At this point,
-you might want to access Spring-managed objects, such as services. 
-There are three ways of doing so (Note that an exception will be thrown if no beans qualify in all cases):
+you might want to access Spring-managed objects, - or any other object - such as services. 
+There are three ways of doing so:
 - Annotate the desired field with
   [Inject](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/Inject.java).
   `@Inject` will only work inside requests.
@@ -178,7 +180,15 @@ There are a few request constructors available, but we will approach only the mo
 
 ```
 public Request(String operation, String transactionId, String correlationId, List<String> projection,
-                   Map<String, String> requestContextEntries)
+                   Map<String, String> requestContextEntries, String traceParent)
+                              
+```
+
+And / or
+
+```
+public Request(String operation, String transactionId, String correlationId, List<String> projection,
+                   String requestContextEntries, String traceParent)
 ```
 
 ### operation
@@ -188,8 +198,8 @@ initializes this value without it actually being one of its constructor paramete
 
 ```
 public CalculateMarginRequest(String transactionId, String correlationId, List<String> projection,
-                   Map<String, String> requestContextEntries) extends Request {
-    super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries);                  
+                   String requestContextEntries, String traceparent) extends Request {
+    super("CALCULATE_MARGIN", transactionId, correlationId, projection, requestContextEntries, traceparent);                  
 }
 ```
 
@@ -213,7 +223,7 @@ response. This could lead to traffic overcharges, the need to map unnecessary fi
 among other issues.
 
 Each request supports a list of field names that will be automatically filtered
-before the response is given. Nestesd fields are represented with dots. 
+before the response is given. Nested fields are represented with dots. 
 So, if a request returns the following json:
 
 ```
@@ -265,7 +275,9 @@ using `:` and separating entries using `;`, as in `aKey:aValue;anotherKey:anothe
 It's highly recommended to use 
 [EntryResolver](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/request/EntryResolver.java)
 to do conversions if needed, though. The default header is accessible via `EntryResolver.HTTP_HEADER`,
-and its value is `X-CONTEXT-ENTRIES`.
+and its value is `X-CONTEXT-ENTRIES`. If configured - which it is by default - HTTP calls will 
+automatically add this header to downstream calls. A downstream service just needs to get 
+the String header and supply it in its request creation.
 
 *Entries are logged in their own fields; exportation of fields other than message
 depends on the logging configuration.
@@ -316,6 +328,16 @@ instantiated manually, there will be no injection of `B` inside `A`.
 A injection tree can be triggered outside a `Request` if so desired. Calling `AppRegistry::getResource`
 for a type will trigger the injection process for the object graph starting with that type.
 
+Currently, if injecting a Spring bean, its scope should be the default Spring scope `singleton`. To
+avoid unnecessary bytecode manipulation, enhanced beans are currently cached. If a scope that
+recreates beans is used, the cached version will still be used.
+
+Note that Spring managed beans still need their default injection mechanism, like using the `@Autowired`
+annotation. If a repository referenced inside a service needs to have its behavior enhanced, it
+should be annotated with both `@Autowired`, and `@Inject`. Injecting a Spring bean inside an
+object that is not a Spring bean, - which lifecycle is not manageg by Spring - 
+like a request, does not require `@Autowired`, only `@Inject`.
+
 ## Context
 [Context](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/Context.java)
 is the source of information for the current processing/request. It stores 
@@ -345,7 +367,7 @@ Some useful information can be retrieved fom a `Context`. Below are a few of the
 - `getRequestContext()`: A map containing the current request entries.
 - `getRequestContextAsString()`: A String representation o the current request entries
 - `getOperation()`: The current operation.
-- `getTraceParent()`: Returns the current tracing context in the `traceparent` W3C header value.
+- `getTraceParent()`: Returns the current tracing context, if available, in the `traceparent` W3C header value format.
 
 ## Logging
 Logging can be done by requesting an 
@@ -1393,12 +1415,11 @@ A sample result:
 As of version `0.1.0`, the framework supports tracing / distributed tracing. Every `Request` is
 traced by default - note that traced is used in general since tracing might be disabled, or a
 specific execution of a request might not be sampled, depending on the configuration.
-If a `Request` is never to be sampled, it can be annotated with
+If a `Request` is never to be sampled, even though general tracing is desired, it can be annotated with
 [@NotTraceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/NotTraceable.java).
 
 Considering that a request is traced and sampled, by default, a single `Span` will be created with the
-request's name. The framework considers a method as the scope of a `Span`. To add more spans, 
-the class in which a method or methods will be exported as spans, has to be annotated with
+request's name. To add more spans, the class in which a method or methods will be exported as spans, has to be annotated with
 [@Traceable](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Traceable.java).
 This will not trigger automatic span creations, as the methods which will be traced also need to be annotated with
 [@Span](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/monitoring/tracing/Span.java).
@@ -1438,6 +1459,59 @@ you can annotate the repository with `@AsTimedOperation`, as shown in the next t
 manually wrap a database call. It's not uncommon for database calls
 to be automatic, having only the interface for the `Repository` created. To avoid wrapping every call
 to the repository in `TimedOperation`, you could create a delegate for such cases:
+
+`@AsTimedOperation` example:
+
+```
+package com.example.demo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+@AsTimedOperation(tag = AsTimedOperation.DB)
+public interface DemoRepository extends JpaRepository<Demo, String> {
+    List<Demo> findAllByStatus(Demo.Status status);
+    Optional<Demo> findByAField(String aFieldValue);
+}
+
+```
+
+Most likely, a service would have a reference for DemoRepository, and a Request a reference
+for the service. Overall, it would looke something like this:
+
+```
+...
+@AsTimedOperation(tag = AsTimedOperation.DB)
+@Repository
+public interface DemoRepository extends JpaRepository<Demo, String> {
+    List<Demo> findAllByStatus(Demo.Status status);
+    Optional<Demo> findByAField(String aFieldValue);
+}
+
+
+...
+@Service
+public class DemoService {
+    
+    @Autowired
+    @Inject
+    DemoRepository demoRepository;
+...    
+}
+
+...
+public DemoRequest extends Resquest {
+    
+    @Inject
+    DemoService demoService;
+    
+}
+
+```
+
+Manual wrapping example:
 
 ```
 package com.example.demo;
@@ -1544,7 +1618,7 @@ The following attributes are supported for `@AsTimedOperation`:
   the method name.
 
 ### TimedOperation limitations
-Currently, there is not a managed context for TimedOperations. That means that, if two TimedOperations are ran at
+Currently, there is not a managed context for TimedOperations. That means that, if two TimedOperations are executed at
 the same time, either concurrently or one timedOperation starts another before it finishes, the total time of both
 will be count towards total execution time. Such cases will create errors in the total request execution time reported.
 A fix is scheduled for a near future.
