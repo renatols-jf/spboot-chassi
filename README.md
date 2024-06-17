@@ -1713,6 +1713,30 @@ default resources folder. The following configurations can be changed:
   added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.
 - `instrumentation.tracing.zipkin-url`: String, no default. Stores the zipkin url to which the traces will be sent.
 
+Sample:
+```
+metrics:
+  health-window-duration-minutes: 10
+  health-value-type: average
+  request:
+    duration:
+      histogram-range:
+        - 500
+        - 2000
+        - 10000
+        - 20000
+
+logging:
+  enable-default-attributes-overwrite: true
+
+instrumentation:
+  tracing:
+    enabled: true
+    strategy: PARENT_BASED_OR_ALWAYS_SAMPLE
+    add-custom-prefix: false
+    zipkin-url: http://localhost:9411/api/v2/spans
+```
+
 ## Labels
 Labels are a means to change default labels, names, or captions for the framework. For that, you need to create
 a file called `chassis-labels.yaml` under the default resources folder. Just add the data that you wish to override.
@@ -1745,6 +1769,20 @@ i18n is also supported by adding an underscore plus the language code after the 
 named like `chassis-labels_en_US.yaml`, `chassis-labels_pt_BR.yaml`, and `chassis-labels_en.yaml` can be used.
 If the locale was set to `en_US`, the framework would search for files in the following order:
 `chassis-labels_en_US.yaml`, `chassis-labels_en.yaml`, and `chassis-labels.yaml`.
+
+Sample:
+```
+application
+  name: demo_app
+  
+logging:
+  transaction_id: transaction
+  context: stuff
+  
+metrics:
+  tag:
+    outcome: result
+```
 
 
 
