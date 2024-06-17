@@ -1626,7 +1626,8 @@ The following attributes are supported for `@AsTimedOperation`:
 Currently, there is not a managed context for TimedOperations. That means that, if two TimedOperations are executed at
 the same time, either concurrently or one timedOperation starts another before it finishes, the total time of both
 will be count towards total execution time. Such cases will create errors in the total request execution time reported.
-A fix is scheduled for a near future.
+A fix is scheduled for a near future. Be it as it may, this issue does not apply to TimedOperations running in
+different Requests / Threads. Each request, and therefore thread, has its own context management.
 
 ## A note about YAML loading and environment variables
 It's possible to load values from environment variables. To do so, the YAML value should be put inside
