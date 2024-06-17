@@ -176,8 +176,8 @@ it sets the outcome as `RequestOutcome.CLIENT_ERROR`. If it is not, it defers th
 `Request#doResolveError` return nulls (this **SHOULD NOT** happen), `Request#resolveError` 
 sets the outcome as `RequestOutcome.SERVER_ERROR`.
 
-Everey request will be automatically logged as soon as it starts and as soon as it finishes. The starting
-log will automatically log its parameters. See `@Classified` on [Logging](#logging) to learn how to omit 
+Every request will be automatically logged as soon as it starts and as soon as it finishes. The starting
+log will automatically log its fields. See `@Classified` on [Logging](#logging) to learn how to omit 
 fields. The final log will log the result of the request (`SUCCESS`, `CLIENT_ERROR`, `SERVER_ERROR`). It will
 also have to total time taken by the request and the time taken categorized by type (http, db, etc).
 
