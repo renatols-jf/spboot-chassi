@@ -1712,6 +1712,7 @@ default resources folder. The following configurations can be changed:
 - `instrumentation.tracing.add-custom-prefix`: Boolean, defaults to `true`. Indicates whether the `custom.` preffix will be 
   added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.
 - `instrumentation.tracing.zipkin-url`: String, no default. Stores the zipkin url to which the traces will be sent.
+  If empty, no tracing information will be recorded event if tracing is enabled and sampling is configured.
 
 Sample:
 ```
