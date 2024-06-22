@@ -7,8 +7,13 @@ import io.github.renatolsjf.chassis.rendering.config.RenderTransformer;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.Map;
 
 public class ObjectRenderer {
+
+    public static Renderable asRenderable(Object obj) {
+        return (media) -> renderProperties(media, obj);
+    }
 
     public static Media renderProperties(Media media, Object obj) {
         Class clazz = obj.getClass();
@@ -75,6 +80,15 @@ public class ObjectRenderer {
                     });
             clazz = clazz.getSuperclass();
         }
+        return media;
+    }
+
+    public static Renderable asRenderable(Map<String, Object> map) {
+        return (media) -> renderMap(media, map);
+    }
+
+    public static Media renderMap(Media media, Map<String, Object> map) {
+        map.forEach((k, v) -> media.print(k, v));
         return media;
     }
 
