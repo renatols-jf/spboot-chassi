@@ -42,11 +42,11 @@ public class Loader {
                         return this;
                     }
                 }
-                logger.debug("No config file found");
             } catch (IOException ex) {
                 logger.warn("Failed to load config file: " + CONFIG_FILE + ext, ex);
             }
         }
+        logger.debug("No config file found");
         return this;
     }
 
@@ -68,12 +68,12 @@ public class Loader {
                             return this;
                         }
                     }
-                    logger.debug("No labels file found");
                 } catch (IOException ex) {
                     logger.warn("Failed to load label file: " + LABELS_FILE + suffix + ext, ex);
                 }
             }
         }
+        logger.debug("No labels file found");
         return this;
     }
 
@@ -93,11 +93,11 @@ public class Loader {
                         return this;
                     }
                 }
-                logger.debug("No api file found");
             } catch (IOException ex) {
                 logger.warn("Failed to load api file: " + API_FILE + ext, ex);
             }
         }
+        logger.debug("No api file found");
         return this;
     }
 
