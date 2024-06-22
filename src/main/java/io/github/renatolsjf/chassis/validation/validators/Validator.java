@@ -149,7 +149,7 @@ public abstract class Validator<T> {
                         + ": " + e.getCause().getMessage(), e.getCause());
             } else {
                 Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
-                        method.getName(), this.validatable.getClass().getName(), e.getCause().getMessage()).log();
+                        method.getName(), this.validatable.getClass().getName(), e.getCause().getMessage());
                 return null;
             }
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public abstract class Validator<T> {
                         + ": " + e.getMessage(), e);
             } else {
                 Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
-                        method.getName(), this.validatable.getClass().getName(), e.getMessage()).log();
+                        method.getName(), this.validatable.getClass().getName(), e.getMessage());
                 return null;
             }
         }
@@ -195,7 +195,7 @@ public abstract class Validator<T> {
                         + ": " + e.getMessage(), e);
             } else {
                 Context.forRequest().createLogger().warn("Ignoring failing validation for {} on class {}. Cause: {}",
-                        name, this.validatable.getClass().getName(), e.getMessage()).log();
+                        name, this.validatable.getClass().getName(), e.getMessage());
                 return null;
             }
         }

@@ -33,8 +33,7 @@ public class CustomValidator extends Validator <Object> {
 
                 } else {
                     Context.forRequest().createLogger().warn("Ignoring failing custom validator for {} on class {}. Cause: {}",
-                            name, this.validatable.getClass().getName(), e.getMessage()).log();
-                    continue;
+                            name, this.validatable.getClass().getName(), e.getMessage());
                 }
             }
 

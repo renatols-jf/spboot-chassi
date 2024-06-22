@@ -10,6 +10,8 @@
 - Added `@AsTimedOperation` annotation
 - Created configuration and `ApiCall` override to enable request entries to be auto propagated
 - `ApiFactory` now throws `NoSuchApiCallException` in case an `ApiCall` is not found.
+- Removed `RestOperation`
+- Reworked logging so there is no longer a need to call `log()` to actually log the message.
 
 ## 0.0.11
 - Added `isBodyAvailable` to `ApiResponse`
@@ -379,7 +381,7 @@ Logging can be done by requesting an
 [ApplicationLogger](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/context/ApplicationLogger.java)
 from the context: `ApplicationLogger logger = Context.forRequest().createLogger()`.
 With an ApplicationLogger instance, you can use the default logging levels to log
-information, as is: `logger.info(message, param1, param2).log()`. A few observations
+information, as is: `logger.info(message, param1, param2)`. A few observations
 are in order:
 
 - As stated in [Request](#request), every request will be automatically logged as soon as
@@ -395,24 +397,21 @@ are in order:
 
 - Any log level provides two arguments: a message and an object varargs. Any varargs
   present will replace `{}` inside the message. 
-  `logger.info("{} is greater than {}", number2, number1).log` 
+  `logger.info("{} is greater than {}", number2, number1)` 
   will result in "2 is greater than 1" being logged.
   
 - `ApplicationLogger#error` also provides an exception argument. This will result
   in the stack trace being logged. Currently, framework exceptions are logged
   with their stack traces. A future release will allow this to be disabled.
   
-- The logging level methods do not actually log the information but rather wait
-  for the `log()` call. That is because we might want to add some extra information
-  to the log. In a future release, the need of `log()` will be removed when
-  extra information is not needed. Besides the fields present in the context, information related only
+- Besides the fields present in the context, information related only
   to that message can also be logged:
-    - `Context.forRequest().createLogger().log(message).attach("name", "Andrew").log()`
+    - `Context.forRequest().createLogger().attach("name", "Andrew").info(message)`
       will create a new field named "name" only for this message.
-    - `Context.forRequest().createLogger().log(message).attachMap(aMap).log()`
+    - `Context.forRequest().createLogger().attachMap(aMap).info(message)`
       will create as many new fields as keys available in the map. This method
       also supports a String varargs to log only the desired fields.
-    - `Context.forRequest().createLogger().log(message).attachObject(anObject).log()`
+    - `Context.forRequest().createLogger().attachObject(anObject).info(message)`
       will create as many fields as are available in the object. Again, you
       could filter the object providing only the keys you desire to log, but
       there is another approach for objects. You can annotate any field in a
@@ -433,23 +432,22 @@ Fields added via `attach` will **NOT** be exported in their own fields. Instead,
 in a field called `context`. A future release will provide a configuration to change this behavior.
 ```
         Context.forRequest().withRequestContextEntry("fixedField", "Present in all messages!")
-                .createLogger()
-                .info("A message")
                 .attach("aField", "aValue")
                 .attach("anotherField", "anotherValue")
-                .log();
+                .createLogger()
+                .info("A message");
 
         Context.forRequest()
                 .createLogger()
-                .info("A  second message")
                 .attach("aThridField", "aThirdValue")
-                .log();
+                .info("A  second message");
 ```
 will log: 
 ```
 {"@timestamp":"2024-02-21T15:25:36.382-03:00","message":"A message","logger_name":"com.example.demo.DemoRequest","level":"INFO","context":"{\"anotherField\":\"anotherValue\",\"aField\":\"aValue\"}","fixedField":"Present in all messages!","operationTimes":"{internal=8, total=8}","operation":"DEMO_OPERATION","transactionId":"c52fa6c6-a5d9-4a39-961c-f832f232da57","elapsedTime":"8","application":"demo-application"}
 {"@timestamp":"2024-02-21T15:25:36.382-03:00","message":"A  second message","logger_name":"com.example.demo.DemoRequest","level":"INFO","context":"{\"aThridField\":\"aThirdValue\"}","fixedField":"Present in all messages!","operationTimes":"{internal=8, total=8}","operation":"DEMO_OPERATION","transactionId":"c52fa6c6-a5d9-4a39-961c-f832f232da57","elapsedTime":"8","application":"demo-application"}
 ```
+
 ## Rendering
 [Media](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/rendering/Media.java)
 and 
@@ -881,64 +879,6 @@ ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute((media) 
 ```
 
 Note that if an API is not found, `ApiFactory.apiFromLabel` will throw a `NoSuchApiCallException`.
-
-
-
-### RestOperation
-DISCALIMER - RestOperation has been deprecated in favor of `ApiCall`. It will be REMOVED in a
-later release. Also, it does not support tracing.
-
-Each HTTP request should be made using the 
-[RestOperation](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/RestOperation.java) 
-class. To create a `RestOperation` you should call `RestOperation#create` 
-providing the following parameters:
-
-- `provider`: It's used to identify to whom the service being called belongs.
-  It's the first of a three-layered identification. I generally use the company
-  or team responsible for the service.
-  
-- `service`: It's used to identify to whom the service being called belongs to.
-  It's the second of a three-layered identification. I generally use the actual
-  service name being called.
-  
-- `operation`: It's used to identify to whom the service being called belongs to.
-  It's the third of a three-layered identification. I generally use a name for the
-  operation being requested, e.g., Authorization.
-  
-- `uri`: self-explanatory; the URI being called.
-
-- `headers`: A `Map<String, String>` with header information. Can be null.
-
-- `body`: A `Map<String, Object>` with body information. Can be null.
-
-- `HttpMethod`: The desired HTTP method.
-
-`RestOperation#create` can also be replaced with `RestOperation#get`,
-`RestOperation#post`, `RestOperation#patch`, `RestOperation#put` or
-`RestOperation#delete` - these do not need the `HttpMethod` parameter.
-
-To make the HTTP call, simply call `RestOperation#call`. Two implementations
-are available: one that accepts a return type and one that accepts a return type
-and an error type. If no return type is expected, a null value can be passed. If
-an spefic error type is not expected, using the `RestOperation#call` without
-the error type will result in errors being initialized in a simple `Map`. 
-
-You can change connect and read timeouts for the call through `RestOperation#withConnectTimeout`, 
-which defaults to 10 seconds, and `RestOperation#withReadTimeOut`, which defaults to 40 seconds. You can
-also configure if a redirect should be followed with `RestOperation#withFollowRedirect`, which
-defaults to true.
-
-In case a connection issue happens, a
-[IOErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/IOErrorOperationException.java)
-will be thrown.
-In the event of a non 2xx/3xx http status return, either a 
-[ClientErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ClientErrorOperationException.java) or a
-[ServerErrorOperationException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/ServerErrorOperationException.java)
-will be thrown. Both are implementations of `StatusRestOperationException`,
-which provides `getBody()` to get the parsed error.
-
-Using `RestOperation` provides automatic logging and metrics creation for the 
-call. These will be configurable in a future release.
 
 ## Monitoring
 This framework exports metrics to Prometheus automatically using the Spring actuator.
@@ -1802,8 +1742,7 @@ in the future.
 - Create a configuration to log attached fields in their own fields.
 - Allow for `@OneOf` to accept values other than `String`.
 - Create further validations, such as the minimum and the maximum size.
-- Create a configuration to have some level of control in automatic logs and metrics.   
-- Remove the need to call `.log()` for messages that have no attachment.  
+- Create a configuration to have some level of control in automatic logs and metrics.
 - Evolve the way this framework interacts with Spring to remove the need for `@ComponentScan`
 - Allow extra tags in automatic metrics.
 - Create a configuration to stop the timer as soon as the domain logic is over (`Request#doProcess`)

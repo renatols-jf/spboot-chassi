@@ -1,7 +1,6 @@
 package io.github.renatolsjf.chassis.integration.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.renatolsjf.chassis.integration.ResponseParsingException;
 import io.github.renatolsjf.chassis.monitoring.timing.TimeSensitive;
 import io.vavr.control.Try;
 

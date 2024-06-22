@@ -130,16 +130,14 @@ public abstract class Request {
             }
 
             this.context.createLogger()
-                    .info("Starting request: {}", this.getClass().getSimpleName())
                     .attachObject(this)
-                    .log();
+                    .info("Starting request: {}", this.getClass().getSimpleName());
 
             Media m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
 
             this.context.createLogger()
-                    .info("Completed request: {}", this.getClass().getSimpleName())
                     .attach("result", "success")
-                    .log();
+                    .info("Completed request: {}", this.getClass().getSimpleName());
 
             this.outcome = RequestOutcome.SUCCESS;
 
@@ -155,10 +153,9 @@ public abstract class Request {
             }
 
             this.context.createLogger()
-                    .error("Completed request {} with error: {}", this.getClass().getSimpleName(),
-                            errorMessage, e)
                     .attach("result", this.outcome.toString())
-                    .log();
+                    .error("Completed request {} with error: {}", this.getClass().getSimpleName(),
+                            errorMessage, e);
 
             throw e;
 
