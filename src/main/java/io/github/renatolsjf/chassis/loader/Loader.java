@@ -1,15 +1,13 @@
 package io.github.renatolsjf.chassis.loader;
 
+import io.github.renatolsjf.chassis.context.ApplicationLogger;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.env.EnvScalarConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class Loader {
 
@@ -29,23 +27,33 @@ public class Loader {
     }
 
     private Loader loadConfig() {
+
+        ApplicationLogger logger = new ApplicationLogger(this.getClass(), Collections.emptyMap());
+
         Yaml yaml = new Yaml(new EnvScalarConstructor());
         yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$");
         for (String ext: SUPPORTED_EXTENSIONS) {
             try {
                 ClassPathResource c = new ClassPathResource(CONFIG_FILE + ext);
-                try (InputStream is = c.getInputStream()) {
-                    this.configData = yaml.load(is);
-                    return this;
+                if (c.exists()) {
+                    try (InputStream is = c.getInputStream()) {
+                        this.configData = yaml.load(is);
+                        logger.debug("Loaded config data from " + CONFIG_FILE + ext);
+                        return this;
+                    }
                 }
+                logger.debug("No config file found").log();
             } catch (IOException ex) {
-                //TODO log issue
+                logger.warn("Failed to load config file: " + CONFIG_FILE + ext, ex).log();
             }
         }
         return this;
     }
 
     private Loader loadLabels() {
+
+        ApplicationLogger logger = new ApplicationLogger(this.getClass(), Collections.emptyMap());
+
         Yaml yaml = new Yaml();
         Locale l = Locale.getDefault();
         List<String> suffixes = Arrays.asList("_" + l.toString(), "_" + l.getLanguage() + "_" + l.getCountry(), "_" + l.getLanguage(), "");
@@ -53,12 +61,16 @@ public class Loader {
             for (String ext: SUPPORTED_EXTENSIONS) {
                 try {
                     ClassPathResource c = new ClassPathResource(LABELS_FILE + suffix + ext);
-                    try (InputStream is = c.getInputStream()) {
-                        this.labelsData = yaml.load(is);
-                        return this;
+                    if (c.exists()) {
+                        try (InputStream is = c.getInputStream()) {
+                            this.labelsData = yaml.load(is);
+                            logger.debug("Loaded labels data from " + LABELS_FILE + suffix + ext);
+                            return this;
+                        }
                     }
+                    logger.debug("No labels file found").log();
                 } catch (IOException ex) {
-                    //TODO log issue
+                    logger.warn("Failed to load label file: " + LABELS_FILE + suffix + ext, ex).log();
                 }
             }
         }
@@ -66,17 +78,24 @@ public class Loader {
     }
 
     private Loader loadApi() {
+
+        ApplicationLogger logger = new ApplicationLogger(this.getClass(), Collections.emptyMap());
+
         Yaml yaml = new Yaml(new EnvScalarConstructor());
         yaml.addImplicitResolver(EnvScalarConstructor.ENV_TAG, EnvScalarConstructor.ENV_FORMAT, "$");
         for (String ext: SUPPORTED_EXTENSIONS) {
             try {
                 ClassPathResource c = new ClassPathResource(API_FILE + ext);
-                try (InputStream is = c.getInputStream()) {
-                    this.apiData = yaml.load(is);
-                    return this;
+                if (c.exists()) {
+                    try (InputStream is = c.getInputStream()) {
+                        this.apiData = yaml.load(is);
+                        logger.debug("Loaded api data from " + API_FILE + ext);
+                        return this;
+                    }
                 }
+                logger.debug("No api file found").log();
             } catch (IOException ex) {
-                //TODO log issue
+                logger.warn("Failed to load api file: " + API_FILE + ext, ex).log();
             }
         }
         return this;
