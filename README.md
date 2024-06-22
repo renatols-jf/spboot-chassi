@@ -382,6 +382,10 @@ With an ApplicationLogger instance, you can use the default logging levels to lo
 information, as is: `logger.info(message, param1, param2).log()`. A few observations
 are in order:
 
+- As stated in [Request](#request), every request will be automatically logged as soon as
+  it starts and as soon as it finishes. Calls made via ApiCall will also have its details
+  logged.
+
 - There are a few fields that are always logged automatically:
   - transactionId: [see above](#transactionid)
   - correlationId: [see above](#correlationid)
@@ -671,15 +675,15 @@ make HTTP calls. To create an ApiCall,  request an instance from
 as in `ApiFactory.createApiCall()`. The following methors are available to configure the ApiCall 
 (each returns the ApiCall object to enable chaining).
 
-- `withProvider(String provider)`: It's used to identify to whom the service being called belongs.
+- `withProvider(String provider)`: **Required**. It's used to identify to whom the service being called belongs.
   It's the first of a three-layered identification. I generally use the company
   or team responsible for the service.
 
-- `withService(String service)`: It's used to identify to whom the service being called belongs to.
+- `withService(String service)`: **Required**. It's used to identify to whom the service being called belongs to.
   It's the second of a three-layered identification. I generally use the actual
   service name being called.
 
-- `withOperation(String operation)`: It's used to identify to whom the service being called belongs to.
+- `withOperation(String operation)`: **Required**. It's used to identify to whom the service being called belongs to.
   It's the third of a three-layered identification. I generally use a name for the
   operation being requested, e.g., Authorization.
 
@@ -695,7 +699,7 @@ as in `ApiFactory.createApiCall()`. The following methors are available to confi
 - `withFailOnError(boolean failOnError)`: It's used to indicate if an error will be thrown if an HTTP error
   code or connection issue will result in an exception thrown or not. Defaults to true.
 
-- `withEndpoint(String endpoint)`: It's used to initialize the base endpoint to be called.
+- `withEndpoint(String endpoint)`: **Required**. It's used to initialize the base endpoint to be called.
 
 - `withQueryParam(String key, String value)`: It's used to add a param to the query string.
 
@@ -737,7 +741,7 @@ DISCLAIMER: Currently, very limited support is  given for any content-type other
 application/x-www-form-urlencoded.
 
 Besides the methods described above, there is also a method called `ApiCall::execute()`, which
-has the same 3 variations. The method will use the ApiMethod configured vai `withApiMethod()`. Being able
+has the same 4 variations. The method will use the ApiMethod configured vai `withApiMethod()`. Being able
 to initialize the ApiMethod prior to the request execution will enable us to automatically configure
 ApiCall objects as we will see bellow.
 
@@ -759,7 +763,7 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getHeaders(): Map<String, String>`: Returns the headers present in the response.
 - `getCause(): Throwable`: Returns an exception in case a connection error happened.
 - `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
-- `isBodyAvailable(): boolean`: Indicates wheter a Response Body is available or not.
+- `isBodyAvailable(): boolean`: Indicates whether a Response Body is available or not.
 
 If `failOnError` is true, an exception will be thrown in case the request is not successful :
 - [IOApiException](https://github.com/renatols-jf/spboot-chassis/blob/master/src/main/java/io/github/renatolsjf/chassis/integration/dsl/IOApiException.java)
@@ -787,18 +791,16 @@ under the default resources folder. The following attributes can be configured (
 - `api-method`: String - GET, POST, PUT, PATCH, or DELETE.
 - `basic-auth`: List with 2 elements - user and password.
 - `bearer-token`: String.
-- `header`: List with 2 elements - key and value. Supports multiple.
-- `query-param`: List with 2 elements - key and value. Supports multiple.
-- `url-replacement`: List with 2 elements - key and value. Supports multiple.
+- `header`: List with 2 elements - key and value. **Supports multiple**.
+- `query-param`: List with 2 elements - key and value. **Supports multiple**.
+- `url-replacement`: List with 2 elements - key and value. **Supports multiple**.
 - `propagate-trace`: Boolean.
 - `propagate-request-entries`: Boolean.
 
 If an attribute supports multiple initializations, to initialize it multiple times an array with
 a multiple of its total parameter count should be provided, e.g, to add 2 query parameters, a
-list with 4 elements needs to be provided.
-
-Also, the first element of the hierarchy will be the label by which that ApiCall is retrieved.
-Here is an example of two different ApiCalls initialized by code and yaml.
+list with 4 elements needs to be provided. If the total number of parameters is not a multiple,
+the attribute value will be ignored, and it will not be initialized.
 
 You might want to initialize some contextual information within a request, like the current
 transactionId in a header. For that, you can grab the current context with `$Context` and access
@@ -817,6 +819,10 @@ header:
   - $Context.operation
 ```
 
+Also, the first element of the hierarchy will be the label by which that ApiCall is retrieved.
+Here is an example of two different ApiCalls initialized by code and yaml.
+
+
 YAML file
 ```
 #label used to retrieve the operation
@@ -826,7 +832,7 @@ google-search:
   provider: GOOGLE
   follow-redirect: false
   endpoint: https://www.google.com.br
-  method: GET
+  api-method: GET
   failOnError: false
   basicAuth: ["user", "pass"]
   queryParam: [test1, test2, test3, test4]
@@ -839,7 +845,7 @@ a-random-api
   service: RANDOM_SERVICE
   provider: RANDOM_PROVIDER
   endpoint: https://www.randomservice.com
-  method: POST
+  api-method: POST
   fail-on-error: true
   bearerToken: 043e8ea2-950c-466a-a7d2-78d693e60a62
 ```
@@ -865,13 +871,13 @@ ApiResponse apiResponse = ApiFactory.createApiCall()
   .withProvider("RANDOM_PROVIDER")
   .withEndpoint("https://www.randomservice.com")
   .withBearerToken("043e8ea2-950c-466a-a7d2-78d693e60a62")
-  .post(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.  
+  .post((media) -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.  
 ```
 
 Code creation and execution using YAML configuration
 ```
 ApiResponse apiResponse = ApiFactory.apiFromLabel("googleSearch").execute();
-ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute(() -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.
+ApiResponse apiResponse = ApiFactory.apiFromLabel("aRandomApi").execute((media) -> media.print("aKey", "aValue")); // A Renderable, or a FieldRenderable, or a Map, etc.
 ```
 
 Note that if an API is not found, `ApiFactory.apiFromLabel` will throw a `NoSuchApiCallException`.
