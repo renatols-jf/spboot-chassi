@@ -105,7 +105,7 @@ public class ApplicationLogger {
             }
         }
 
-        if (data == null) {
+        if (data == null || data.isEmpty()) {
             return;
         }
 
