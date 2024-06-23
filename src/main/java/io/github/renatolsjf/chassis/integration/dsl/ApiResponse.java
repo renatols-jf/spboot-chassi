@@ -105,4 +105,8 @@ public class ApiResponse implements TimeSensitive {
     public void setDurationInMilliseconds(long milliseconds) {
         this.durationInMillis = milliseconds;
     }
+
+    public static ObjectMapper getMapper() {
+        return objectMapper;
+    }
 }

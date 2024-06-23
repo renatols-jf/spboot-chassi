@@ -760,7 +760,11 @@ will be returned. It has the necessary data/behavior related to the request made
 - `getHttpStatusAsInt(): int`: Returns the HTTP status or 0, if `isConnectionError()` is true.
 - `getHeaders(): Map<String, String>`: Returns the headers present in the response.
 - `getCause(): Throwable`: Returns an exception in case a connection error happened.
-- `getBody(Class<T>): T`: Returns the response body transformed into the Type provided.
+- `getBody(Class<T>): T`: Returns the response body transformed into the Type provided. A standard jackson ObjectMapper
+  is used for deserialization. Currently, there is no options for customization. As such, the ObjectMapper is currently
+  exposed via the static method `ApiResponse.getMapper()`. You can customize the deserialization as you see fit using
+  the Jackson API. This is expected to change in a future release, and customization will be done using the ApiCall
+  API itself.
 - `isBodyAvailable(): boolean`: Indicates whether a Response Body is available or not.
 
 If `failOnError` is true, an exception will be thrown in case the request is not successful :
