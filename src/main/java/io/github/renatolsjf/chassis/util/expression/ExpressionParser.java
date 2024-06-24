@@ -1,10 +1,10 @@
 package io.github.renatolsjf.chassis.util.expression;
 
-import io.github.renatolsjf.chassis.util.CaseString;
 import io.github.renatolsjf.chassis.util.genesis.ExtractedMember;
 import io.github.renatolsjf.chassis.util.genesis.NoAdequateMemberException;
 import io.github.renatolsjf.chassis.util.genesis.ObjectExtractor;
 import io.github.renatolsjf.chassis.util.genesis.UnableToGetMemberException;
+import io.github.renatolsjf.utils.string.casestring.CaseString;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

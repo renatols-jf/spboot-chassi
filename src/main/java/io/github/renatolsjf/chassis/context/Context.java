@@ -7,7 +7,7 @@ import io.github.renatolsjf.chassis.monitoring.tracing.TelemetryContext;
 import io.github.renatolsjf.chassis.monitoring.tracing.TracingContext;
 import io.github.renatolsjf.chassis.rendering.transforming.Projection;
 import io.github.renatolsjf.chassis.request.EntryResolver;
-import io.github.renatolsjf.chassis.util.CaseString;
+import io.github.renatolsjf.utils.string.casestring.CaseString;
 
 import java.time.Duration;
 import java.util.*;

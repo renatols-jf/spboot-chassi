@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.util.conversion;
 
-import io.github.renatolsjf.chassis.util.CaseString;
+import io.github.renatolsjf.utils.string.casestring.CaseString;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
