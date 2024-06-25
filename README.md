@@ -1798,6 +1798,7 @@ A few future updates have been thought of. Having said that, this does not neith
 an order of priority nor a commitment. These are just a few items that might be done
 in the future.
 
+- Consider using scoped values instead of ThreadLocal to context management.
 - Create a configuration to not log stack traces.
 - Create a configuration to log attached fields in their own fields.
 - Allow for `@OneOf` to accept values other than `String`.
