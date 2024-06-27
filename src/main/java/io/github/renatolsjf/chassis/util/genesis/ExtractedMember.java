@@ -1,6 +1,6 @@
 package io.github.renatolsjf.chassis.util.genesis;
 
-import io.github.renatolsjf.chassis.util.CaseString;
+import io.github.renatolsjf.utils.string.casestring.CaseString;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
@@ -38,8 +38,8 @@ public abstract class ExtractedMember<T extends Member> implements Comparable<Ex
         }
 
         CaseString cs = CaseString.parse(memberName);
-        String camel = cs.getValue(CaseString.CaseType.CAMEL);
-        String pascal = cs.getValue(CaseString.CaseType.PASCAL);
+        String camel = cs.getCaseValue(CaseString.CaseType.CAMEL);
+        String pascal = cs.getCaseValue(CaseString.CaseType.PASCAL);
         if (this.member.getName().equals(camel)) {
             this.affinity = 0x0F;
         } else if (this.member.getName().equals(pascal)) {

@@ -347,8 +347,6 @@ public abstract class ApiCall {
         String statusCode = apiResponse.getHttpStatus();
 
         Context.forRequest().createLogger(timedOperation)
-                .info("API CALL: " + method.toString() + " " + this.getEndpoint() +
-                        " " + statusCode + " " + duration)
                 .attach(LOGGING_FIELD_PROVIDER, this.provider)
                 .attach(LOGGING_FIELD_SERVICE, this.service)
                 .attach(LOGGING_FIELD_OPERATION, this.operation)
@@ -362,7 +360,8 @@ public abstract class ApiCall {
                 .attach(LOGGING_FIELD_RESPONSE_HEADERS, apiResponse.getHeaders())
                 .attach(LOGGING_FIELD_RESPONSE_BODY, apiResponse.getRawBody())
                 .attach(LOGGING_FIELD_REQUEST_DURATION, duration)
-                .log();
+                .info("API CALL: " + method + " " + this.getEndpoint() +
+                " " + statusCode + " " + duration);
 
         Chassis.getInstance().getApplicationHealthEngine().httpCallEnded(this.provider, this.service, this.operation,
                 statusCode, apiResponse.isSuccess(), apiResponse.isClientError(), apiResponse.isServerError(), duration);
@@ -372,16 +371,13 @@ public abstract class ApiCall {
         if (!apiResponse.isSuccess()) {
             if (apiResponse.isUnauthorized()) {
                 Context.forRequest().createLogger()
-                        .error("Unauthorized http request")
-                        .log();
+                        .error("Unauthorized http request");
             } else if (apiResponse.isForbidden()) {
                 Context.forRequest().createLogger()
-                        .error("Forbidden http request")
-                        .log();
+                        .error("Forbidden http request");
             } else if (!apiResponse.isConnectionError()) {
                 Context.forRequest().createLogger()
-                        .error("Unknown error in http call: statusCode -> {}", statusCode)
-                        .log();
+                        .error("Unknown error in http call: statusCode -> {}", statusCode);
             }
 
             if (failOnError) {

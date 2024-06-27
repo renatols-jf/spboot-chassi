@@ -1,7 +1,7 @@
 package io.github.renatolsjf.chassis.integration.dsl.resttemplate;
 
-import io.github.renatolsjf.chassis.integration.OperationException;
 import io.github.renatolsjf.chassis.integration.dsl.ApiCall;
+import io.github.renatolsjf.chassis.integration.dsl.ApiException;
 import io.github.renatolsjf.chassis.integration.dsl.ApiResponse;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class RestTemplateApiCall extends ApiCall {
 
     @Override
-    protected <T> ApiResponse doExecute(ApiMethod method, T body) throws OperationException {
+    protected <T> ApiResponse doExecute(ApiMethod method, T body) throws ApiException {
 
         HttpHeaders h = new HttpHeaders();
         this.headers.keySet().forEach(k -> h.set(k, this.headers.get(k)));

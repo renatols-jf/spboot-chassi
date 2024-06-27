@@ -5,7 +5,7 @@
 
 	<groupId>io.github.renatols-jf</groupId>
 	<artifactId>spboot-chassis</artifactId>
-	<version>0.1.0-rc4</version>
+	<version>0.1.0</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Multipurpose microservice chassis for spring boot</description>
 	<url>https://github.com/renatols-jf/spboot-chassis</url>
@@ -77,6 +77,11 @@
 			<groupId>org.yaml</groupId>
 			<artifactId>snakeyaml</artifactId>
 			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.renatols-jf</groupId>
+			<artifactId>case-string</artifactId>
+			<version>0.0.3</version>
 		</dependency>
 
 		<!-- Monitoring -->

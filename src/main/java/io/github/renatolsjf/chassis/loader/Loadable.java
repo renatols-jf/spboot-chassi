@@ -1,7 +1,7 @@
 package io.github.renatolsjf.chassis.loader;
 
-import io.github.renatolsjf.chassis.util.CaseString;
 import io.github.renatolsjf.chassis.util.conversion.ConversionFactory;
+import io.github.renatolsjf.utils.string.casestring.CaseString;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +53,7 @@ public interface Loadable<T> {
 
         Object toReturn = this.defaultValue();
         for (String p: this.path()) {
-            toReturn = CaseString.parse(p).getMapValue(m);
+            toReturn = CaseString.parse(p).createMapExtractor().extractValue(m, false);
             if (toReturn == null) {
                 break;
             } else if ((toReturn instanceof Map)) {

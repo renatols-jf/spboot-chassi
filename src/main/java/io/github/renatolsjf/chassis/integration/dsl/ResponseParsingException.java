@@ -1,6 +1,6 @@
-package io.github.renatolsjf.chassis.integration;
+package io.github.renatolsjf.chassis.integration.dsl;
 
-public class ResponseParsingException extends OperationException {
+public class ResponseParsingException extends ApiException {
 
     public ResponseParsingException() { super(); }
     public ResponseParsingException(String message) { super(message); }

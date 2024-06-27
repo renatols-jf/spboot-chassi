@@ -1,7 +1,8 @@
 package io.github.renatolsjf.chassis.integration.dsl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.renatolsjf.chassis.integration.ResponseParsingException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.renatolsjf.chassis.monitoring.timing.TimeSensitive;
 import io.vavr.control.Try;
 
@@ -10,6 +11,10 @@ import java.util.Map;
 public class ApiResponse implements TimeSensitive {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    {
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     private int statusCode = 0;
     private String body;
@@ -99,5 +104,9 @@ public class ApiResponse implements TimeSensitive {
     @Override
     public void setDurationInMilliseconds(long milliseconds) {
         this.durationInMillis = milliseconds;
+    }
+
+    public static ObjectMapper getMapper() {
+        return objectMapper;
     }
 }

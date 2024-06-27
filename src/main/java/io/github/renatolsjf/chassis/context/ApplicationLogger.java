@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +31,20 @@ public class ApplicationLogger {
         this.fixedAttributes = fixedAttributes;
     }
 
-    public LogRecord info(String message, Object... args) {
-        return new LogRecord(message, LogRecord.Level.INFO, this, args);
+    public LogRecord attach(String key, String value) {
+        return new LogRecord(this).attach(key, value);
+    }
+
+    public LogRecord attachMap(final Map<String, Object> m, String... fieldsToPrint) {
+        return new LogRecord(this).attachMap(m, fieldsToPrint);
+    }
+
+    public LogRecord attachObject(final Object value, String... fieldToPrint) {
+        return new LogRecord(this).attachObject(value, fieldToPrint);
+    }
+
+    public void info(String message, Object... args) {
+        this.info(message, Collections.emptyMap(), args);
     }
 
     void info(String message, Map<String, Object> data, Object... args) {
@@ -40,8 +53,8 @@ public class ApplicationLogger {
         this.clearMDC();
     }
 
-    public LogRecord warn(String message, Object... args) {
-        return new LogRecord(message, LogRecord.Level.WARN, this, args);
+    public void warn(String message, Object... args) {
+        this.warn(message, Collections.emptyMap(), args);
     }
 
     void warn(String message, Map<String, Object> data, Object... args) {
@@ -50,8 +63,9 @@ public class ApplicationLogger {
         this.clearMDC();
     }
 
-    public LogRecord error(String message, Object... args) {
-        return new LogRecord(message, LogRecord.Level.ERROR, this, args);
+
+    public void error(String message, Object... args) {
+        this.error(message, Collections.emptyMap(), args);
     }
 
     void error(String message, Map<String, Object> data, Object... args) {
@@ -60,8 +74,8 @@ public class ApplicationLogger {
         this.clearMDC();
     }
 
-    public LogRecord debug(String message, Object... args) {
-        return new LogRecord(message, LogRecord.Level.DEBUG, this, args);
+    public void debug(String message, Object... args) {
+        this.debug(message, Collections.emptyMap(), args);
     }
 
     void debug(String message, Map<String, Object> data, Object... args) {
@@ -70,10 +84,9 @@ public class ApplicationLogger {
         this.clearMDC();
     }
 
-    public LogRecord trace(String message, Object... args) {
-        return new LogRecord(message, LogRecord.Level.TRACE, this, args);
+    public void trace(String message, Object... args) {
+        this.trace(message, Collections.emptyMap(), args);
     }
-
 
     public void trace(String message, Map<String, Object> data, Object... args){
         this.prepareMDC(data);
@@ -92,7 +105,7 @@ public class ApplicationLogger {
             }
         }
 
-        if (data == null) {
+        if (data == null || data.isEmpty()) {
             return;
         }
 

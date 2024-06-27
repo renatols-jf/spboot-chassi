@@ -41,7 +41,7 @@ public class TimedEnhancer implements TypeEnhancer {
             if (traced && timed) {
                 Context.logger().warn("Method " + method.getName() + " for class "
                         + method.getDeclaringClass().getName() + " has both @AsTimedOperation and @Span annotations. @AsTimedOperation is ignored. " +
-                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true").log();
+                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true");
             } else if (timed) {
                 shouldEnhance = true;
             }
@@ -81,7 +81,7 @@ class TimingEnhancement implements Enhancement {
                 Context.logger().warn("Method " + method.getName() + " for class "
                         + method.getDeclaringClass().getName() + " has both @AsTimedOperation - either the method itself or the class - " +
                         "and @Span annotations. @AsTimedOperation is ignored. " +
-                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true").log();
+                        "To trace a @AsTimedOperation method, set @AsTimedOperation::traced to true");
                 return;
             }
 

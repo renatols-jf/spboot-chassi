@@ -21,17 +21,11 @@ public class LogRecord {
 
     private static final Class[] CLASSES_NOT_TO_EXPLODE = {String.class, Number.class, Void.class, Enum.class};
 
-    private final String message;
-    private final Object[] messageData;
-    private final Level level;
     private final ApplicationLogger logger;
     private Map<String, Object> recordData = new HashMap<>();
 
-    LogRecord(String message, Level level, ApplicationLogger logger, Object... messageData) {
-        this.message = message;
-        this.level = level;
+    LogRecord(ApplicationLogger logger) {
         this.logger = logger;
-        this.messageData = messageData;
     }
 
     public LogRecord attach(String key, Object value) {
@@ -136,30 +130,24 @@ public class LogRecord {
         return this;
     }
 
-    public void log() {
-        switch (this.level) {
+    public void trace(String message, Object... args) {
+        this.logger.trace(message, this.recordData, args);
+    }
 
-            case TRACE:
-                this.logger.trace(this.message, this.recordData, this.messageData);
-                break;
+    public void info(String message, Object... args) {
+        this.logger.info(message, this.recordData, args);
+    }
 
-            case DEBUG:
-                this.logger.debug(this.message, this.recordData, this.messageData);
-                break;
+    public void debug(String message, Object... args) {
+        this.logger.debug(message, this.recordData, args);
+    }
 
-            case INFO:
-                this.logger.info(this.message, this.recordData, this.messageData);
-                break;
+    public void warn(String message, Object... args) {
+        this.logger.warn(message, this.recordData, args);
+    }
 
-            case WARN:
-                this.logger.warn(this.message, this.recordData, this.messageData);
-                break;
-
-            case ERROR:
-                this.logger.error(this.message, this.recordData, this.messageData);
-                break;
-
-        }
+    public void error(String message, Object... args) {
+        this.logger.error(message, this.recordData, args);
     }
 
     private List<Field> getFields(Class clazz) {
