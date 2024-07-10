@@ -432,9 +432,9 @@ Fields added via `attach` will **NOT** be exported in their own fields. Instead,
 in a field called `context`. A future release will provide a configuration to change this behavior.
 ```
         Context.forRequest().withRequestContextEntry("fixedField", "Present in all messages!")
-                .attach("aField", "aValue")
-                .attach("anotherField", "anotherValue")
                 .createLogger()
+                .attach("aField", "aValue")
+                .attach("anotherField", "anotherValue")               
                 .info("A message");
 
         Context.forRequest()
