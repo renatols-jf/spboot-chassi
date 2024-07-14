@@ -4,6 +4,7 @@ import io.github.renatolsjf.chassis.Chassis;
 import io.github.renatolsjf.chassis.context.AppRegistry;
 import io.github.renatolsjf.chassis.context.Context;
 import io.github.renatolsjf.chassis.context.ContextCreator;
+import io.github.renatolsjf.chassis.context.LogRecord;
 import io.github.renatolsjf.chassis.context.data.Classified;
 import io.github.renatolsjf.chassis.context.data.cypher.IgnoringCypher;
 import io.github.renatolsjf.chassis.monitoring.request.HealthIgnore;
@@ -135,9 +136,14 @@ public abstract class Request {
 
             Media m = doProcess().transform(MediaTransformerFactory.createTransformerFromContext(context));
 
-            this.context.createLogger()
-                    .attach("result", "success")
-                    .info("Completed request: {}", this.getClass().getSimpleName());
+            LogRecord lr = this.context.createLogger()
+                    .attach("result", "success");
+
+            if (Chassis.getInstance().getConfig().logRequestReturnData()) {
+                lr.attach("returnData", m != null ? m.render() : null);
+            }
+
+            lr.info("Completed request: {}", this.getClass().getSimpleName());
 
             this.outcome = RequestOutcome.SUCCESS;
 

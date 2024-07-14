@@ -2,6 +2,9 @@
 
 # Changelist
 
+## 0.1.1
+- Added `request.log-returned-data` configuration to control whether the data returned by the request should be logged.
+
 ## 0.1.0
 - Implemented distributed tracing 
 - Enhanced `@Inject` behavior
@@ -109,13 +112,13 @@ To use this project, you need to update your pom.xml if using Maven
 <dependency>
     <groupId>io.github.renatols-jf</groupId>
     <artifactId>spboot-chassis</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 </dependency>
 ```
 
 or your build.gradle if using Gradle
 ```
-implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.0'
+implementation group: 'io.github.renatols-jf', name: 'spboot-chassis', version: '0.1.1'
 ```
 
 This is a Spring Boot framework, and it will need to access Spring-managed
@@ -182,6 +185,7 @@ Every request will be automatically logged as soon as it starts and as soon as i
 log will automatically log its fields. See `@Classified` on [Logging](#logging) to learn how to omit 
 fields. The final log will log the result of the request (`SUCCESS`, `CLIENT_ERROR`, `SERVER_ERROR`). It will
 also have the total time taken by the request and the time taken categorized by type (http, db, etc), among others.
+The finishing log message will log the returned data by default, but this configuration can be changed.
 
 There are a few request constructors available, but we will approach only the most complete:
 
@@ -1663,6 +1667,8 @@ default resources folder. The following configurations can be changed:
   added to span attributes added via `SpanAttribute` or `SpanAttributeParamenter`.
 - `instrumentation.tracing.zipkin-url`: String, no default. Stores the zipkin url to which the traces will be sent.
   If empty, no tracing information will be recorded even if tracing is enabled and sampling is configured.
+- `request.log-returned-data`: Boolean, defaults to `true`. Determines if the data returned by a `Request` should be
+  logged when the request finishes.
 
 Sample:
 ```
